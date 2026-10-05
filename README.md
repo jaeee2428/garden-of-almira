@@ -1,7 +1,5 @@
 # The Garden of Almira  ·  Ang Hardin ni Almira
 A folk-tale garden in Sugbo (Cebu), built in Babylon.js. Inspired by the title *Garden of Almira* by Erlinda Alburo.
-It is an original scene, not a retelling: the text itself could not be found online, so the flowers are ones that
-grow in Cebuano gardens (swap them in `G.INFO` in `public/js/garden.js`).
 
 ## Run
 Double-click `run.command`, or:  `python3 server.py`  then open http://localhost:8765  (Python 3 only, nothing to install)
