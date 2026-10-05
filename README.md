@@ -1,0 +1,49 @@
+# The Garden of Almira  ·  Ang Hardin ni Almira
+A folk-tale garden in Sugbo (Cebu), built in Babylon.js. Inspired by the title *Garden of Almira* by Erlinda Alburo.
+It is an original scene, not a retelling: the text itself could not be found online, so the flowers are ones that
+grow in Cebuano gardens (swap them in `G.INFO` in `public/js/garden.js`).
+
+## Run
+Double-click `run.command`, or:  `python3 server.py`  then open http://localhost:8765  (Python 3 only, nothing to install)
+
+## What to do
+- **Click any flower** → its Cebuano name, scientific name and a fact. Each new flower fills your *bayong*.
+  Collect all 14 and the garden awakens ("Pit Señor!").
+- **Look for the lights**: parol star lanterns glow in the trees,
+  a ring of mushrooms (some glow at night) is hidden at the edge of the garden. Click them.
+- **Animals**: native Filipino chickens (a rooster, three hens and chicks that follow them), maya sparrows on the roof ridge and flying overhead, an egret at the pond, thirty alibangbang (butterflies) by day, moths around the porch lamp and a great many alitaptap (fireflies) at night. Click them to meet them.
+- **All around the garden**: roses, canna, heliconia and kamia join the sampaguita, gumamela, kalachuchi, santan, dama de noche, bogambilya, kadena de amor and ilang-ilang; orchids grow on the trunks; a lily pond with lotus; mango trees; bamboo clumps; a bahay kubo; a tubod (well); a duyan (hammock) between two palms; clay tapayan jars and flower pots; mossy rocks.
+- Click the puso, the candles at the roadside cross (light / snuff them), the bangka, the hens, the butterflies (alibangbang)
+- **🚶 Walk** (or press T): W A S D, Shift to run, click to look, Esc to free the mouse
+- **Buntag ↔ Gabii** slider: morning → udto (noon) → hapon (golden afternoon) → kilumkilom (dusk) → gabii (night); windows and lanterns glow, fireflies and shooting stars appear. The name of the hour shows beside the slider.
+- **Living wind**: a sea breeze blows all the time, turns slowly and sends gusts rolling through. It bends every leaf, branch and palm frond on the GPU, swings the star lanterns and fiesta flags, and carries petals and fireflies. Plants part around you as you walk, and a click sends a ripple through the garden.
+- **Keys**: press **K** for the full list: W A S D / arrows walk and turn, Shift run, F fly (Space up, C down), Z (hold) or mouse wheel to zoom, T tour/walk, Space pause the tour, R restart, 1-5 pick the hour (Buntag, Udto, Hapon, Kilumkilom, Gabii), , . or [ ] step through the day, P let time pass, H hide panels, M music.
+- **Sound**: the garden's own sounds are generated live, with no melody and no audio files: the sea (louder near the shore), wind in the leaves (louder near palms and bamboo), birds you hear where they actually fly or perch, the rooster crowing when he crows, hens clucking, chicks peeping, frogs and an owl at night (no bee hum or cricket drone, on purpose: it stays peaceful), and your footsteps on grass, stone or sand. Browsers only allow sound after your first click or key press. Press **M** or the Sound button to mute.
+- Always runs at full detail. If a computer struggles it quietly renders fewer pixels, nothing else changes.
+
+## Made for speed
+Wind bends every plant on the GPU. Every plant is built in 3 levels of detail and drawn by distance; plants behind you or far away are skipped; grass is
+split into chunks that are culled; shadows are redrawn every few frames; lights that are off cost nothing; the pixel
+ratio is capped at 1.5.
+
+## Files
+- `server.py`  tiny local web server
+- `public/js/core.js`        engine, sky/sea shaders, terrain, time of day, mesh builder
+- `public/js/flora.js`       hand-modelled petals, leaves, trunks, palms
+- `public/js/flora2.js`      roses, canna, heliconia, kamia, orchids, lotus
+- `public/js/structures.js`  house, arch, pergola, shrine, bangka, banderitas, puso
+- `public/js/garden.js`      planting, trees, butterflies, hens, fireflies
+- `public/js/props.js`       pond, mango trees, bamboo, bahay kubo, well, hammock, pots, rocks, orchids
+- `public/js/flora3.js`      the wild plants: lantana, makahiya, cosmos, cogon & talahib, croton, ferns, beach morning glory, pandan
+- `public/js/fauna.js`       chickens & chicks, birds, egret, butterflies, moths, fireflies, glowing bluebells
+- `public/js/audio.js`       the generated ambient music and nature sounds
+- `public/js/magic.js`       diwata, parol, fairy ring, orbs, gold dust, shooting stars
+- `public/js/main.js`        cameras, picking, UI
+- `old/main_v1.js`           the first stylised version, kept for reference
+
+## Sea, boats and flowers (latest)
+- The sea uses Gerstner waves on the GPU; the sailing bangka rides the same wave function on the CPU, and the beached bangka sits clear of the rocks.
+- Weeds are flower-like and unlabeled; the 14 named flowers are the ones you can click (card + bayong).
+- Cards describe Visayan folk and herbal practice (mostly medicinal, some cultural) from public Philippine ethnobotany sources (StuartXchange, Philippine Traditional Knowledge Digital Library). They are folk uses, not medical advice, and were not checked by a Cebuano healer.
+- The text of Erlinda Alburo's "Garden of Almira" could not be found online, so the plant list is typical of Cebuano gardens, not taken from the work.
+- `STATE.md` records the full current state of the app.
