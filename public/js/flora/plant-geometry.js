@@ -214,7 +214,18 @@ function coconutPalm(seed) {
         mb.grid(LOD ? 3 : 5, 1, (u, v) => { const q = u * u * .12 * ll; return [p.x + dir.x * ll * u + wd.x * (v * 2 - 1) * (1 - .55 * u), p.y + dir.y * ll * u - q + wd.y * (v * 2 - 1), p.z + dir.z * ll * u + wd.z * (v * 2 - 1) * (1 - .55 * u)]; }, u => shade(mixA(rgb('#2b6528'), rgb('#7cae48'), u * .8 + .1), .9 + .2 * (k % 3) / 3), null, u => .1 + .9 * u); }
     }
   }
-  for (let i = 0; i < 7; i++) { const a = i * 2.4, g = r() < .5 ? '#6f8a2c' : '#a8782c'; mb.ellipsoid(top.x + Math.cos(a) * .22, top.y - .35 - (i % 2) * .15, top.z + Math.sin(a) * .22, .13, .17, .13, 8, 6, (u, v) => shade(rgb(g), .8 + .3 * v)); }
+  // the coconut bunch: nuts hang on short stalks just below the frond bases, spaced so they never cut into the trunk
+  // or into each other; vertex alpha 0 = no leaf flutter (a heavy nut only moves with the crown)
+  const TR = .2, CR = .13, nuts = [];                                    // trunk radius at the crown, coconut radius
+  for (let i = 0; nuts.length < 7 && i < 60; i++) {
+    const a = i * 2.39996 + r() * .3, ring = TR + CR + .015 + (i % 3 === 2 ? .06 : 0), y = top.y - .3 - (i % 2) * .2 - r() * .06;
+    const c = new V3(top.x + Math.cos(a) * ring, y, top.z + Math.sin(a) * ring);
+    if (nuts.every(q => V3.Distance(q, c) > CR * 2.05)) nuts.push(c);
+  }
+  nuts.forEach(c => { const g = r() < .5 ? '#6f8a2c' : '#a8782c', still = (u, v) => { const k = shade(rgb(g), .8 + .3 * v); return [k[0], k[1], k[2], 0]; };
+    const out = new V3(c.x - top.x, 0, c.z - top.z).normalize();
+    mb.tube([new V3(top.x + out.x * (TR - .02), top.y - .12, top.z + out.z * (TR - .02)), new V3(c.x - out.x * .04, c.y + CR * .9, c.z - out.z * .04)], [.02, .014], 4, () => [...rgb('#7a6a3a'), 0]);   // stalk
+    mb.ellipsoid(c.x, c.y, c.z, CR, CR * 1.25, CR, 8, 6, still); });
   return { mb, top: top.y, lean };
 }
 function bananaPlant(seed) {

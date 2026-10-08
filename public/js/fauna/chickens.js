@@ -79,8 +79,13 @@ function updateChicken(t, dt, cam) {
   for (const a of chicken) {
     const dxc = a.x - cam.x, dzc = a.z - cam.z, far = dxc * dxc + dzc * dzc > 55 * 55; a.root.setEnabled(!far); if (far) continue;
     a.timer -= dt; const chick = a.kind === 'chick';
+    const av = G.avatar; if (av && av.active && a.state !== 'flee') {                       // you come too close (closer still if you walk slowly): they scatter
+      const dx = a.x - av.x, dz = a.z - av.z, d = Math.hypot(dx, dz), reach = .9 + .45 * av.speed;
+      if (d < reach && av.speed > .35) { a.state = 'flee'; a.timer = R(.9, 1.6); a.fleeYaw = Math.atan2(dx, dz) + R(-.5, .5); if (!chick) a.flap = .7; }
+    }
     if (a.state === 'idle') { a.spd += (0 - a.spd) * Math.min(1, dt * 6); if (a.timer <= 0) { const q = rand(); if (chick && a.leader) { a.state = 'walk'; a.tx = a.leader.x + Rr(-1, 1, rand); a.tz = a.leader.z + Rr(-1, 1, rand); a.timer = R(1, 2.5); } else if (q < .45) { a.state = 'peck'; a.timer = R(1.4, 3.2); } else { for (let k = 0; k < 10; k++) { const ang = rand() * 6.283, d = R(2, 6), x = (a.leader ? a.leader.x : a.x) + Math.cos(ang) * d, z = (a.leader ? a.leader.z : a.z) + Math.sin(ang) * d; if (Math.hypot(x - G.chickenHome.x, z - G.chickenHome.z) < 18 && !G.blocked(x, z, 0)) { a.tx = x; a.tz = z; a.state = 'walk'; a.timer = R(3, 7); break; } } if (a.state !== 'walk') a.timer = 1; } if (a.kind === 'rooster' && rand() < .22) { a.state = 'crow'; a.timer = 1.6; } if (a.kind === 'hen' && rand() < .06) { a.flap = 1.2; } } }
     else if (a.state === 'peck') { a.spd += (0 - a.spd) * Math.min(1, dt * 6); if (a.timer <= 0) { a.state = 'idle'; a.timer = R(.5, 2); } }
+    else if (a.state === 'flee') { let dy = a.fleeYaw - a.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); a.yaw += dy * Math.min(1, dt * 10); a.spd += ((chick ? 1.5 : 2.1) - a.spd) * Math.min(1, dt * 6); if (a.timer <= 0) { a.state = 'idle'; a.timer = R(.8, 2); } }
     else if (a.state === 'crow') { a.spd = 0; if (a.timer <= 0) { a.state = 'idle'; a.timer = R(3, 8); } }
     else if (a.state === 'walk') { const dx = a.tx - a.x, dz = a.tz - a.z, d = Math.hypot(dx, dz); if (d < .25 || a.timer <= 0) { a.state = 'idle'; a.timer = R(.6, 2.5); } else { const want = Math.atan2(dx, dz); let dy = want - a.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); a.yaw += dy * Math.min(1, dt * 5); a.spd += ((chick ? .85 : .55) - a.spd) * Math.min(1, dt * 4); } }
     if (a.spd > .01) { const nx = a.x + Math.sin(a.yaw) * a.spd * dt, nz = a.z + Math.cos(a.yaw) * a.spd * dt, p = avoid(a, nx, nz, chick ? .15 : .25); a.x = p[0]; a.z = p[1]; }

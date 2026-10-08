@@ -23,7 +23,7 @@ window.GARDEN_CONFIG = {
   wind: {
     materials: {
       shrub:  { flex: .05,  hz: 2.4, maxBend: .35, flutter: .01, fade: [78, 98] },  grass: { flex: .6, hz: 5.5, maxBend: .5, flutter: 0, fade: [62, 90] },
-      wild:   { flex: .7,   hz: 4.5, maxBend: .45, flutter: .003, fade: [52, 78] }, palm:  { flex: .005, hz: 1.1, maxBend: .3, flutter: .035 },
+      wild:   { flex: .7,   hz: 4.5, maxBend: .45, flutter: .003, fade: [52, 78] }, palm:  { flex: .0032, hz: 1.0, maxBend: .22, flutter: .018 },
       banana: { flex: .02,  hz: 1.6, maxBend: .3, flutter: .03 },   tree:  { flex: .004, hz: .9, maxBend: .2, flutter: .018 },
       vine:   { flex: .04,  hz: 2.2, maxBend: .35, flutter: .02 },  hang:  { flex: .05, hz: 3.0, maxBend: .45, flutter: .02, hang: true },
       // wild plants (flora/wild-plants.js)
@@ -40,6 +40,16 @@ window.GARDEN_CONFIG = {
   //   breakAt: where waves break (m from the shoreline, negative = seaward); shoal: how much they grow before breaking;
   //   swash: how high (m) the water sheet runs up the beach per swell
   sea: { swells: [[1, .15, 26, .30], [.95, -.35, 13, .15], [.7, .7, 7.5, .075], [1, -.1, 3.8, .04]], breakAt: -9, shoal: .35, swash: .16 },
+
+  // Sound mix (audio/soundscape.js): ambience = sea, wind, leaves; animals = birds, hens, frogs; effects = your steps, splashes, rustling
+  audio: { ambience: .45, animals: .7, effects: 1.6 },
+
+  // The avatar (game/avatar.js): a ~1.60 m young woman in a sundress. Speeds in m/s (a real walk is ~1.4, a jog ~3, a run ~5).
+  avatar: {
+    walk: 1.9, run: 4.6, accel: 9, decel: 12, airControl: .25, jump: 3.4, gravity: 9.81, radius: .3,
+    eye: 1.5, third: { dist: 2.9, height: .3, lag: 10 }, wadeSlow: .6, maxWade: .8,
+    skin: '#c4916c', hair: '#17100d', dress: '#ee9c8a', trim: '#fbf6ee', sandal: '#c39466', lips: '#c2676d',   // morena skin, black hair, blush-coral sundress
+  },
 
   // Level of detail: how far each detail level reaches (metres), what is culled.
   lodTiers: [

@@ -6,12 +6,13 @@ Double-click `run.command`, or:  `python3 server.py`  then open http://localhost
 
 ## What to do
 - **Click any flower** → its Cebuano name, scientific name and a fact. Each new flower fills your *bayong*.
-  Collect all 14 and the garden awakens ("Pit Señor!").
+  Collect all 18 and the garden awakens ("Pit Señor!").
 - **Look for the lights**: parol star lanterns glow in the trees,
   a ring of mushrooms (some glow at night) is hidden at the edge of the garden. Click them.
 - **Animals**: native Filipino chickens (a rooster, three hens and chicks that follow them), maya sparrows on the roof ridge and flying overhead, an egret at the pond, thirty alibangbang (butterflies) by day, moths around the porch lamp and a great many alitaptap (fireflies) at night. Click them to meet them.
 - **All around the garden**: roses, canna, heliconia and kamia join the sampaguita, gumamela, kalachuchi, santan, dama de noche, bogambilya, kadena de amor and ilang-ilang; orchids grow on the trunks; a lily pond with lotus; mango trees; bamboo clumps; a bahay kubo; a tubod (well); a duyan (hammock) between two palms; clay tapayan jars and flower pots; mossy rocks.
 - Click the puso, the candles at the roadside cross (light / snuff them), the bangka, the hens, the butterflies (alibangbang)
+- **You**: walking puts you in the garden as a visitor in tsinelas, through your own eyes or (Tab / 👤) from behind. Run with Shift, jump with Space. Plants part and rustle as you pass, your feet sound like grass, sand, stone or water, the surf and pond splash, hens scatter and butterflies take off.
 - **🚶 Walk** (or press T): W A S D, Shift to run, click to look, Esc to free the mouse
 - **Buntag ↔ Gabii** slider: morning → udto (noon) → hapon (golden afternoon) → kilumkilom (dusk) → gabii (night); windows and lanterns glow, fireflies and shooting stars appear. The name of the hour shows beside the slider.
 - **Living wind**: a sea breeze blows all the time, turns slowly and sends gusts rolling through. Every plant bends from its root like a real stem (stiff trees barely move, grass sways quickly, nothing stretches), on the GPU. The star lanterns and fiesta flags are little pendulums that lean downwind and settle; the wind also carries petals and fireflies. Plants part around you as you walk, and a click sends a ripple through the garden.
