@@ -1,5 +1,5 @@
 /* =====================================================================
-   audio.js - the sounds of the garden, generated live with WebAudio
+   audio/soundscape.js - the sounds of the garden, generated live with WebAudio
    (no audio files, no melody): just the surroundings, tied to what is
    actually moving in the scene.
      · the sea, louder as you near the shore · wind in the leaves, following

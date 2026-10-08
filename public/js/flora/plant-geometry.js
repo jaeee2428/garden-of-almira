@@ -1,5 +1,5 @@
 /* =====================================================================
-   flora.js - hand-built plants of a Cebuano garden (buwakan)
+   flora/plant-geometry.js - hand-built plants of a Cebuano garden (buwakan)
    Each plant is real geometry: curved petals with ruffles and veins,
    folded leaves with midribs, tapered woody stems, ringed palm trunks.
    ===================================================================== */

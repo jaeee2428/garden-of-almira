@@ -1,0 +1,64 @@
+/* The Garden of Almira - page + HUD styles (the 3D scene is all in /js) */
+  :root { --paper:#f4e9d0; --ink:#2a1d12; --clay:#b5532e; --gold:#e8b04a; --leaf:#3f7a3a; --night:#17120d; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--night); overflow:hidden; font-family:'Cormorant Garamond', Georgia, serif; color:var(--paper); }
+  #scene { width:100vw; height:100vh; display:block; outline:none; touch-action:none; }
+  #brand, #hint, #bag, #bar, #title { contain:layout style; }
+  .noui #bar,.noui #hint,.noui #bag,.noui #brand { display:none; }
+
+  #title { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; text-align:center; transition:opacity 2.6s ease; padding:0 24px; background:linear-gradient(to bottom, rgba(20,12,6,.35), rgba(20,12,6,.1) 40%, rgba(20,12,6,.5)); }
+  #title.hide { opacity:0; }
+  #title .greet { font-size:clamp(15px,2vw,21px); letter-spacing:.4em; text-transform:uppercase; color:var(--gold); margin-bottom:.8em; }
+  #title h1 { margin:0; font-weight:500; font-style:italic; font-size:clamp(46px,9vw,118px); line-height:1; color:#fff6e2; text-shadow:0 2px 24px rgba(0,0,0,.55); }
+  #title .ceb { margin-top:.5em; font-size:clamp(20px,3vw,34px); font-style:italic; color:#f1d6a2; text-shadow:0 1px 12px rgba(0,0,0,.6); }
+  #title .by small { display:block; margin-top:.6em; opacity:.75; font-size:.8em; }
+  #title .by { margin-top:1.4em; font-size:clamp(14px,1.8vw,21px); opacity:.9; max-width:34em; text-shadow:0 1px 10px rgba(0,0,0,.7); }
+  #loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--night); font-style:italic; font-size:28px; transition:opacity 1.2s ease; z-index:30; }
+  #loading.hide { opacity:0; pointer-events:none; }
+
+  #brand { position:fixed; left:18px; top:14px; font-size:20px; font-style:italic; opacity:.85; text-shadow:0 1px 8px rgba(0,0,0,.7); pointer-events:none; }
+  #brand small { display:block; font-size:13px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); font-style:normal; }
+  #hint { position:fixed; right:18px; top:16px; font-size:16px; font-style:italic; opacity:.85; text-align:right; max-width:46vw; text-shadow:0 1px 8px rgba(0,0,0,.8); pointer-events:none; }
+  #reticle { position:fixed; left:50%; top:50%; width:8px; height:8px; margin:-4px 0 0 -4px; border-radius:50%; border:1.5px solid rgba(255,244,220,.85); box-shadow:0 0 4px rgba(0,0,0,.6); display:none; pointer-events:none; z-index:12; transition:transform .12s, background .12s; }
+  #reticle.on { transform:scale(1.9); background:rgba(232,176,74,.55); }
+  #keys { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(.96); width:min(520px,calc(100vw - 30px)); padding:14px 18px 16px; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:25; }
+  #keys.show { opacity:1; pointer-events:auto; transform:translate(-50%,-50%); }
+  #keys h3 { margin:0 0 8px; font-size:22px; font-weight:600; }
+  #keys .kg { display:grid; grid-template-columns:auto 1fr; column-gap:14px; row-gap:3px; font-size:16.5px; }
+  #keys .kg b { color:var(--gold); font-weight:600; text-align:right; white-space:nowrap; }
+  #tip { position:fixed; pointer-events:none; opacity:0; transition:opacity .1s; will-change:transform,opacity; background:rgba(34,22,12,.86); border:1px solid rgba(232,176,74,.5); padding:3px 11px; border-radius:6px; font-size:18px; font-style:italic; z-index:12; }
+
+  .panel { background:rgba(36,24,14,.9); border:1px solid rgba(232,176,74,.35); border-radius:14px; contain:layout paint style; }
+  #bar { position:fixed; left:50%; bottom:14px; transform:translateX(-50%); display:flex; gap:9px; align-items:center; padding:7px 11px; max-width:calc(100vw - 20px); flex-wrap:wrap; justify-content:center; z-index:10; }
+  #bar button { font-family:inherit; font-size:15px; color:var(--paper); cursor:pointer; background:rgba(181,83,46,.3); border:1px solid rgba(232,176,74,.55); padding:5px 11px; border-radius:999px; white-space:nowrap; }
+  #bar button:hover, #bar button.on { background:rgba(181,83,46,.65); }
+  #bar input[type=text] { font-family:inherit; font-size:16px; font-style:italic; color:var(--paper); background:transparent; border:none; border-bottom:1px solid rgba(232,176,74,.6); padding:4px 4px; width:min(15vw,190px); outline:none; }
+  #bar input::placeholder { color:rgba(244,233,208,.5); }
+  .tgroup { display:flex; align-items:center; gap:6px; font-size:14px; font-style:italic; }
+  #tname { min-width:5.2em; text-align:center; font-weight:600; color:var(--gold); }
+  #time { width:min(11vw,120px); accent-color:#e8b04a; }
+  .sep { width:1px; height:24px; background:rgba(232,176,74,.3); }
+
+  #card { position:fixed; left:18px; bottom:70px; width:min(380px,calc(100vw - 36px)); padding:16px 18px 15px; transform:translateY(14px); opacity:0; pointer-events:none; transition:opacity .3s ease, transform .3s ease; z-index:11; will-change:opacity,transform; }
+  #card.show { opacity:1; transform:none; pointer-events:auto; }
+  #card .row { display:flex; align-items:center; gap:10px; }
+  #cdot { width:14px; height:14px; border-radius:50%; flex:none; border:2px solid rgba(255,255,255,.7); }
+  #cname { font-size:30px; font-weight:600; line-height:1; }
+  #csci { font-style:italic; opacity:.75; font-size:16px; margin:2px 0 8px 24px; }
+  #cfact { font-size:18px; line-height:1.28; }
+  #cextra { margin-top:8px; color:var(--gold); font-size:16px; font-style:italic; }
+  #cclose { margin-left:auto; background:none; border:none; color:var(--paper); font-size:22px; cursor:pointer; opacity:.6; }
+
+  #bag { position:fixed; right:16px; top:60px; padding:10px 12px; width:262px; z-index:9; }
+  #bag h3 { margin:0 0 8px; font-size:19px; font-weight:600; display:flex; justify-content:space-between; align-items:baseline; }
+  #bag h3 small { font-size:13px; font-style:italic; opacity:.7; }
+  #chips { display:grid; grid-template-columns:1fr 1fr; column-gap:10px; }
+  .chip { display:flex; align-items:center; gap:6px; font-size:14.5px; padding:1px 0; opacity:.38; transition:opacity .3s; white-space:nowrap; }
+  .chip.got { opacity:1; }
+  .chip i { width:11px; height:11px; border-radius:50%; border:1px solid rgba(255,255,255,.6); flex:none; }
+  #resetbag { margin-top:6px; background:none; border:none; color:var(--paper); opacity:.5; font-family:inherit; font-style:italic; font-size:13px; cursor:pointer; padding:0; }
+  #pit { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity .8s; z-index:20; text-align:center; }
+  #pit.show { opacity:1; }
+  #pit b { font-size:clamp(60px,12vw,150px); font-style:italic; font-weight:500; color:#fff0c8; text-shadow:0 0 30px rgba(232,120,50,.8), 0 3px 0 rgba(0,0,0,.4); }
+  #pit span { font-size:clamp(18px,2.5vw,30px); font-style:italic; color:#ffe0a8; text-shadow:0 1px 10px #000; }
+  @media (max-width:760px) { #bag { top:auto; bottom:150px; right:10px; width:150px; } .tgroup span.lbl { display:none; } }

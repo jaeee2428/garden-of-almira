@@ -1,5 +1,5 @@
 /* =====================================================================
-   magic.js - the folk-tale layer
+   fx/magic.js - the folk-tale layer
    diwata (nature-spirit lights) · parol star lanterns · a glowing fairy
    ring · floating orbs · drifting gold dust · shooting stars
    ===================================================================== */
@@ -10,10 +10,6 @@ const R = G.R, rand = G.rand, T = G.L.tree, RING = G.L.ring, hexC = h => C3.From
 G.magicK = 0; G.magicTarget = 0;
 const NOM = (G.params.get('no') || '').split(',');
 
-Object.assign(G.INFO_OTHER, {
-  parol: { ceb: 'Parol', sci: 'star lantern', color: '#ffc24a', fact: 'The star lantern of the Philippines, made of bamboo and capiz shell or paper, hung at Christmas (its name comes from the Spanish “farol”, lantern). San Fernando, Pampanga is famous for giant ones.' },
-  fairyring: { ceb: 'Uhong', sci: 'a ring of mushrooms', color: '#9fe8ff', fact: 'Mushrooms (uhong) often spring up in a neat ring on damp ground after the rain. In the garden a few of them glow softly in the dark.' },
-});
 
 /* ---------- soft glow sprites (orbs of light) ---------- */
 const glowURL = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,.7)'); gr.addColorStop(.2, 'rgba(255,255,255,.4)'); gr.addColorStop(.5, 'rgba(255,255,255,.1)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c.toDataURL(); })();
@@ -54,11 +50,15 @@ G.parols = [];
   const cord = B.MeshBuilder.CreateCylinder('parolCord', { height: 1, diameter: .012, tessellation: 4 }, scene); cord.material = G.mat('cordM', { diffuse: new C3(.8, .74, .55), specular: C3.Black() }); cord.isPickable = false; cord.alwaysSelectAsActiveMesh = true;
   const cbuf = new Float32Array(items.length * 16); cord.thinInstanceSetBuffer('matrix', cbuf, 16, false);
   variants.forEach((v, i) => { v.thinInstanceSetBuffer('matrix', bufs[i], 16, false); v.alwaysSelectAsActiveMesh = true; });
-  const q = new B.Quaternion(), tmp = new B.Matrix(), off = new V3(), c = new V3(), sc = new V3(), cs = new V3();
+  const q = new B.Quaternion(), qt = new B.Quaternion(), qy = new B.Quaternion(), tmp = new B.Matrix(), off = new V3(), c = new V3(), sc = new V3(), cs = new V3();
+  // Each parol swings as a 2-axis damped pendulum on its cord: wind drag pushes it downwind, gravity pulls it back.
+  const PH = G.physics; items.forEach(it => { it.px = PH.pendulum(); it.pz = PH.pendulum(); }); let lastT = null;
   G.updateParols = t => {
-    const w = G.windState; counts.fill(0);
-    items.forEach(it => { const amp = (.05 + .1 * w.gain * (.55 + .45 * Math.sin(t * 1.3 + it.ph))) / Math.max(.7, it.L), sw = Math.sin(t * .9 + it.ph) * .035, roll = -w.dx * amp + sw, pitch = w.dz * amp + Math.cos(t * .8 + it.ph) * .03;
-      B.Quaternion.RotationYawPitchRollToRef(it.yaw, pitch, roll, q); off.set(0, -it.L, 0).rotateByQuaternionToRef(q, off); c.copyFromFloats(it.pivot.x + off.x, it.pivot.y + off.y, it.pivot.z + off.z);
+    const w = G.windState, dt = lastT === null ? 0 : Math.min(t - lastT, .1); lastT = t; counts.fill(0);
+    items.forEach(it => { const k = PH.GRAVITY / it.L, drag = 1.6 * w.gain * PH.gusty(t, it.ph) / it.s;
+      const roll = PH.stepPendulum(it.px, k, -w.dx * drag, 1.1, dt), pitch = PH.stepPendulum(it.pz, k, w.dz * drag, 1.1, dt);
+      B.Quaternion.RotationYawPitchRollToRef(0, pitch, roll, qt); B.Quaternion.RotationYawPitchRollToRef(it.yaw, 0, 0, qy); qt.multiplyToRef(qy, q);   // spin first, then tilt in WORLD axes (downwind)
+      off.set(0, -it.L, 0).rotateByQuaternionToRef(q, off); c.copyFromFloats(it.pivot.x + off.x, it.pivot.y + off.y, it.pivot.z + off.z);
       sc.set(it.s, it.s, it.s); M4.ComposeToRef(sc, q, c, tmp); tmp.copyToArray(bufs[it.ci], counts[it.ci]++ * 16);
       if (it.orb) it.orb.base.copyFrom(c);
     });
@@ -119,7 +119,7 @@ const _v = new V3();
 G.updateMagic = (t, dt) => {
   const cam = G.camera.position;
   G.magicK += (G.magicTarget - G.magicK) * Math.min(1, dt * .8); const K = G.magicK, night = G.state.night || 0;
-  G.pipe.bloomWeight = (G.bloomBase || .3) + .3 * K; G.updateParols(t);
+  G.pipe.bloomWeight = (G.bloomBase || G.CONFIG.render.bloom.weight) + .16 * K; G.updateParols(t);
   const wd = G.windState; if (G.driftPS) G.driftPS.gravity.set(wd.dx * wd.gain * 1.2, -.28, wd.dz * wd.gain * 1.2); if (G.fireflies) G.fireflies.gravity.set(wd.dx * wd.gain * .18, .02, wd.dz * wd.gain * .18); G.motes.gravity.set(wd.dx * wd.gain * .5, .01, wd.dz * wd.gain * .5);
   for (const w of G.wisps) {
     const x = w.cx + Math.sin(t * w.a + w.ph) * w.A, z = w.cz + Math.cos(t * w.c + w.ph) * w.Bz, y = hFn(x, z) + 1.3 + (Math.sin(t * w.b + w.ph) + 1) * 1.1;
@@ -127,10 +127,12 @@ G.updateMagic = (t, dt) => {
     const dc = Math.hypot(x - cam.x, y - cam.y, z - cam.z), near = clamp((dc - 1.5) / 5, 0, 1);       // fade out as it nears the camera: no blown-out white discs
     w.halo.position.set(x, y, z); w.halo.size = (.42 + .03 * Math.sin(t * 1.1 + w.ph) + .25 * K + .3 * night) * (.35 + .65 * near); w.halo.color.a = (.1 + .22 * night + .12 * K) * near; w.hot.pos.set(x, y, z);
   }
-  for (const o of G.orbs) { const dd = Math.hypot(o.base.x - cam.x, o.base.y - cam.y, o.base.z - cam.z), nr = clamp((dd - 1.2) / 4, 0, 1), f = (.9 + .1 * night * Math.sin(t * .9 + o.ph)) * nr; o.s.position.set(o.base.x + Math.sin(t * .3 + o.ph) * .15, o.base.y + Math.sin(t * .5 + o.ph * 2) * .12, o.base.z); o.s.size = o.size * (.92 + .1 * f) * (1 + .4 * K); o.s.color.a = (.34 + .3 * f) * (o.nightOnly ? clamp(night * 1.5, 0, 1) : (.55 + .6 * night + .5 * K)); }
-  G.motes.emitRate = 14 + 30 * night + 50 * K; G.ringPS.emitRate = 12 + 30 * night + 40 * K;
+  for (const o of G.orbs) { const dd = Math.hypot(o.base.x - cam.x, o.base.y - cam.y, o.base.z - cam.z), nr = clamp((dd - 1.2) / 4, 0, 1), f = (.9 + .1 * night * Math.sin(t * .9 + o.ph)) * nr; o.s.position.set(o.base.x + Math.sin(t * .3 + o.ph) * .15, o.base.y + Math.sin(t * .5 + o.ph * 2) * .12, o.base.z); o.s.size = o.size * (.92 + .1 * f) * (1 + .4 * K); o.s.color.a = (.34 + .3 * f) * (o.nightOnly ? clamp(night * 1.5, 0, 1) : (.1 + .85 * night + .5 * K)); }      // orbs belong to dusk and night: barely there by day
+  G.motes.emitRate = 3 + 18 * night + 40 * K; G.ringPS.emitRate = 3 + 22 * night + 30 * K;                  // fewer sparkles (calmer)
   const s = G.shoot;
   if (night > .55) { s.next -= dt; if (s.t < 0 && s.next <= 0) { const az = rand() * 6.283, el = R(.45, .9); s.from = new V3(Math.cos(az) * 300, 150 + Math.sin(el) * 150, Math.sin(az) * 300).add(G.camera.position); s.v = new V3(R(-1, 1), R(-.5, -.25), R(-1, 1)).normalize().scale(260); s.t = 0; s.star.setEnabled(true); s.tr.emitRate = 140; s.star.position.copyFrom(s.from); s.next = R(7, 14); } }
   if (s.t >= 0) { s.t += dt; s.star.position.addInPlace(s.v.scale(dt)); if (s.t > 1.1) { s.t = -1; s.star.setEnabled(false); s.tr.emitRate = 0; } }
 };
+
+G.systems.add('magic', (t, dt) => G.updateMagic(t, dt), { order: 50 });
 })();

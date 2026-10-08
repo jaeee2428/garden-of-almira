@@ -1,5 +1,5 @@
 /* =====================================================================
-   props.js - more of the homestead, all around the garden:
+   world/props.js - more of the homestead, all around the garden:
    lily pond · mango trees · bamboo clumps · bahay kubo · tubod (well) ·
    duyan (hammock) · clay pots · rocks · orchids on the trunks
    ===================================================================== */
@@ -8,14 +8,6 @@ const { B, V3, C3, M4, MB, basis, rgb, mixA, shade, clamp, lerp, rng, scene, hFn
 const Rr = (a, b, r) => a + (b - a) * r(), R = G.R, rand = G.rand, UP = V3.Up(), P = G.POND, L = G.L;
 const tmp = new B.Matrix();
 
-Object.assign(G.INFO_OTHER, {
-  mangga: { ceb: 'Mangga', sci: 'Mangifera indica', color: '#ffc23a', fact: 'A mango tree shades a yard for generations. Cebu is famous for its sweet dried mangoes, a favourite pasalubong (gift) that visitors carry home.' },
-  kawayan: { ceb: 'Kawayan', sci: 'bamboo', color: '#a8b24a', fact: 'The backbone of rural life in the Philippines: house posts, floors, fences, ladders and the outriggers of a bangka are all bamboo. A clump rustles loudly in the wind.' },
-  bahaykubo: { ceb: 'Bahay Kubo', sci: 'the nipa hut', color: '#c7a766', fact: 'The traditional house of the Philippines: raised on stilts, walled with woven bamboo and roofed with thatch. It stays cool and lets the breeze run straight through.' },
-  tubod: { ceb: 'Tubod', sci: 'the well', color: '#9a9a96', fact: 'A well like this was a gathering place in a village, where neighbours drew water and traded news.' },
-  duyan: { ceb: 'Duyan', sci: 'the hammock', color: '#e0522a', fact: 'A hammock slung between two coconut palms is the Visayan way to rest through the afternoon heat. The word duyan also means a baby’s cradle.' },
-  tapayan: { ceb: 'Tapayan', sci: 'clay jar', color: '#b0643a', fact: 'Big clay jars that store water, rice, or ferment vinegar and wine. A tapayan by the stairs is a very Filipino sight.' },
-});
 const addHot = (x, y, z, r, kind, sp) => G.hot.push({ pos: new V3(x, y, z), r, kind, sp });
 
 /* ---------- rocks (displaced spheres, mossy on top) ---------- */
@@ -30,7 +22,9 @@ function rockMesh(seed, name) {
   const meshes = [rockMesh(1, 'rock1'), rockMesh(2, 'rock2'), rockMesh(3, 'rock3')], bufs = [[], [], []], r = rng(808);
   const put = (x, z, s, sink = .1) => { M4.ComposeToRef(new V3(s * Rr(.9, 1.3, r), s * Rr(.7, 1.1, r), s), B.Quaternion.RotationYawPitchRoll(r() * 6.28, Rr(-.15, .15, r), Rr(-.15, .15, r)), new V3(x, hFn(x, z) - sink * s, z), tmp); bufs[Math.floor(r() * 3)].push(...tmp.toArray()); };
   for (let i = 0; i < 26; i++) { const a = i / 26 * 6.283 + Rr(-.1, .1, r), rr = P.r + Rr(.1, .9, r); put(P.x + Math.cos(a) * rr, P.z + Math.sin(a) * rr, Rr(.35, .8, r)); }          // around the pond
-  for (let i = 0; i < 24; i++) { const z = Rr(-36, 36, r), x = G.shoreX(z) + Rr(.5, 5, r), bb = G.beachedBoat; if (bb && Math.hypot(x - bb.x, z - bb.z) < 4.6) continue; if (!G.blocked(x + 6, z, 0) || x > G.shoreX(z) + 1) put(x, z, Rr(.25, .9, r), .2); }              // along the beach
+  const onSand = (x, z) => { const d = x - G.shoreX(z); return d > .9 && d < 3.2; };
+  for (let i = 0; i < 24; i++) { const z0 = Rr(-36, 36, r), s = Rr(.25, .9, r), [x, z, m] = G.findFree(G.shoreX(z0) + Rr(.3, 2.6, r), z0, .62 * s, onSand, 3);      // along the beach, on the sand
+    if (m < 0) continue; put(x, z, s, .2); G.claim(x, z, .55 * s, true, 'rock'); }
   for (let i = 0; i < 12; i++) { const a = Rr(0, 6.283, r), x = L.well.x + Math.cos(a) * 2.4, z = L.well.z + Math.sin(a) * 2.4; put(x, z, Rr(.25, .45, r)); }
   for (let i = 0; i < 14; i++) { const x = Rr(-40, 40, r), z = Rr(-38, 38, r); if (!G.blocked(x, z, 1.2)) put(x, z, Rr(.3, .7, r)); }
   meshes.forEach((m, i) => { if (bufs[i].length) { m.thinInstanceSetBuffer('matrix', new Float32Array(bufs[i]), 16, true); m.thinInstanceRefreshBoundingInfo(true); G.cast(m); } else m.setEnabled(false); });
@@ -136,7 +130,7 @@ function rockMesh(seed, name) {
 (function hammock() {
   const hm = L.hammock, y = hFn(hm.x, hm.z1), srcs = G.palmSrc[1], pts = geo.palmTrunk[62]; if (!srcs || !pts) return;
   const at = (z) => { const gy = hFn(hm.x, z) - .05; srcs.forEach((src, l) => { const m = src.createInstance('hamPalm' + z + l); m.position.set(hm.x, gy, z); m.isPickable = false; m.setEnabled(false); (G.hamInst = G.hamInst || {})[z + ':' + l] = m; });
-    G.trees.push({ x: hm.x, z, levels: [0, 1, 2].map(l => [G.hamInst[z + ':' + l]]), t: [26, 62, 170], cur: -1, sway: false, ph: 0 }); G.obstacles.push({ x: hm.x, z, r: .5 }); let bi = 0; pts.forEach((q, i) => { if (Math.abs(q.y - 1.75) < Math.abs(pts[bi].y - 1.75)) bi = i; }); return { c: new V3(hm.x + pts[bi].x, gy + pts[bi].y, z + pts[bi].z), t: bi / 24, gy }; };
+    G.trees.push({ x: hm.x, z, levels: [0, 1, 2].map(l => [G.hamInst[z + ':' + l]]), t: [26, 62, 170], cur: -1, sway: false, ph: 0 }); G.claim(hm.x, z, .5, true, 'hammock palm'); let bi = 0; pts.forEach((q, i) => { if (Math.abs(q.y - 1.75) < Math.abs(pts[bi].y - 1.75)) bi = i; }); return { c: new V3(hm.x + pts[bi].x, gy + pts[bi].y, z + pts[bi].z), t: bi / 24, gy }; };
   const pa = at(hm.z1), pb = at(hm.z2), rad = t => .33 * (1 - t) + .18 * t + .17 * Math.exp(-t * 15), dz = Math.sign(pb.c.z - pa.c.z);
   const A = new V3(pa.c.x, pa.c.y, pa.c.z + dz * (rad(pa.t) + .03)), Bp = new V3(pb.c.x, pb.c.y, pb.c.z - dz * (rad(pb.t) + .03)); const mb = new MB(), dir = Bp.subtract(A), len = dir.length(), side = new V3(-dir.z, 0, dir.x).normalize(), sag = .75;
   const pos = (t, v) => { const w = .12 + (.85 - .12) * Math.pow(Math.sin(Math.PI * t), .55), lat = (v - .5) * w, p = V3.Lerp(A, Bp, t); return [p.x - A.x + side.x * lat, p.y - A.y - sag * 4 * t * (1 - t) - .12 * (1 - 4 * (v - .5) ** 2) * Math.sin(Math.PI * t), p.z - A.z + side.z * lat]; };
@@ -167,4 +161,6 @@ function rockMesh(seed, name) {
 
 /* ---------- tapayan info on the clay jars by the stairs ---------- */
 for (const [lx, lz] of [[-.4, -6.4], [-4, -6.2], [.9, -6.3]]) { const p = G.houseLocalToWorld(lx, .5, lz); G.hot.push({ pos: p, r: .6, kind: 'tapayan' }); }
+
+G.systems.add('pond', t => G.updatePond(t), { order: 33 });
 })();

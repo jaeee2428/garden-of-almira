@@ -1,5 +1,5 @@
 /* =====================================================================
-   flora2.js - more flowers for the buwakan:
+   flora/plant-geometry-extra.js - more flowers for the buwakan:
    rosas (roses), canna lily, heliconia, kamia (white ginger lily),
    orkidyas (moth orchid), liryo (lotus & lily pads)
    ===================================================================== */
