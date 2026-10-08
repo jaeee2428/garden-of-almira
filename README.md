@@ -14,7 +14,7 @@ Double-click `run.command`, or:  `python3 server.py`  then open http://localhost
 - Click the puso, the candles at the roadside cross (light / snuff them), the bangka, the hens, the butterflies (alibangbang)
 - **🚶 Walk** (or press T): W A S D, Shift to run, click to look, Esc to free the mouse
 - **Buntag ↔ Gabii** slider: morning → udto (noon) → hapon (golden afternoon) → kilumkilom (dusk) → gabii (night); windows and lanterns glow, fireflies and shooting stars appear. The name of the hour shows beside the slider.
-- **Living wind**: a sea breeze blows all the time, turns slowly and sends gusts rolling through. It bends every leaf, branch and palm frond on the GPU, swings the star lanterns and fiesta flags, and carries petals and fireflies. Plants part around you as you walk, and a click sends a ripple through the garden.
+- **Living wind**: a sea breeze blows all the time, turns slowly and sends gusts rolling through. Every plant bends from its root like a real stem (stiff trees barely move, grass sways quickly, nothing stretches), on the GPU. The star lanterns and fiesta flags are little pendulums that lean downwind and settle; the wind also carries petals and fireflies. Plants part around you as you walk, and a click sends a ripple through the garden.
 - **Keys**: press **K** for the full list: W A S D / arrows walk and turn, Shift run, F fly (Space up, C down), Z (hold) or mouse wheel to zoom, T tour/walk, Space pause the tour, R restart, 1-5 pick the hour (Buntag, Udto, Hapon, Kilumkilom, Gabii), , . or [ ] step through the day, P let time pass, H hide panels, M music.
 - **Sound**: the garden's own sounds are generated live, with no melody and no audio files: the sea (louder near the shore), wind in the leaves (louder near palms and bamboo), birds you hear where they actually fly or perch, the rooster crowing when he crows, hens clucking, chicks peeping, frogs and an owl at night (no bee hum or cricket drone, on purpose: it stays peaceful), and your footsteps on grass, stone or sand. Browsers only allow sound after your first click or key press. Press **M** or the Sound button to mute.
 - Always runs at full detail. If a computer struggles it quietly renders fewer pixels, nothing else changes.
@@ -25,19 +25,18 @@ split into chunks that are culled; shadows are redrawn every few frames; lights 
 ratio is capped at 1.5.
 
 ## Files
-- `server.py`  tiny local web server
-- `public/js/core.js`        engine, sky/sea shaders, terrain, time of day, mesh builder
-- `public/js/flora.js`       hand-modelled petals, leaves, trunks, palms
-- `public/js/flora2.js`      roses, canna, heliconia, kamia, orchids, lotus
-- `public/js/structures.js`  house, arch, pergola, shrine, bangka, banderitas, puso
-- `public/js/garden.js`      planting, trees, butterflies, hens, fireflies
-- `public/js/props.js`       pond, mango trees, bamboo, bahay kubo, well, hammock, pots, rocks, orchids
-- `public/js/flora3.js`      the wild plants: lantana, makahiya, cosmos, cogon & talahib, croton, ferns, beach morning glory, pandan
-- `public/js/fauna.js`       chickens & chicks, birds, egret, butterflies, moths, fireflies, glowing bluebells
-- `public/js/audio.js`       the generated ambient music and nature sounds
-- `public/js/magic.js`       diwata, parol, fairy ring, orbs, gold dust, shooting stars
-- `public/js/main.js`        cameras, picking, UI
-- `old/main_v1.js`           the first stylised version, kept for reference
+The code is split by responsibility; see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the full map and the rules for adding to it.
+- `server.py` tiny local web server · `run.command` double-click launcher
+- `public/js/boot.js` the load order (one manifest) · `public/js/config/settings.js` every tunable number
+- `public/js/engine/` engine core: namespace, system registry, GPU wind, pendulum physics, mesh builder, rendering, time of day
+- `public/js/data/` the flower and lore cards (content only)
+- `public/js/world/` terrain, sky, sea, layout, house/arch/pergola/shrine/boats, props
+- `public/js/flora/` plant geometry library, garden beds + trees, wild plants
+- `public/js/fauna/` chickens, birds, butterflies & moths, night glow
+- `public/js/fx/` fireflies & petals, parols, orbs, fairy ring, shooting stars
+- `public/js/game/` controls (tour/walk/zoom), interaction (picking, card, bayong), the frame loop
+- `public/js/ui/hud.js`, `public/js/audio/soundscape.js`, `public/js/dev/debug.js`
+- `tools/` headless Chrome screenshot + console helpers · `archive/` the first prototype (not loaded)
 
 ## Sea, boats and flowers (latest)
 - The sea uses Gerstner waves on the GPU; the sailing bangka rides the same wave function on the CPU, and the beached bangka sits clear of the rocks.

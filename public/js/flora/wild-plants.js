@@ -1,5 +1,5 @@
 /* =====================================================================
-   flora3.js - the wild, flower-like plants of a Visayan yard and beach.
+   flora/wild-plants.js - the wild, flower-like plants of a Visayan yard and beach.
    No cards, not in the bayong: just life all around the garden.
    lantana · touch-me-not (makahiya) · ageratum · wedelia · cosmos ·
    cogon & talahib grass · croton · ferns · beach morning glory · pandan
@@ -12,11 +12,7 @@ const UP = V3.Up(), ORG = V3.Zero(), Rr = (a, b, r) => a + (b - a) * r(), Q = G.
 const tmp = new B.Matrix(), vds = new Map();
 
 /* ---------- materials: each kind of plant bends its own amount ---------- */
-const M = {
-  low: G.windMat('windLow', { flex: 1.4, flutter: .006 }), cosmos: G.windMat('windCosmos', { flex: .45, flutter: .02 }),
-  cogon: G.windMat('windCogon', { flex: .32, flutter: .02 }), tall: G.windMat('windTall', { flex: .11, flutter: .03 }),
-  fern: G.windMat('windFern', { flex: .5, flutter: .04 }), pandan: G.windMat('windPandan', { flex: .05, flutter: .03 }), vine: G.windMat('windGlory', { flex: .3, flutter: .03 }),
-};
+const M = { low: G.mats.low, cosmos: G.mats.cosmos, cogon: G.mats.cogon, tall: G.mats.tall, fern: G.mats.fern, pandan: G.mats.pandan, vine: G.mats.glory };   // stiffness per kind: config/settings.js
 
 /* ---------- little helpers ---------- */
 function arc(mb, o, yaw, len, rise, droop, W, nu, cfn, afn, prof) {                        // a curved ribbon: grass blade, fern frond, leaflet
@@ -174,7 +170,8 @@ function chunks(srcMesh, mats, lim, cell = 24) {
 function scatter(variants, o) {                                                              // variants: [meshes]; o: { n, ok(x,z), scale:[a,b], lim, maxR }
   const r = rng(o.seed || 7), out = [], n = Math.round(o.n * Q); let tries = 0;
   while (out.length < n && tries++ < n * 40) { const a = r() * 6.283, rr = Math.sqrt(r()) * (o.maxR || 60), x = (o.cx || 0) + Math.cos(a) * rr, z = (o.cz || 0) + Math.sin(a) * rr; if (!o.ok(x, z, r)) continue;
-    const s = Rr(o.scale[0], o.scale[1], r); M4.ComposeToRef(new V3(s, s * Rr(.85, 1.2, r), s), B.Quaternion.RotationYawPitchRoll(r() * 6.28, o.tilt ? Rr(-o.tilt, o.tilt, r) : 0, o.tilt ? Rr(-o.tilt, o.tilt, r) : 0), new V3(x, hFn(x, z) - .015, z), tmp); out.push([x, z, tmp.toArray().slice(), Math.floor(r() * variants.length)]); }
+    if (o.space && !G.isFree(x, z, o.space)) continue;                                        // no overlapping (only beach plants use this)
+    const s = Rr(o.scale[0], o.scale[1], r); if (o.space) G.claim(x, z, o.space * s, !!o.solid, o.tag || ''); M4.ComposeToRef(new V3(s, s * Rr(.85, 1.2, r), s), B.Quaternion.RotationYawPitchRoll(r() * 6.28, o.tilt ? Rr(-o.tilt, o.tilt, r) : 0, o.tilt ? Rr(-o.tilt, o.tilt, r) : 0), new V3(x, hFn(x, z) - .015, z), tmp); out.push([x, z, tmp.toArray().slice(), Math.floor(r() * variants.length)]); }
   variants.forEach((src, vi) => chunks(src, out.filter(q => q[3] === vi).map(q => [q[0], q[1], q[2]]), o.lim));
 }
 const build = (fn, mat, name, ...args) => { G.setLOD(1); const mbs = fn(...args), m = mbs[0].build(name, mat); G.setLOD(0); m.setEnabled(false); return m; };
@@ -206,8 +203,10 @@ setTimeout(() => {}, 0);
   fm.forEach((src, vi) => chunks(src, fer.filter(q => q[3] === vi).map(q => [q[0], q[1], q[2]]), 54));
   // the beach: morning glory creeping over the sand, pandan standing behind it
   const keep = (x, z) => !G.L.keepOut.some(k => Math.hypot(x - k.x, z - k.z) < k.r);
-  scatter([build(glory, M.vine, 'gloryA', 71), build(glory, M.vine, 'gloryB', 72)], { seed: 39, n: 46, maxR: 52, scale: [.9, 1.5], lim: 80, ok: (x, z) => { const s = G.shoreX(z); return x > s + .6 && x < s + 5 && keep(x, z); } });
-  scatter([build(pandan, M.pandan, 'pandanA', 81), build(pandan, M.pandan, 'pandanB', 82)], { seed: 40, n: 24, maxR: 56, scale: [.8, 1.3], lim: 90, ok: (x, z) => { const s = G.shoreX(z); return x > s + 3.5 && x < s + 9 && keep(x, z) && patch(x, z, .05, .4); } });
+  scatter([build(glory, M.vine, 'gloryA', 71), build(glory, M.vine, 'gloryB', 72)], { seed: 39, n: 46, maxR: 52, scale: [.9, 1.5], lim: 80, space: .45, tag: 'glory', ok: (x, z) => { const s = G.shoreX(z); return x > s + 1.9 && x < s + 6 && keep(x, z); } });   // morning glory stays above the swash run-up
+  scatter([build(pandan, M.pandan, 'pandanA', 81), build(pandan, M.pandan, 'pandanB', 82)], { seed: 40, n: 24, maxR: 56, scale: [.8, 1.3], lim: 90, space: .85, solid: true, tag: 'pandan', ok: (x, z) => { const s = G.shoreX(z); return x > s + 3.5 && x < s + 9 && keep(x, z) && patch(x, z, .05, .4); } });
 })();
 G.updateCover = () => { const c = G.camera.position; for (const e of G.cover) e.m.setEnabled(Math.hypot(e.x - c.x, e.z - c.z) < (e.lim !== undefined ? e.lim : G.QUAL.grass + 14) + 12); };
+
+G.systems.add('coverLOD', () => G.updateCover(), { order: 11, every: 10 });
 })();

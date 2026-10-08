@@ -1,5 +1,5 @@
 /* =====================================================================
-   structures.js - the made things of a Cebuano homestead
+   world/structures.js - the made things of a Cebuano homestead
    Visayan ancestral house (coral-stone silong, plank upper floor, capiz
    windows, clay-tile roof) · bamboo arch · kadena de amor pergola ·
    roadside shrine with candles · bangka · fiesta banderitas · puso
@@ -7,12 +7,6 @@
 (() => {
 const { B, V3, C3, M4, MB, basis, rgb, mixA, shade, clamp, lerp, rng, scene, hFn } = G;
 const Rr = (a, b, r) => a + (b - a) * r();
-G.hot = [];            // click-able special things  {pos:V3, r, kind, name, ...}
-G.obstacles = [];      // things you bump into when walking {x,z,r}  or  {box:true,x,z,hw,hd,yaw}
-G.L = { house: { x: 19, z: 4, yaw: Math.PI / 2 }, tree: { x: 0, z: 7.5 }, shrine: { x: -12, z: -8.5 }, arch: { x: -33.5 }, ring: { x: 13, z: -17 }, kubo: { x: -24.5, z: -27, yaw: .7 }, well: { x: 15.5, z: 15 }, hammock: { x: -33, z1: 12, z2: 7.6 },
-  mango: [[28, -18], [-38, -30], [31, 27], [-4, 37], [8, -31]], bamboo: [[38, -12], [36, 24], [-8, 34], [-40, -22]] };
-G.L.keepOut = [{ x: G.POND.x, z: G.POND.z, r: G.POND.r + 3.2 }, { x: G.L.kubo.x, z: G.L.kubo.z, r: 5 }, { x: G.L.well.x, z: G.L.well.z, r: 2.6 }, { x: -33, z: 9.8, r: 5 },
-  ...G.L.mango.map(([x, z]) => ({ x, z, r: 4.6 })), ...G.L.bamboo.map(([x, z]) => ({ x, z, r: 3.6 }))];
 
 /* ---------- procedural textures with real relief (normal maps) ---------- */
 function canvasTex(name, size, draw) { const t = new B.DynamicTexture(name, { width: size, height: size }, scene, true); draw(t.getContext(), size); t.update(); t.wrapU = t.wrapV = B.Texture.WRAP_ADDRESSMODE; return t; }
@@ -319,8 +313,15 @@ G.flags = [];
   const idx = tri.map(() => []); G.flags.forEach((f, i) => idx[f.ci].push(i));
   const bufs = tri.map((m, c) => new Float32Array(idx[c].length * 16)); tri.forEach((m, c) => m.thinInstanceSetBuffer('matrix', bufs[c], 16, false));
   G.flagIdx = idx; G.flagBufs = bufs;
-  G.updateFlags = (t, wind) => { const q = new B.Quaternion(), s = new V3(1, 1, 1);
-    idx.forEach((list, c) => { list.forEach((fi, j) => { const f = G.flags[fi], sw = Math.sin(t * 3.2 + f.ph) * .22 * wind + Math.sin(t * 5.1 + f.ph * 2) * .08 * wind; B.Quaternion.RotationYawPitchRollToRef(f.yaw + Math.PI / 2, sw, Math.sin(t * 2.1 + f.ph) * .15 * wind, q); M4.ComposeToRef(s, q, f.p, tmp); tmp.copyToArray(bufs[c], j * 16); }); tri[c].thinInstanceBufferUpdated('matrix'); }); };
+  // Each pennant is a damped pendulum hanging from the string: wind drag on the part of the wind that blows
+  // THROUGH the flag pushes it downwind, gravity pulls it back, and turbulence makes it flutter.
+  const PH = G.physics, LCOM = .1, K = PH.GRAVITY / LCOM;                 // centre of mass ~10 cm below the string
+  G.flags.forEach(f => { f.sw = PH.pendulum(); f.nx = Math.cos(f.yaw); f.nz = -Math.sin(f.yaw); });
+  let lastT = null;
+  G.updateFlags = (t, wind) => { const q = new B.Quaternion(), s = new V3(1, 1, 1), W = G.windState, dt = lastT === null ? 0 : Math.min(t - lastT, .1); lastT = t;
+    idx.forEach((list, c) => { list.forEach((fi, j) => { const f = G.flags[fi], across = (W.dx * f.nx + W.dz * f.nz) * W.gain, drive = 38 * across * (.6 + .4 * Math.abs(across)) * PH.gusty(t, f.ph);
+      PH.stepPendulum(f.sw, K, drive, 3.2, dt); const twist = Math.sin(t * 2.1 + f.ph) * .06 * W.gain;
+      B.Quaternion.RotationYawPitchRollToRef(f.yaw + Math.PI / 2, f.sw.a, twist, q); M4.ComposeToRef(s, q, f.p, tmp); tmp.copyToArray(bufs[c], j * 16); }); tri[c].thinInstanceBufferUpdated('matrix'); }); };
 })();
 
 /* ---------- papag (bamboo bench) under the ilang-ilang ---------- */
@@ -362,12 +363,24 @@ function makeBangka(seed, sailCol, o = {}) {
 (function boats() {
   const b1 = makeBangka(1, '#efe3c0'), b2 = makeBangka(2, '#e8c26a'), b3 = makeBangka(3, '#f4efe2');
   [[b1, -88, 24, 1.9, .5], [b2, -125, -34, 1.1, -.3], [b3, -64, -52, 1.6, .8]].forEach(([b, x, z, yaw, sp]) => { b.position.set(x, G.SEA_Y + .3, z); b.rotation.y = yaw; G.boats.push({ m: b, x, z, yaw, sp, ph: Math.random() * 6 }); });
-  // the beached bangka: hauled up the sand, hull sunk a little, no sail
-  const bb = makeBangka(4, '#d8cfae', { beached: true }), sx = G.shoreX(-15) + 3.5; bb.position.set(sx, hFn(sx, -15) + .22, -15); bb.rotation.set(.05, .5, -.1); G.beachedBoat = { x: sx, z: -15 };
-  G.hot.push({ pos: new V3(sx, hFn(sx, -15) + .5, -15), r: 1.6, kind: 'bangka' }); G.obstacles.push({ x: sx, z: -15, r: 2.2 });
+  // the beached bangka: hauled up the sand bow-first to the sea, resting on its keel along the real slope of the beach
+  // (the outrigger floats lie along the shore, held clear of the sand by their bamboo arms)
+  const bb = makeBangka(4, '#d8cfae', { beached: true }), bz0 = -15, sl = .198 * Math.cos(bz0 * .09) + .184 * Math.cos(bz0 * .23), nl = Math.hypot(1, sl);
+  const fx = 1 / nl, fz = -sl / nl, bx = G.shoreX(bz0) + 2.6, bz = bz0;                                     // f = up-the-beach direction
+  const hAt = (along, side) => hFn(bx + fx * along + fz * side, bz + fz * along - fx * side);
+  const up = new V3(hAt(0, -1) - hAt(0, 1), 2, hAt(-1, 0) - hAt(1, 0)).normalize();                         // ground normal (central differences)
+  const zdir = new V3(fx * 6.4, hAt(3.2, 0) - hAt(-3.2, 0), fz * 6.4), keelY = Math.min(hAt(0, 0), (hAt(3.2, 0) + hAt(-3.2, 0)) / 2);
+  const Mb = G.basis(zdir, up, V3.Zero()); bb.rotationQuaternion = B.Quaternion.FromRotationMatrix(Mb); bb.position.set(bx, keelY + .44, bz);   // keel ~6 cm into the sand
+  G.beachedBoat = { x: bx, z: bz };
+  G.hot.push({ pos: new V3(bx, keelY + .7, bz), r: 1.6, kind: 'bangka' });
+  for (const k of [-2.3, 0, 2.3]) G.claim(bx + fx * k, bz + fz * k, 1.95, true, 'bangka');                  // hull + outriggers footprint
 })();
 const _wv = {}, _wv2 = {};
 G.updateBoats = t => G.boats.forEach(b => {
   const px = b.x + Math.sin(t * .05 * b.sp + b.ph) * 6, pz = b.z + Math.cos(t * .04 * b.sp + b.ph) * 3, w = G.waveAt(px, pz, t, _wv), fx = Math.sin(b.m.rotation.y), fz = Math.cos(b.m.rotation.y), rx = Math.cos(b.m.rotation.y), rz = -Math.sin(b.m.rotation.y);
   b.m.position.set(px, G.SEA_Y + .28 + w.h, pz); b.m.rotation.x = -(w.gx * fx + w.gz * fz) * .9; b.m.rotation.z = (w.gx * rx + w.gz * rz) * .9 + Math.sin(t * .6 + b.ph) * .01;
-});})();
+});
+G.systems.add('flags', t => G.updateFlags(t, G.wind), { order: 30 });
+G.systems.add('boats', t => G.updateBoats(t), { order: 31, every: 2 });
+G.systems.add('candles', t => G.flickerCandles(t), { order: 32 });
+})();
