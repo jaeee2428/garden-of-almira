@@ -2,7 +2,8 @@
    dev/debug.js - URL switches for screenshots and automated checks (no effect without them)
      ?cam=x,y,z,tx,ty,tz      fixed camera            ?atsp=gumamela&v=red   close-up of a species
      ?atplant=N               close-up of plant N     ?at=hen&i=0&d=1        close-up of an animal (frozen), + &pose=peck|crow
-     ?walk=1&x=&z=&yaw=       start walking there     ?test=flower|candle|puso   click tests -> console
+     ?walk=1&x=&z=&yaw=&view=third&hold=KeyW,ShiftLeft   walk there as the avatar (3rd person, holding keys)
+        ?test=flower|candle|puso   click tests -> console
      ?u=.45 time of day · ?hideui=1 · ?nomusic=1 · ?no=cover,trees,plants,orbs · ?q=low · ?debug=1
    ===================================================================== */
 (() => {
@@ -13,10 +14,13 @@ const $ = id => document.getElementById(id), params = G.params, P = G.player;
 if (params.has('cam')) { const c = params.get('cam').split(',').map(Number); P.mode = 'static'; camera.position.set(c[0], c[1], c[2]); camera.setTarget(new V3(c[3], c[4], c[5])); G.camFwd.set(c[3] - c[0], 0, c[5] - c[2]); }
 if (params.has('atplant')) { const p = G.plants[parseInt(params.get('atplant'))]; P.mode = 'static'; camera.position.set(p.x + .5, p.y + .65, p.z + .5); camera.setTarget(new V3(p.x, p.y + .45, p.z)); G.camFwd.set(-.5, 0, -.5); }
 if (params.has('atsp')) { const sp = params.get('atsp'), v = params.get('v'); let p = null, bn = 1e9; for (const q of G.plants) { if (q.sp !== sp || (v && G.kinds[q.ki].v !== v) || Math.hypot(q.x + 5, q.z) > 45) continue; let n = 0; for (const o of G.plants) if (o !== q && Math.hypot(o.x - q.x, o.z - q.z) < 2.4) n++; if (n < bn) { bn = n; p = q; } }
-  if (p) { P.mode = 'static'; const d = p.H * 1.05 + .45; camera.position.set(p.x + d * .6, p.y + p.H * .5, p.z + d * .8); camera.setTarget(new V3(p.x, p.y + p.H * .5, p.z)); G.camFwd.set(-.6, 0, -.8); } }
+  if (p) { P.mode = 'static'; const d = (p.H * 1.05 + .45) * (parseFloat(params.get('near')) || 1); camera.position.set(p.x + d * .6, p.y + p.H * .5, p.z + d * .8); camera.setTarget(new V3(p.x, p.y + p.H * .5, p.z)); G.camFwd.set(-.6, 0, -.8); } }
 if (params.has('at')) { const lists = { hen: G.chicken, bird: G.birds, fly: G.flyers }, E = (lists[params.get('at')] || [])[parseInt(params.get('i') || '0')]; if (E) { const p = E.root.position, d = parseFloat(params.get('d') || '1'); P.mode = 'static'; camera.position.set(p.x + d * .8, p.y + d * .35, p.z + d * .6); camera.setTarget(new V3(p.x, p.y + .12, p.z)); G.camFwd.set(-.8, 0, -.6); G.freezeFauna = true; } }
 if (params.has('pose') && G.chicken) G.chicken.forEach(c => { c.state = params.get('pose'); c.timer = 1e9; });      // ?pose=peck|crow : hold the chickens in one pose
-if (params.has('walk')) { G.controls.setMode('walk'); camera.position.set(parseFloat(params.get('x') || '-30'), 2, parseFloat(params.get('z') || '0')); P.yaw = parseFloat(params.get('yaw') || '1.57'); P.pitch = parseFloat(params.get('pitch') || '.05'); }
+if (params.has('walk')) { G.controls.setMode('walk'); camera.position.set(parseFloat(params.get('x') || '-30'), 2, parseFloat(params.get('z') || '0')); P.yaw = parseFloat(params.get('yaw') || '1.57'); P.pitch = parseFloat(params.get('pitch') || '.05');
+  if (G.avatar) { G.avatar.enter(camera.position.x, camera.position.z, P.yaw); G.avatar.setView(params.get('view') === 'third' ? 'third' : 'first'); }
+  if (params.has('hold')) params.get('hold').split(',').forEach(k => { P.keys[k] = true; });          // e.g. &hold=KeyW,ShiftLeft : walk / run on the spot for screenshots
+}
 
 /* ---------- click tests: results go to the console ---------- */
 const testName = params.get('test');

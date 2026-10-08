@@ -16,7 +16,7 @@ G.poke = (x, z, amp = 1) => { const w = G.windState; w.pokeX = x; w.pokeZ = z; w
 //  * the bend is capped (maxBend = horizontal offset / height), so nothing folds flat
 //  * optional distance fade (fade: [start, end] metres): tiny far plants shrink into the ground instead of
 //    shimmering as sub-pixel noise, and never pop when their chunk is culled
-const UNIFORMS = 'uniform vec4 uWind0; uniform vec4 uWind1; uniform vec4 uWind2; uniform vec4 uPlayer; uniform vec4 uPoke;';
+const UNIFORMS = 'uniform vec4 uWind0; uniform vec4 uWind1; uniform vec4 uWind2; uniform vec4 uPlayer; uniform vec4 uPoke; uniform vec4 uTrail;';
 const WIND_DEFS = `
 #ifdef WIND
 vec3 windOffset(vec3 wp, vec3 root, float hh, float aw) {
@@ -36,6 +36,14 @@ vec3 windOffset(vec3 wp, vec3 root, float hh, float aw) {
   if (pt > 0.0 && pt < 4.0) { vec2 pr = wp.xz - uPoke.xz; float rr = length(pr); float fr = pt * 6.0; float w = sin((rr - fr) * 2.1) * exp(-abs(rr - fr) * 0.55) * exp(-pt * 0.8) * uPoke.w; push += normalize(pr + vec2(1e-4)) * w * b * 1.5; }
   float sl = length(push), smax = uWind2.y * hh;                         // cap the bend angle
   if (sl > smax) push *= smax / max(sl, 1e-5);
+  // body contact (the avatar): soft foliage inside her body radius is pushed out of the way, up to her height,
+  // and a weaker push from where she was ~0.4 s ago makes plants spring back behind her instead of snapping
+  if (uPlayer.w > 0.0 && wp.y < uPlayer.y + 1.2) {
+    vec2 c1 = wp.xz - uPlayer.xz, c2 = wp.xz - uTrail.xy; float d1 = length(c1), d2 = length(c2);
+    vec2 cp = normalize(c1 + vec2(1e-4)) * max(0.0, uTrail.w - d1) + normalize(c2 + vec2(1e-4)) * max(0.0, uTrail.w * .75 - d2) * uTrail.z;
+    float cl = length(cp), cm = .85 * hh; if (cl > cm) cp *= cm / max(cl, 1e-5);
+    push += cp * clamp(hh * 2.5, 0.0, 1.0) * uPlayer.w; sl = length(push); smax = max(smax, .9 * hh); sl = min(sl, smax);
+  }
   sl = min(sl, smax);
   float drop = hh - sqrt(max(hh * hh - sl * sl, 0.0));                   // keep the stem length
   float fl = uWind1.y * aw * (0.25 + 0.6 * amp);                         // small leaf tremble at the tips
@@ -47,8 +55,8 @@ class WindPlugin extends B.MaterialPluginBase {
   constructor(material, o) { super(material, 'Wind', 210, { WIND: false }); this.flex = o.flex ?? .05; this.flutter = o.flutter ?? 0; this.hang = !!o.hang; this.hz = o.hz ?? 2.4; this.maxBend = o.maxBend ?? .5; this.fade = o.fade || [0, 0]; this._enable(true); }
   prepareDefines(defines) { defines.WIND = true; }
   getClassName() { return 'WindPlugin'; }
-  getUniforms() { return { ubo: ['uWind0', 'uWind1', 'uWind2', 'uPlayer', 'uPoke'].map(name => ({ name, size: 4, type: 'vec4' })), vertex: `#ifdef WIND\n${UNIFORMS}\n#endif` }; }
-  bindForSubMesh(ub) { const w = G.windState; ub.updateFloat4('uWind0', w.dx, w.dz, w.gain, w.time); ub.updateFloat4('uWind1', this.flex, this.flutter, this.hang ? 1 : 0, w.playerR); ub.updateFloat4('uWind2', this.hz, this.maxBend, this.fade[0], this.fade[1]); ub.updateFloat4('uPlayer', w.px, w.py, w.pz, 0); ub.updateFloat4('uPoke', w.pokeX, w.pokeT, w.pokeZ, w.pokeAmp); }
+  getUniforms() { return { ubo: ['uWind0', 'uWind1', 'uWind2', 'uPlayer', 'uPoke', 'uTrail'].map(name => ({ name, size: 4, type: 'vec4' })), vertex: `#ifdef WIND\n${UNIFORMS}\n#endif` }; }
+  bindForSubMesh(ub) { const w = G.windState; ub.updateFloat4('uWind0', w.dx, w.dz, w.gain, w.time); ub.updateFloat4('uWind1', this.flex, this.flutter, this.hang ? 1 : 0, w.playerR); ub.updateFloat4('uWind2', this.hz, this.maxBend, this.fade[0], this.fade[1]); ub.updateFloat4('uPlayer', w.px, w.py, w.pz, (w.contact || 0) * (this.flex >= .02 && !this.hang ? 1 : 0)); ub.updateFloat4('uTrail', w.tx || 0, w.tz || 0, w.trailK || 0, w.bodyR || .45); ub.updateFloat4('uPoke', w.pokeX, w.pokeT, w.pokeZ, w.pokeAmp); }   // body contact only bends soft plants
   getCustomCode(shaderType) {
     if (shaderType !== 'vertex') return null;
     return {

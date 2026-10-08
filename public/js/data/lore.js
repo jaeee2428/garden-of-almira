@@ -18,6 +18,8 @@ G.INFO_OTHER = {
   // folk-tale lights
   parol: { ceb: 'Parol', sci: 'star lantern', color: '#ffc24a', fact: 'The star lantern of the Philippines, made of bamboo and capiz shell or paper, hung at Christmas (its name comes from the Spanish “farol”, lantern). San Fernando, Pampanga is famous for giant ones.' },
   fairyring: { ceb: 'Uhong', sci: 'a ring of mushrooms', color: '#9fe8ff', fact: 'Mushrooms (uhong) often spring up in a neat ring on damp ground after the rain. In the garden a few of them glow softly in the dark.' },
+  // you
+  ikaw: { ceb: 'Ikaw', sci: 'the visitor (you)', color: '#ee9c8a', fact: 'You: a young Cebuana in a coral sundress, sandals and a sampaguita in her hair, out for a walk in the garden. Walk with W A S D, run with Shift, jump with Space; Tab switches between your own eyes and a view from behind. Plants part and rustle as you brush past, petals fall if you run through the flowers, the surf and the pond splash around your feet, and the hens scatter if you hurry at them.' },
   // animals
   hen: { ceb: 'Manok', sci: 'native chicken (hen)', color: '#c8782a', fact: 'Free-range native chickens scratch around almost every Visayan yard. The hen leads her chicks, clucking, and teaches them where to peck.' },
   rooster: { ceb: 'Tandang', sci: 'native rooster', color: '#d06a1a', fact: 'The rooster guards the flock and crows at first light. Native roosters are lean and long-legged, with a glossy green-black tail.' },

@@ -19,7 +19,7 @@ Inspired by the *title* of Erlinda K. Alburo's "Garden of Almira". **The text of
 - Tour (190 s camera path) is the original flow. Walk mode: WASD/arrows, Shift run, Q/E turn, F fly, mouse look (click to lock).
 - Zoom: hold **Z** or use the **mouse wheel**, in every mode (tour, walk, static). R resets.
 - Hover label = Cebuano name of exactly what the ray hits. Plants are picked by distance to their own stem line (tight radius), occluded things are skipped.
-- Click a flower: card with name, scientific name and folk/herbal facts; adds it to the bayong (14 flowers; collecting all triggers the "awaken" magic).
+- Click a flower: card with name, scientific name and folk/herbal facts; adds it to the bayong (18 flowers; collecting all triggers the "awaken" magic).
 - Time: keys 1–5 / slider; fireflies and candle/lantern flicker only at night; no grain; no fairies.
 - Sound: environment tied to animated things (wind in leaves, sea, birds, chickens, frogs/owl at night; no buzzing hum — user wants peace), toggle M.
 
@@ -34,6 +34,10 @@ Wish/lantern release, "Kuwento" panel, "Hangin" button, Detail quality button, g
 - LOD fade: small plants sink into the ground before culling (`fade` in config). MSAA ×4 + FXAA. Bloom softer (thr .92, w .14). Orbs/motes/ring sparkles mostly at night; no daytime fireflies; softer sea glitter. Softer sun, more sky fill, lighter shadows, gentle fog (EXP2 .0072–.012).
 
 - Shore (Oct 2026): surf zone with refraction, shoaling, breaking at ~9 m, foam bores, swash run-up, waterline foam on the real sand height, faint blue night surf. Wider dry-sand beach. Beached bangka on its keel along the slope, bow to sea. Footprint registry (`G.isFree/findFree/claim`, `?audit=1`): beach rocks, pandan, morning glory, palms, bananas, boat never overlap (nudged, never dropped). Sea breeze by day, land breeze at night.
+
+- Avatar (Oct 2026): `game/avatar.js` "Ikaw" - a young Cebuana (~1.58 m) in a coral floral sundress with flutter sleeves, white sash, sandals, long black hair with a sampaguita; high-poly face (almond eyes, lashes, brows, lips). Jointed skeleton, procedural walk/run with hip sway, human physics (accel, slope, wading, gravity, jump/land, bump), CLOTH skirt (CPU: knees push it, lags with acceleration, wind ripples), hair pendulum. Tab = first/third person (no button). Body contact bends soft plants (shader uPlayer.w/uTrail, wake behind her), rustle + petals when running through flowers, contact sounds via `G.sfx` on an effects bus (ambience bus quieter: config.audio). Hens flee, butterflies startle; card `ikaw`. F fly and the tour unchanged. Dev: `&face=1.1` portrait camera, `&hold=KeyW`.
+- Coconuts: bunch on stalks below the fronds, no overlap with trunk/each other, no flutter; palms stiffer (config).
+- Heritage flowers (Oct 2026): adelfa (pink/white), pukingan (vine on a bamboo tripod), tsampaka (small tree), rosal (gardenia) in `flora/plant-geometry-heritage.js`, planted by their own pass (w: 0 keeps the original layout), cards in data/flowers.js; bayong is 18.
 
 ## Known caveats
 - Load ≈ 9 s in headless software GL (instrumentation `__t`, `READY_MS`); real GPU should be faster.

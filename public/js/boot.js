@@ -20,12 +20,12 @@ const MODULES = [
   // 3 · content data (cards)
   'data/flowers', 'data/lore',
   // 4 · plant geometry library, then the built world
-  'flora/plant-geometry', 'flora/plant-geometry-extra',
+  'flora/plant-geometry', 'flora/plant-geometry-extra', 'flora/plant-geometry-heritage',
   'world/layout', 'world/structures', 'flora/garden-beds', 'fx/particles', 'world/props', 'world/hill-forest', 'flora/wild-plants',
   // 5 · folk-tale lights, then the animals
   'fx/magic', 'fauna/common', 'fauna/chickens', 'fauna/birds', 'fauna/insects', 'fauna/night-glow',
   // 6 · player, interaction, HUD, loop (starts rendering), sound, dev switches
-  'game/controls', 'game/interaction', 'ui/hud', 'game/loop', 'audio/soundscape', 'dev/debug',
+  'game/controls', 'game/avatar', 'game/interaction', 'ui/hud', 'game/loop', 'audio/soundscape', 'dev/debug',
 ];
 const t = window.__t = window.__t || [];
 for (const m of MODULES) {

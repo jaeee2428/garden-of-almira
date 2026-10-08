@@ -14,7 +14,8 @@
 (() => {
 const G = window.G; if (G.params.has('nomusic')) return;
 const B = G.B, btn = document.getElementById('sound');
-let ctx = null, master = null, bus = null, started = false, muted = false, vol = .9, L = {}, lastBird = 0, lastFrog = 0, lastOwl = 0, lastBee = 0, stepT = 0, tickIv = null;
+const MIX = G.CONFIG.audio || { ambience: .45, animals: .7, effects: 1.6 };
+let ctx = null, master = null, bus = null, fxBus = null, started = false, muted = false, vol = .9, L = {}, lastBird = 0, lastFrog = 0, lastOwl = 0, lastBee = 0, stepT = 0, tickIv = null;
 try { muted = localStorage.getItem('almira.muted') === '1'; } catch (e) { }
 const rnd = (a, b) => a + Math.random() * (b - a), clamp = (x, a, b) => Math.min(b, Math.max(a, x));
 const label = () => { if (btn) btn.textContent = muted ? '🔇 Sound' : '🔊 Sound'; };
@@ -30,8 +31,11 @@ function init() {
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC || ctx) return; ctx = new AC();
   master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
   const rv = ctx.createConvolver(); rv.buffer = impulse(1.7, 3); const rg = ctx.createGain(); rg.gain.value = .35; rv.connect(rg); rg.connect(master); L.rv = rv;
-  bus = ctx.createGain(); bus.connect(master);
-  const layer = (type, freq, q, gain, pink = true) => { const n = noiseSrc(4, pink), f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = ctx.createGain(); g.gain.value = gain; n.connect(f); f.connect(g); g.connect(master); n.start(); return { g, f }; };
+  // the mix: ambience (sea, wind, leaves) sits low under everything; animals a little higher; YOUR sounds (steps, splashes,
+  // rustling, bumps) are clearly in front
+  const amb = ctx.createGain(); amb.gain.value = MIX.ambience; amb.connect(master); L.amb = amb; fxBus = ctx.createGain(); fxBus.gain.value = MIX.effects; fxBus.connect(master);
+  bus = ctx.createGain(); bus.gain.value = MIX.animals; bus.connect(master);
+  const layer = (type, freq, q, gain, pink = true) => { const n = noiseSrc(4, pink), f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = ctx.createGain(); g.gain.value = gain; n.connect(f); f.connect(g); g.connect(amb); n.start(); return { g, f }; };
   L.sea = layer('lowpass', 620, .4, .05); const sw = ctx.createOscillator(), swg = ctx.createGain(); sw.frequency.value = .1; swg.gain.value = .035; sw.connect(swg); swg.connect(L.sea.g.gain); sw.start();       // slow swell
   L.wind = layer('bandpass', 480, .5, .02); L.rustle = layer('highpass', 3200, .3, .0, false); L.rustleLow = layer('bandpass', 1500, .7, .0, true);
   // no bee hum and no cricket drone: the soundscape stays soft and peaceful (silent stand-ins keep the code below simple)
@@ -57,14 +61,35 @@ function crow(x, y, z) {
 }
 function frog(x, y, z) { const w = where(x, y, z, 60); if (!w) return; const now = ctx.currentTime, g0 = ctx.createGain(); g0.gain.value = .07 * w.gain; out(g0, w.pan, .3); const n = 2 + Math.floor(Math.random() * 3); for (let i = 0; i < n; i++) { const t = now + i * .24, o = ctx.createOscillator(), a = ctx.createOscillator(), ag = ctx.createGain(), f = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(rnd(120, 160), t); o.frequency.exponentialRampToValueAtTime(rnd(190, 240), t + .16); a.frequency.value = 38; ag.gain.value = .5; f.type = 'bandpass'; f.frequency.value = 520; f.Q.value = 2.5; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + .2); a.connect(ag); ag.connect(g.gain); o.connect(f); f.connect(g); g.connect(g0); o.start(t); a.start(t); o.stop(t + .25); a.stop(t + .25); } }
 function owl(x, y, z) { const w = where(x, y, z, 90); if (!w) return; const now = ctx.currentTime, g0 = ctx.createGain(); g0.gain.value = .09 * w.gain; out(g0, w.pan, .6); [0, .75].forEach((dt, i) => { const t = now + dt, o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(i ? 300 : 340, t); o.frequency.linearRampToValueAtTime(i ? 270 : 330, t + .5); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .12); g.gain.exponentialRampToValueAtTime(.001, t + .55); o.connect(g); g.connect(g0); o.start(t); o.stop(t + .6); }); }
-function footstep(kind) {
+function footstep(kind, k = 1) {
   const now = ctx.currentTime, n = noiseSrc(.3, true); n.loop = false; const f = ctx.createBiquadFilter(), g = ctx.createGain(); let len = .12, gain = .1;
-  if (kind === 'stone') { f.type = 'bandpass'; f.frequency.value = 1900; f.Q.value = 1.6; len = .06; gain = .14; const o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.value = 170; og.gain.setValueAtTime(.12, now); og.gain.exponentialRampToValueAtTime(.001, now + .08); o.connect(og); og.connect(master); o.start(now); o.stop(now + .1); }
+  if (kind === 'stone') { f.type = 'bandpass'; f.frequency.value = 1900; f.Q.value = 1.6; len = .06; gain = .14; const o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.value = 170; og.gain.setValueAtTime(.12, now); og.gain.exponentialRampToValueAtTime(.001, now + .08); o.connect(og); og.connect(fxBus); o.start(now); o.stop(now + .1); }
   else if (kind === 'sand') { f.type = 'bandpass'; f.frequency.value = 2400; f.Q.value = .6; len = .16; gain = .09; } else { f.type = 'lowpass'; f.frequency.value = 1300; len = .13; gain = .075; }
-  g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(gain, now + .012); g.gain.exponentialRampToValueAtTime(.001, now + len); n.connect(f); f.connect(g); g.connect(master); n.start(now); n.stop(now + len + .05);
+  g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(gain * k, now + .012); g.gain.exponentialRampToValueAtTime(.001, now + len * (.8 + .2 * k)); n.connect(f); f.connect(g); g.connect(fxBus); n.start(now); n.stop(now + len * 1.4 + .05);
 }
+/* ---------- the avatar's own sounds (called by game/avatar.js through G.sfx) ---------- */
+function burst(type, freq, q, gain, len, delay = 0) {                 // a filtered noise burst: the basis of every contact sound
+  const now = ctx.currentTime + delay, n = noiseSrc(.5, true), f = ctx.createBiquadFilter(), g = ctx.createGain(); n.loop = false;
+  f.type = type; f.frequency.value = freq; f.Q.value = q; g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(gain, now + .01); g.gain.exponentialRampToValueAtTime(.001, now + len);
+  n.connect(f); f.connect(g); g.connect(fxBus); n.start(now); n.stop(now + len + .05); return f;
+}
+function splash(size = 1) {                                            // a foot or a body entering shallow water
+  const now = ctx.currentTime, f = burst('bandpass', 900, .8, .11 * size, .32 + .2 * size); f.frequency.setValueAtTime(1400, now); f.frequency.exponentialRampToValueAtTime(380, now + .3);
+  for (let i = 0; i < 3; i++) { const o = ctx.createOscillator(), og = ctx.createGain(), t0 = now + .04 + Math.random() * .16; o.frequency.setValueAtTime(rnd(500, 900), t0); o.frequency.exponentialRampToValueAtTime(rnd(1200, 1900), t0 + .05); og.gain.setValueAtTime(.025 * size, t0); og.gain.exponentialRampToValueAtTime(.001, t0 + .07); o.connect(og); og.connect(fxBus); o.start(t0); o.stop(t0 + .09); }   // little bubbles
+}
+const SFX = {
+  step(kind, k = 1) { if (kind === 'water') { splash(.55 * k); return; } footstep(kind, k); if (kind === 'grass') burst('highpass', 3300, .5, .035 * k, .14); },   // + a swish of grass blades
+  land(kind) { if (kind === 'water') { splash(1.4); return; } footstep(kind, 1.7); burst('lowpass', 220, .7, .12, .16); },
+  splash,
+  rustle(k = 1) { burst('highpass', 2600 + Math.random() * 900, .5, .075 * k, .26 + .12 * Math.random()); burst('bandpass', 5200, 1.2, .035 * k, .18, .05); burst('bandpass', 1400, .8, .03 * k, .2, .09); },   // leaves and twigs brushing past her
+  thud(k = 1) { const now = ctx.currentTime, o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.setValueAtTime(95, now); o.frequency.exponentialRampToValueAtTime(48, now + .14); og.gain.setValueAtTime(.16 * k, now); og.gain.exponentialRampToValueAtTime(.001, now + .2); o.connect(og); og.connect(fxBus); o.start(now); o.stop(now + .22); burst('lowpass', 500, .7, .06 * k, .1); },
+  jump() { burst('bandpass', 700, .9, .03, .18); },                      // cloth and breath as you push off
+};
+G.sfx = new Proxy(SFX, { get: (o, k) => (...a) => { if (!ctx || ctx.state === 'suspended' || muted) return; try { o[k](...a); } catch (e) { } } });   // silent until sound has started
+
 function stepper() {
-  if (!ctx || ctx.state === 'suspended' || muted) return; const sp = G.walkSpeed || 0; if (sp < .6) { stepT = 0; return; }
+  if (!ctx || ctx.state === 'suspended' || muted) return; if (G.avatar && G.avatar.active) return;            // the avatar times its own footfalls
+  const sp = G.walkSpeed || 0; if (sp < .6) { stepT = 0; return; }
   stepT -= .09; if (stepT > 0) return; stepT = .62 * 3.2 / clamp(sp, 1.6, 7); const c = G.camera.position;
   footstep(G.path.dist(c.x, c.z) < 1.05 ? 'stone' : c.x < G.shoreX(c.z) + 6 ? 'sand' : 'grass');
 }
@@ -87,6 +112,7 @@ function tick() {
   for (const a of G.chicken || []) { const p = a.root.position;
     if (a.state === 'crow') { if (!a._crowed) { a._crowed = true; crow(p.x, p.y + .5, p.z); } } else a._crowed = false;
     if (a.kind === 'chick') { if (a.state === 'walk' && Math.random() < .09) peep(p.x, p.y, p.z); }
+    else if (a.state === 'flee' && Math.random() < .5) cluck(p.x, p.y + .3, p.z);
     else if (a.state === 'peck' && Math.random() < .2) cluck(p.x, p.y + .3, p.z); else if (a.state === 'walk' && Math.random() < .03) cluck(p.x, p.y + .3, p.z); }
   // night: frogs at the pond, an owl far away
   if (night > .45) { const P = G.POND; if (now - lastFrog > 1.4 && Math.random() < .5 * night) { lastFrog = now; const a = Math.random() * 6.283; frog(P.x + Math.cos(a) * P.r, 0, P.z + Math.sin(a) * P.r); } if (now - lastOwl > 18 && Math.random() < .03) { lastOwl = now; const a = Math.random() * 6.283; owl(cam.x + Math.cos(a) * 55, 9, cam.z + Math.sin(a) * 55); } }

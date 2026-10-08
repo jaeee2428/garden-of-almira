@@ -27,12 +27,13 @@ public/
     world/                the land and the made things
       terrain.js sky.js sea.js layout.js structures.js props.js
     flora/                plants
-      plant-geometry.js plant-geometry-extra.js   (geometry library: G.geo)
+      plant-geometry.js plant-geometry-extra.js plant-geometry-heritage.js   (geometry library: G.geo)
       garden-beds.js      hero flowers, hedges, pots, ground cover, trees + LOD
       wild-plants.js      unlabeled flower-like weeds, chunked + culled
     fauna/                animals: common.js chickens.js birds.js insects.js night-glow.js
     fx/                   particles.js (fireflies, petals), magic.js (parols, orbs, fairy ring, shooting stars)
-    game/                 controls.js (tour/walk/zoom/input), interaction.js (picking, card, bayong), loop.js
+    game/                 controls.js (tour/walk/zoom/input), avatar.js (you: body, gait, human physics, 1st/3rd person),
+                          interaction.js (picking, card, bayong), loop.js
     ui/hud.js             time slider, keys panel
     audio/soundscape.js   procedural environmental sound
     dev/debug.js          URL switches for screenshots and tests (inert without them)
@@ -78,6 +79,9 @@ archive/                  the first stylised prototype, for reference only (not 
   is thin over the real sand height. Night surf glows faintly (bioluminescence).
 - **Boats:** ride the same wave function the sea shader uses (`G.waveAt`). The beached bangka rests on its keel along
   the real slope of the sand, bow to the sea.
+- **You (game/avatar.js):** acceleration/deceleration, slower uphill, wading slows you and deep water turns you back,
+  gravity + jump + landing that bends the knees, inelastic stop with a thud when you walk into something solid. The gait
+  phase advances with distance travelled (no foot sliding); every footfall plays the sound of the surface under that foot.
 - **Animals:** the chicken's body, head, tail and wings hang off a torso pivot at hip height,
   so pecking and crowing tilt them together over planted legs.
 

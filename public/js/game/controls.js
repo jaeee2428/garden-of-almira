@@ -28,15 +28,20 @@ const TOUR = 190;
 
 /* ---------- modes, hints ---------- */
 const modeBtn = $('mode'), hint = $('hint');
-const TOUR_HINT = 'click any flower to meet it · press <b>K</b> for all keys', WALK_HINT = '<b>W A S D</b> walk · <b>←/→</b> or <b>Q/E</b> turn · <b>Shift</b> run · <b>F</b> fly · <b>click</b> to meet things · <b>K</b> keys';
+const TOUR_HINT = 'click any flower to meet it · press <b>K</b> for all keys', WALK_HINT = '<b>W A S D</b> walk · <b>Shift</b> run · <b>Space</b> jump · <b>Tab</b> your eyes ⇄ behind you · <b>F</b> fly · <b>K</b> keys';
 function setMode(m) {
   if (m === P.mode) return; P.mode = m;
   if (m === 'walk') {
     const f = camera.getForwardRay().direction; P.yaw = Math.atan2(f.x, f.z); P.pitch = Math.asin(clamp(f.y, -1, 1)) * -1; camera.position.y = hFn(camera.position.x, camera.position.z) + 1.65;
-    modeBtn.textContent = '🎞 Tour'; hint.innerHTML = WALK_HINT;
-  } else { if (document.pointerLockElement) document.exitPointerLock(); modeBtn.textContent = '🚶 Walk'; hint.innerHTML = TOUR_HINT; P.fly = false; }
+    modeBtn.textContent = '🎞 Tour'; hint.innerHTML = WALK_HINT; if (G.avatar) G.avatar.enter(camera.position.x, camera.position.z, P.yaw);
+  } else { if (document.pointerLockElement) document.exitPointerLock(); modeBtn.textContent = '🚶 Walk'; hint.innerHTML = TOUR_HINT; P.fly = false; if (G.avatar) G.avatar.exit(); }
 }
 modeBtn.onclick = () => setMode(P.mode === 'tour' ? 'walk' : 'tour');
+function toggleView() {                                                  // your own eyes <-> a camera behind you
+  if (!G.avatar) return; if (P.mode !== 'walk' || P.fly) { setMode('walk'); if (P.fly) { P.fly = false; G.avatar.enter(camera.position.x, camera.position.z, P.yaw); } }
+  G.avatar.setView(G.avatar.view === 'first' ? 'third' : 'first'); if (G.avatar.view === 'third') P.pitch = Math.max(P.pitch, .15);
+  flash(G.avatar.view === 'first' ? 'first person: through your own eyes' : 'third person: a camera behind you');
+}
 function flash(t) { hint.textContent = t; clearTimeout(flash.t); flash.t = setTimeout(() => { hint.innerHTML = P.mode === 'walk' ? WALK_HINT : TOUR_HINT; }, 2400); }
 const FOV0 = .95;
 function resetView() { setMode('tour'); P.tourT = 0; P.tourPaused = false; P.fly = false; P.zoomK = 1; camera.fov = FOV0; flash('back to the start of the tour'); }
@@ -50,9 +55,11 @@ addEventListener('keydown', e => {
   if (digit) { G.hud.setTime([0, .2, .45, .7, 1][+digit[1] - 1]); flash(G.timeName(G.timeU)); return; }
   switch (e.code) {
     case 'KeyT': modeBtn.click(); break;
-    case 'KeyF': if (P.mode !== 'walk') setMode('walk'); P.fly = !P.fly; flash(P.fly ? 'fly mode: Space up · C down' : 'walking again'); break;
+    case 'KeyF': if (P.mode !== 'walk') setMode('walk'); P.fly = !P.fly; flash(P.fly ? 'fly mode: Space up · C down' : 'walking again');
+      if (G.avatar) { if (P.fly) G.avatar.exit(); else G.avatar.enter(camera.position.x, camera.position.z, P.yaw); } break;
+    case 'Tab': e.preventDefault(); toggleView(); break;
     case 'KeyR': resetView(); break;
-    case 'Space': e.preventDefault(); if (P.mode === 'tour') { P.tourPaused = !P.tourPaused; flash(P.tourPaused ? 'tour paused (Space to continue)' : 'tour playing'); } break;
+    case 'Space': e.preventDefault(); if (P.mode === 'walk' && !P.fly) P.jump = true; if (P.mode === 'tour') { P.tourPaused = !P.tourPaused; flash(P.tourPaused ? 'tour paused (Space to continue)' : 'tour playing'); } break;
     case 'KeyH': document.body.classList.toggle('noui'); break;
     case 'KeyK': case 'Slash': G.hud.toggleKeys(); break;
     case 'Escape': G.hud.hideKeys(); break;
@@ -84,6 +91,13 @@ function collide(nx, nz) {                                                      
   return [nx, nz];
 }
 function walkStep(dt) {
+  if (G.avatar && !P.fly) {                                               // you walk: human physics in game/avatar.js
+    if (keys.ArrowLeft || keys.KeyQ) P.yaw -= 1.7 * dt; if (keys.ArrowRight || keys.KeyE) P.yaw += 1.7 * dt;
+    if (keys.PageUp) P.pitch = clamp(P.pitch - 1.2 * dt, -1.3, 1.3); if (keys.PageDown) P.pitch = clamp(P.pitch + 1.2 * dt, -1.3, 1.3);
+    const fwd = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0), strafe = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
+    G.avatar.step(dt, { fwd, strafe, run: !!(keys.ShiftLeft || keys.ShiftRight), jump: !!P.jump, yaw: P.yaw, pitch: P.pitch }, G.clock); P.jump = false;
+    G.walkSpeed = G.avatar.speed; G.avatar.placeCamera(dt, P.yaw, P.pitch); return;
+  }
   const sp = (keys.ShiftLeft || keys.ShiftRight ? 6 : 3.2) * dt * (P.fly ? 1.6 : 1); let fx = 0, fz = 0;
   if (keys.KeyW || keys.ArrowUp) fz += 1; if (keys.KeyS || keys.ArrowDown) fz -= 1; if (keys.KeyD) fx += 1; if (keys.KeyA) fx -= 1;
   if (keys.ArrowLeft || keys.KeyQ) P.yaw -= 1.7 * dt; if (keys.ArrowRight || keys.KeyE) P.yaw += 1.7 * dt;

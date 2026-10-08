@@ -39,6 +39,12 @@ const kinds = [
   { sp: 'canna', v: 'yellow', w: 4, build: s => geo.canna('yellow', s), H: 1.3, sc: [.85, 1.2] },
   { sp: 'heliconia', v: 'h', w: 5, build: s => geo.heliconia(s), H: 1.5, sc: [.85, 1.2] },
   { sp: 'kamia', v: 'k', w: 6, build: s => geo.kamia(s), H: 1.3, sc: [.85, 1.2] },
+  // planted by their own pass below (w: 0 keeps the original random layout of everything above exactly as it was)
+  { sp: 'adelfa', v: 'pink', w: 0, build: s => geo.adelfa('pink', s), H: 1.7, sc: [.9, 1.15] },
+  { sp: 'adelfa', v: 'white', w: 0, build: s => geo.adelfa('white', s), H: 1.7, sc: [.9, 1.15] },
+  { sp: 'pukingan', v: 'b', w: 0, build: s => geo.pukingan(s), H: 1.6, sc: [.95, 1.1] },
+  { sp: 'tsampaka', v: 't', w: 0, build: s => geo.tsampaka(s), H: 3.0, sc: [.9, 1.1] },
+  { sp: 'rosal', v: 'w', w: 0, build: s => geo.rosal(s), H: 1.1, sc: [.9, 1.2] },
 ];
 G.kinds = kinds;
 const bag = kinds.flatMap((k, i) => Array(k.w).fill(i));
@@ -75,6 +81,16 @@ G.potSpots = [];
     const T = b.subtract(a).normalize(), nx = -T.z, nz = T.x;
     for (const sd of [-1, 1]) { const off = 1.75 + Rr(0, .5, r), x = b.x + nx * off * sd + Rr(-.2, .2, r), z = b.z + nz * off * sd + Rr(-.2, .2, r); if (blocked(x, z, 1.3) || false) continue;
       const q = r(); addPlant(q < .5 ? idxOf('sampaguita') : q < .78 ? idxOf('santan', r() < .7 ? 'red' : 'yellow') : q < .92 ? idxOf('gumamela', pick4(r)) : idxOf('dama'), x, z); }
+  }
+})();
+(function heritagePlants() {                               // adelfa, pukingan, tsampaka, rosal: into free spots in the beds, never on another plant
+  const r = rng(1898), want = [['adelfa', 'pink', 6, 1.2], ['adelfa', 'white', 3, 1.2], ['pukingan', null, 6, .9], ['tsampaka', null, 3, 2.2], ['rosal', null, 8, .9]];
+  for (const [sp, v, n, gap] of want) { let placed = 0, tries = 0;
+    while (placed < Math.round(n * Math.max(.6, Q)) && tries++ < 4000) {
+      const b = beds[Math.floor(r() * beds.length)], a = r() * 6.283, rr = Math.sqrt(r()); const x = b.x + Math.cos(a) * rr * b.rx, z = b.z + Math.sin(a) * rr * b.rz;
+      if (blocked(x, z, 1.5) || !G.isFree(x, z, gap * .5)) continue;
+      if (G.plants.some(p => (p.x - x) ** 2 + (p.z - z) ** 2 < (gap + p.r * .6) ** 2)) continue;
+      addPlant(idxOf(sp, v), x, z); if (sp === 'tsampaka' || sp === 'pukingan') G.claim(x, z, sp === 'tsampaka' ? .25 : .35, true, sp); placed++; }
   }
 })();
 function pick4(r) { const q = r(); return q < .5 ? 'red' : q < .7 ? 'pink' : q < .85 ? 'yellow' : 'orange'; }

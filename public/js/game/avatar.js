@@ -1,0 +1,264 @@
+/* =====================================================================
+   game/avatar.js - "Ikaw": you, a visitor in a cotton shirt, shorts and tsinelas
+   A simple but properly proportioned 1.65 m human with a jointed skeleton (hips, knees, ankles,
+   shoulders, elbows, neck), driven by human physics and a procedural gait:
+     physics : acceleration / inertia, slower uphill, wading slows you (deep water stops you), gravity,
+               jumping and landing (knees absorb the impact), you stop when you walk into something solid
+     gait    : the walk/run cycle advances with the distance travelled, so feet don't skate; arms counter-swing,
+               hips and shoulders twist, the torso leans with speed, the body breathes when standing still
+     contact : footsteps that sound like what you step on (grass, sand, stone, water), splashes, a thud when you
+               bump into things, leaves that rustle and part around you, hens and butterflies that get out of the way
+   Views: first person (camera in the eyes, steps bob it naturally) or third person (a follow camera). Tab switches.
+   game/controls.js calls G.avatar.step(dt, input) while walking (not while flying, not in the tour).
+   ===================================================================== */
+(() => {
+const { B, V3, MB, rgb, mixA, shade, clamp, scene, hFn, camera } = G;
+const C = G.CONFIG.avatar, NOOP = new Proxy({}, { get: () => () => { } });
+const sfx = () => G.sfx || NOOP;                                         // no sound module (?nomusic) = silent
+const sm = G.smooth;
+
+/* ---------- the body: a young Filipina (~1.60 m) in a floral sundress; one mesh per bone on a skeleton of transform nodes ---------- */
+const SKIN = rgb(C.skin), HAIR = rgb(C.hair), DRESS = rgb(C.dress), TRIM = rgb(C.trim), SANDAL = rgb(C.sandal), LIP = rgb(C.lips);
+const node = (name, parent, x = 0, y = 0, z = 0) => { const n = new B.TransformNode('av_' + name, scene); n.parent = parent; n.position.set(x, y, z); return n; };
+const meshes = [];
+const part = (name, parent, draw) => { G.LODV = 0; const mb = new MB(); draw(mb); const m = mb.build('av_' + name, G.vc); m.parent = parent; m.isPickable = false; G.cast(m); meshes.push(m); return m; };
+const tube = (mb, a, b, r, col, sides = 14) => mb.tube([new V3(...a), V3.Lerp(new V3(...a), new V3(...b), .5), new V3(...b)], r, sides, (t, s) => shade(col, .95 + .06 * Math.sin(s * 6.283)), null, true);
+const skinC = (k = 1) => (u, v) => shade(SKIN, k * (.93 + .08 * v));
+const print = (u, v) => { const cu = Math.floor(u * 44), cv = Math.floor(v * 24), hsh = Math.sin(cu * 12.9898 + cv * 78.233) * 43758.5; const f = hsh - Math.floor(hsh), du = u * 44 % 1 - .5, dv = v * 24 % 1 - .5;   // tiny white florets on coral
+  return f > .6 && du * du + dv * dv < .035 ? mixA(TRIM, rgb('#ffd9e0'), .3) : shade(DRESS, .95 + .07 * Math.sin(u * 50 + v * 20)); };
+const ell = (mb, x, y, z, rx, ry, rz, n, m, cf) => mb.ellipsoid(x, y, z, rx, ry, rz, n, m, typeof cf === 'function' ? cf : () => cf);
+
+const root = new B.TransformNode('avatar', scene);
+const pelvis = node('pelvis', root, 0, .86, 0);
+part('hips', pelvis, mb => { ell(mb, 0, 0, -.005, .158, .11, .105, 24, 14, print); ell(mb, 0, .07, 0, .118, .03, .085, 20, 6, TRIM); });   // dress over the hips + white sash
+const spine = node('spine', pelvis, 0, .06, 0);
+part('torso', spine, mb => {
+  mb.grid(32, 18, (u, v) => {                                                               // the bodice as one smooth turned shape: waist -> fuller front -> neckline
+    const a = u * 6.283, y = -.01 + v * .32, rx = .106 + .034 * G.smooth(0, .62, v) - .01 * G.smooth(.82, 1, v), rz = .078 + .012 * G.smooth(0, .6, v) - .012 * G.smooth(.82, 1, v);
+    const front = Math.max(0, Math.cos(a)), bust = .016 * Math.exp(-Math.pow((v - .62) / .16, 2)) * front * front;
+    return [Math.sin(a) * rx, y, Math.cos(a) * (rz + bust) + .006]; }, print);
+  ell(mb, 0, .312, -.004, .148, .075, .086, 28, 14, skinC());                              // shoulders and upper chest, sloping into the neck
+  mb.tube([new V3(-.125, .3, .045), new V3(-.06, .285, .085), new V3(0, .279, .097), new V3(.06, .285, .085), new V3(.125, .3, .045)], .0055, 6, () => TRIM);   // neckline trim
+});
+const neck = node('neck', spine, 0, .365, .004);
+part('neck', neck, mb => tube(mb, [0, -.03, 0], [0, .095, .01], [.046, .039], SKIN));
+const head = node('head', neck, 0, .085, .01);
+const headParts = [
+  part('head', head, mb => {
+    ell(mb, 0, .1, 0, .073, .097, .087, 30, 22, skinC());                                   // cranium + face
+    ell(mb, 0, .048, .022, .05, .046, .06, 20, 14, skinC());                                 // soft jaw and chin
+    for (const sd of [-1, 1]) {
+      ell(mb, sd * .028, .111, .077, .0145, .0072, .0062, 14, 8, [.95, .93, .9]);           // eye whites (almond)
+      ell(mb, sd * .028, .111, .0815, .0062, .0062, .0035, 12, 8, rgb('#3a2418'));          // iris (dark brown)
+      ell(mb, sd * .028, .111, .0845, .0027, .0027, .0015, 8, 6, [.02, .015, .01]);         // pupil
+      ell(mb, sd * .0255, .1135, .0855, .0011, .0011, .0008, 5, 4, [1, 1, 1]);              // catch-light
+      ell(mb, sd * .029, .1172, .0805, .0165, .0026, .0045, 12, 4, HAIR);                   // upper lash line
+      mb.tube([new V3(sd * .012, .128, .084), new V3(sd * .028, .1335, .083), new V3(sd * .044, .129, .074)], [.0028, .0016], 5, () => shade(HAIR, 1.2));   // arched brows
+      ell(mb, sd * .07, .1, -.006, .009, .018, .012, 8, 6, skinC(.95));                    // ears
+    }
+    ell(mb, 0, .093, .082, .0085, .016, .012, 10, 8, skinC(1.03));                         // nose bridge
+    ell(mb, 0, .083, .089, .0085, .0075, .0075, 10, 8, skinC(1.03));                        // nose tip
+    ell(mb, 0, .0645, .083, .0155, .0042, .0058, 14, 6, LIP); ell(mb, 0, .0585, .0815, .0135, .0058, .0065, 14, 6, shade(LIP, 1.1));   // lips
+  }),
+  part('hair', head, mb => {
+    mb.grid(28, 16, (u, v) => { const th = u * 6.283, ph = v * Math.PI * .62, front = Math.max(0, Math.cos(th - Math.PI / 2)), lift = front * front * .38;   // a cap that stops at the hairline
+      const ph2 = Math.min(ph, Math.PI * (.62 - lift)); return [Math.cos(th) * Math.sin(ph2) * .081, .128 + Math.cos(ph2) * .088, Math.sin(th) * Math.sin(ph2) * .095 - .008]; },
+      (u, v) => shade(HAIR, .85 + .3 * Math.pow(Math.max(0, Math.sin(u * 80 + v * 3)), 4)));
+    mb.grid(16, 4, (u, v) => { const a = -.25 + u * 1.6; return [Math.cos(a) * .07 - .006, .205 - v * .03 - u * .012, Math.sin(a) * .03 + .062 - v * .004]; }, (u, v) => shade(HAIR, .9 + .25 * Math.sin(u * 40)));   // side-swept bangs, above the brow
+    for (const sd of [-1, 1]) mb.grid(4, 10, (u, v) => [sd * (.07 + .012 * Math.sin(v * 3)) + sd * u * .02, .15 - v * .2, .03 - u * .045 - v * .02], (u, v) => shade(HAIR, .85 + .2 * Math.sin(v * 30 + u * 9)));   // locks framing the face
+    G.geo.sampaguitaFlower(mb, G.basis(new V3(.55, .3, .25).normalize(), V3.Up(), new V3(.068, .165, .012), 0, 1.6), G.rng(7));                                  // a sampaguita in her hair
+    G.geo.sampaguitaFlower(mb, G.basis(new V3(.7, .55, -.1).normalize(), V3.Up(), new V3(.074, .155, -.012), 0, 1.3), G.rng(8));
+  }),
+];
+// long hair hanging down her back: its own pendulum (swings back when she runs, bounces with her steps, moves in the wind)
+const hairPivot = node('hairPivot', head, 0, .15, -.068);
+const hairFall = part('hairFall', hairPivot, mb => {
+  mb.grid(14, 16, (u, v) => { const a = (u - .5) * 2.4, rad = .085 + .03 * v, len = .44; return [Math.sin(a) * rad, -v * len - .01, -.02 + Math.cos(a) * rad * .55 - .03 * v - Math.cos(a) * .045]; },
+    (u, v) => shade(HAIR, .82 + .25 * Math.pow(Math.max(0, Math.sin(u * 70 + v * 4)), 5) - .1 * v), null, null);
+});
+headParts.push(hairFall);
+const arm = sd => {
+  const sh = node('shoulder' + sd, spine, sd * .162, .355, -.006);
+  part('upperArm' + sd, sh, mb => {
+    tube(mb, [0, .015, 0], [0, -.265, 0], [.036, .03], SKIN);
+    mb.grid(20, 4, (u, v) => { const a = u * 6.283, r = .043 + .03 * v; return [Math.cos(a) * r, .02 - v * .085, Math.sin(a) * r * .95]; }, print);   // flutter sleeve
+  });
+  const el = node('elbow' + sd, sh, 0, -.265, 0);
+  part('forearm' + sd, el, mb => {
+    tube(mb, [0, 0, 0], [0, -.235, 0], [.029, .022], SKIN); ell(mb, 0, 0, 0, .031, .031, .031, 12, 8, skinC());   // elbow
+    ell(mb, 0, -.268, .006, .021, .036, .03, 12, 10, skinC());                                            // palm
+    for (let f = 0; f < 4; f++) { const x = (f - 1.5) * .0115; mb.tube([new V3(x, -.296, .012), new V3(x, -.33 + Math.abs(f - 1.5) * .006, .022), new V3(x, -.353 + Math.abs(f - 1.5) * .01, .03)], [.0068, .0048], 7, () => SKIN, null, true); }   // fingers, gently curled
+    mb.tube([new V3(sd * -.016, -.262, .022), new V3(sd * -.028, -.29, .036), new V3(sd * -.03, -.31, .045)], [.0078, .0055], 7, () => SKIN, null, true);   // thumb
+    ell(mb, 0, -.236, 0, .025, .006, .025, 12, 4, rgb('#e6c97a'));                                        // a thin gold bangle
+  });
+  return { sh, el };
+};
+const leg = sd => {
+  const hip = node('hip' + sd, pelvis, sd * .08, -.03, 0);
+  part('thigh' + sd, hip, mb => tube(mb, [0, .02, 0], [0, -.41, 0], [.066, .046], SKIN));
+  const knee = node('knee' + sd, hip, 0, -.41, 0);
+  part('shin' + sd, knee, mb => { tube(mb, [0, 0, 0], [0, -.39, 0], [.043, .028], SKIN); ell(mb, 0, 0, .004, .045, .045, .045, 12, 8, skinC()); ell(mb, 0, -.12, -.014, .041, .095, .04, 14, 10, skinC()); });
+  const ankle = node('ankle' + sd, knee, 0, -.395, 0);
+  part('foot' + sd, ankle, mb => {
+    ell(mb, 0, -.008, .04, .031, .02, .086, 14, 8, skinC());                                              // foot
+    ell(mb, 0, -.027, .045, .038, .007, .108, 16, 4, SANDAL);                                            // sandal sole
+    for (const zz of [.07, .02]) mb.tube([new V3(-.031, -.022, zz), new V3(0, .006, zz + .01), new V3(.031, -.022, zz)], .0045, 6, () => TRIM);   // two straps
+    ell(mb, 0, .004, .072, .006, .006, .006, 6, 5, rgb('#f2d0dc'));                                       // a little flower on the strap
+  });
+  return { hip, knee, ankle };
+};
+const L = { arm: arm(-1), leg: leg(-1) }, Rt = { arm: arm(1), leg: leg(1) };
+
+/* ---------- the skirt: real cloth, simulated on the CPU (~400 vertices) ----------
+   An A-line skirt from the waist to just below the knee. Each frame it is pushed out by the knees, trails behind
+   when she moves (a damped spring on her acceleration), and ripples in the wind. */
+const SK = { rings: 12, seg: 36, top: .07, hem: -.47, r0: .155, r1: .3 };
+const skirt = (() => {
+  const mb = new MB(); mb.grid(SK.seg, SK.rings, (u, v) => { const a = u * 6.283, r = SK.r0 + (SK.r1 - SK.r0) * Math.pow(v, .9); return [Math.sin(a) * r, SK.top + (SK.hem - SK.top) * v, Math.cos(a) * r * .88]; },
+    (u, v) => v > .93 ? TRIM : print(u, v));
+  const m = mb.build('av_skirt', G.vc); m.parent = pelvis; m.isPickable = false; G.cast(m); meshes.push(m);
+  const pos = m.getVerticesData(B.VertexBuffer.PositionKind); m.markVerticesDataAsUpdatable(B.VertexBuffer.PositionKind, true); m.markVerticesDataAsUpdatable(B.VertexBuffer.NormalKind, true);
+  return { m, pos: Float32Array.from(pos), idx: m.getIndices(), nrm: [] };
+})();
+const cloth = { lx: 0, lz: 0, vx: 0, vz: 0 };                          // the skirt's lag behind the body (pelvis-local, metres)
+function stepSkirt(dt, t, ax, az, speed) {
+  // spring-damper: the hem lags behind acceleration and leans back against the air at speed
+  const kx = -ax * .012, kz = -az * .012 - speed * speed * .006; cloth.vx += ((kx - cloth.lx) * 60 - cloth.vx * 9) * dt; cloth.vz += ((kz - cloth.lz) * 60 - cloth.vz * 9) * dt; cloth.lx += cloth.vx * dt; cloth.lz += cloth.vz * dt;
+  const W = G.windState, cy = Math.cos(A.yaw), sy = Math.sin(A.yaw), wlx = (W.dx * cy - W.dz * sy) * W.gain, wlz = (W.dx * sy + W.dz * cy) * W.gain;   // wind in her frame
+  const knees = [L.leg, Rt.leg].map((lg, k) => { const th = lg.hip.rotation.x, sh = lg.knee.rotation.x; return { x: (k ? 1 : -1) * .08, kz: -.41 * Math.sin(th), ky: -.03 - .41 * Math.cos(th), az: -.41 * Math.sin(th) - .395 * Math.sin(th + sh), ay: -.03 - .41 * Math.cos(th) - .395 * Math.cos(th + sh) }; });
+  const p = skirt.pos, n1 = SK.seg + 1;
+  for (let j = 0; j <= SK.rings; j++) { const v = j / SK.rings, y = SK.top + (SK.hem - SK.top) * v, rb = SK.r0 + (SK.r1 - SK.r0) * Math.pow(v, .9), vv = Math.pow(v, 1.6);
+    const legAt = knees.map(k => { const tt = (y - (-.03)) / (k.ky + .03); if (tt <= 1) { const q = clamp(tt, 0, 1); return [k.x, k.kz * q]; } const q = clamp((y - k.ky) / (k.ay - k.ky), 0, 1); return [k.x, k.kz + (k.az - k.kz) * q]; });
+    for (let i = 0; i <= SK.seg; i++) { const a = i / SK.seg * 6.283, dx = Math.sin(a), dz = Math.cos(a) * .88; let r = rb;
+      for (const [lx, lz] of legAt) { const along = lx * dx + lz * Math.cos(a), dl = Math.hypot(lx, lz) || 1, cosA = along / dl; if (cosA > .5) r = Math.max(r, (along + .075) * ((cosA - .5) / .5) + rb * (1 - (cosA - .5) / .5)); }   // knees push the cloth out
+      const flut = Math.sin(t * 5.3 + a * 3 + v * 2) * .008 * W.gain * vv + Math.sin(t * 3.1 - a * 5) * .004 * speed * vv;
+      const o = (j * n1 + i) * 3; p[o] = dx * (r + flut) + (cloth.lx + wlx * .025) * vv; p[o + 1] = y + (Math.abs(cloth.lz) + Math.abs(cloth.lx)) * .25 * vv; p[o + 2] = dz * (r + flut) + (cloth.lz + wlz * .025) * vv; } }
+  skirt.m.updateVerticesData(B.VertexBuffer.PositionKind, p); B.VertexData.ComputeNormals(p, skirt.idx, skirt.nrm); skirt.m.updateVerticesData(B.VertexBuffer.NormalKind, skirt.nrm);
+}
+root.setEnabled(false);
+
+/* ---------- state ---------- */
+const A = G.avatar = {
+  active: false, view: G.params.get('view') === 'third' ? 'third' : 'first',
+  x: 0, y: 0, z: 0, vx: 0, vz: 0, vy: 0, yaw: 0, grounded: true, phase: 0, land: 0, bump: 0, wade: 0, surface: 'grass', speed: 0,
+  root, head,
+};
+const hot = { pos: new V3(), r: 0, kind: 'ikaw' }; G.hot.push(hot);
+
+/* ---------- splashes: one reusable burst of droplets ---------- */
+const dropTex = (() => { const t = new B.DynamicTexture('dropTex', { width: 32, height: 32 }, scene, true), g = t.getContext(), gr = g.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(.5, 'rgba(225,240,255,.45)'); gr.addColorStop(1, 'rgba(225,240,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 32, 32); t.update(); t.hasAlpha = true; return t; })();
+const drops = new B.ParticleSystem('splash', 260, scene); drops.particleTexture = dropTex; drops.emitter = new V3(); drops.minEmitBox = new V3(-.08, 0, -.08); drops.maxEmitBox = new V3(.08, .02, .08);
+drops.direction1 = new V3(-.9, 1.6, -.9); drops.direction2 = new V3(.9, 2.6, .9); drops.minEmitPower = .5; drops.maxEmitPower = 1.3; drops.gravity = new V3(0, -9.81, 0);
+drops.minLifeTime = .3; drops.maxLifeTime = .6; drops.minSize = .02; drops.maxSize = .05; drops.emitRate = 0; drops.color1 = new B.Color4(.92, .96, 1, .85); drops.color2 = new B.Color4(.8, .9, 1, .7); drops.colorDead = new B.Color4(.8, .9, 1, 0); drops.start();
+const splashAt = (x, y, z, n) => { drops.emitter.set(x, y, z); drops.manualEmitCount = n; };
+
+/* ---------- the world under your feet ---------- */
+const P = G.POND, _w = {};
+function waterAt(x, z, t) {                                            // water surface height here, or -Infinity
+  if (Math.hypot(x - P.x, z - P.z) < P.r + .3) return -.2;                                       // the lily pond
+  if (x < G.shoreX(z) + 2) return G.SEA_Y + G.waveAt(x, z, t, _w).h + .05;                       // the sea and its swash
+  return -Infinity;
+}
+const surfaceAt = (x, z, depth) => depth > .03 ? 'water' : G.path.dist(x, z) < 1.05 ? 'stone' : x < G.shoreX(z) + 6.5 ? 'sand' : 'grass';
+function collide(x, z, r) {                                            // slide around solid things; returns the push-out normal (or null)
+  let nx = 0, nz = 0, hit = false;
+  for (const o of G.obstacles) {
+    if (o.box) { const c = Math.cos(o.yaw), s = Math.sin(o.yaw), dx = x - o.x, dz = z - o.z; let lx = dx * c - dz * s, lz = dx * s + dz * c; const bx = o.hw + r, bz = o.hd + r;
+      if (Math.abs(lx) < bx && Math.abs(lz) < bz) { const px = x, pz = z; if (bx - Math.abs(lx) < bz - Math.abs(lz)) lx = Math.sign(lx || 1) * bx; else lz = Math.sign(lz || 1) * bz; x = o.x + lx * c + lz * s; z = o.z - lx * s + lz * c; nx += x - px; nz += z - pz; hit = true; } }
+    else { const dx = x - o.x, dz = z - o.z, d = Math.hypot(dx, dz), m = o.r + r; if (d < m && d > .001) { const px = x, pz = z; x = o.x + dx / d * m; z = o.z + dz / d * m; nx += x - px; nz += z - pz; hit = true; } }
+  }
+  const rr = Math.hypot(x, z); if (rr > 90) { nx -= x * (1 - 90 / rr); nz -= z * (1 - 90 / rr); x *= 90 / rr; z *= 90 / rr; hit = true; }
+  return { x, z, n: hit ? (() => { const l = Math.hypot(nx, nz) || 1; return [nx / l, nz / l]; })() : null };
+}
+
+/* ---------- enter / leave ---------- */
+A.enter = (x, z, yaw) => { A.x = x; A.z = z; A.y = hFn(x, z); A.vx = A.vz = A.vy = 0; A.yaw = yaw; A.grounded = true; A.active = true; root.setEnabled(true); A.setView(A.view); };
+A.exit = () => { A.active = false; root.setEnabled(false); hot.r = 0; G.windState.contact = 0; };
+A.setView = v => { A.view = v; headParts.forEach(m => m.setEnabled(v === 'third')); hot.r = v === 'third' ? .5 : 0; G.windState.playerR = 1.3; };
+
+/* ---------- physics + gait, once per frame while walking ---------- */
+let lastStepSin = [0, 0], rustleT = 0, frame = 0; const hairSw = G.physics.pendulum(), hairSwZ = G.physics.pendulum(), trail = [];
+A.step = (dt, inp, t) => {
+  frame++; const yawC = inp.yaw, pvx = A.vx, pvz = A.vz;
+  // ---- where you want to go (relative to the camera), how fast the ground lets you
+  let fx = Math.sin(yawC) * inp.fwd + Math.cos(yawC) * inp.strafe, fz = Math.cos(yawC) * inp.fwd - Math.sin(yawC) * inp.strafe; const il = Math.hypot(fx, fz); if (il > 1) { fx /= il; fz /= il; }
+  const gy0 = hFn(A.x, A.z), e = .5, gx = (hFn(A.x + e, A.z) - hFn(A.x - e, A.z)) / (2 * e), gz = (hFn(A.x, A.z + e) - hFn(A.x, A.z - e)) / (2 * e);
+  const uphill = il > .01 ? (gx * fx + gz * fz) / Math.max(il, 1) : 0, slopeK = uphill > 0 ? 1 / (1 + 1.6 * uphill) : 1 + .15 * Math.min(-uphill, 1);
+  const water = waterAt(A.x, A.z, t), depth = Math.max(0, water - gy0); A.wade = clamp(depth / C.maxWade, 0, 1);
+  const top = (inp.run ? C.run : C.walk) * slopeK * (1 - C.wadeSlow * A.wade);
+  const tx = fx * top, tz = fz * top, ctrl = A.grounded ? 1 : C.airControl;
+  let dvx = tx - A.vx, dvz = tz - A.vz; const dl = Math.hypot(dvx, dvz), lim = (Math.hypot(tx, tz) > Math.hypot(A.vx, A.vz) ? C.accel : C.decel) * (1 - .5 * A.wade) * ctrl * dt;
+  if (dl > lim) { dvx *= lim / dl; dvz *= lim / dl; } A.vx += dvx; A.vz += dvz;
+  // ---- move, then resolve contacts: solid things stop you (inelastic), deep water turns you back
+  let nx = A.x + A.vx * dt, nz = A.z + A.vz * dt;
+  const wNext = waterAt(nx, nz, t); if (wNext - hFn(nx, nz) > C.maxWade * 1.25) { nx = A.x; nz = A.z; A.vx *= .3; A.vz *= .3; }      // too deep to wade
+  const c = collide(nx, nz, C.radius);
+  if (c.n) { const vn = A.vx * c.n[0] + A.vz * c.n[1]; if (vn < 0) { A.vx -= vn * c.n[0]; A.vz -= vn * c.n[1]; if (-vn > 1.1 && A.bump <= 0) { sfx().thud(clamp(-vn / 4, .3, 1)); A.bump = .45; } } }
+  A.x = c.x; A.z = c.z; A.bump = Math.max(0, A.bump - dt);
+  // ---- gravity, jumping, landing
+  const gy = hFn(A.x, A.z);
+  if (A.grounded && inp.jump) { A.vy = C.jump; A.grounded = false; sfx().jump(); }
+  if (!A.grounded) { A.vy -= C.gravity * dt; A.y += A.vy * dt; if (A.y <= gy) { const hit = -A.vy; A.y = gy; A.vy = 0; A.grounded = true; A.land = clamp(hit / 4.5, .25, 1);
+      const w = waterAt(A.x, A.z, t), kind = surfaceAt(A.x, A.z, w - gy); sfx().land(kind); G.poke(A.x, A.z, .45); if (kind === 'water') splashAt(A.x, w, A.z, 70); } }
+  else { if (gy < A.y - .35) { A.grounded = false; A.vy = 0; } else A.y = gy; }               // walk off an edge -> fall
+  A.land = Math.max(0, A.land - dt * 2.6);
+  // ---- facing: in first person the body turns with your eyes; in third person it turns toward where you walk
+  const hv = Math.hypot(A.vx, A.vz); A.speed = hv;
+  const want = A.view === 'first' || hv < .25 ? (A.view === 'first' ? yawC : A.yaw) : Math.atan2(A.vx, A.vz);
+  let dy = want - A.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); A.yaw += dy * Math.min(1, dt * (A.view === 'first' ? 30 : 9));
+  // ---- the gait: phase advances with distance travelled (cycle = two steps)
+  const cycle = 1.25 + .28 * hv; if (A.grounded) A.phase += 2 * Math.PI * hv * dt / cycle;
+  const m = clamp(hv / C.walk, 0, 1), runK = sm(C.walk + .3, C.run, hv), wadeLift = A.wade * .5;
+  const pose = (lg, am, ph, sd) => {
+    const s = Math.sin(ph), cph = Math.cos(ph), air = A.grounded ? 0 : 1;
+    const thigh = (-(.32 + .26 * runK) * s * m) * (1 - air) - .55 * air - .5 * A.land, shin = ((.5 + .75 * runK + wadeLift) * Math.pow(Math.max(0, cph), 1.4) * m + .05) * (1 - air) + .85 * air + 1.0 * A.land;
+    lg.hip.rotation.x = thigh; lg.knee.rotation.x = shin; lg.ankle.rotation.x = -(thigh + shin) * .85 + .25 * Math.max(0, -cph) * Math.max(0, -s) * m;   // sole level, heel lifts at push-off
+    lg.hip.rotation.z = sd * .03;
+    am.sh.rotation.x = (.2 + .3 * runK) * s * m * (1 - air) - .35 * air + .02 * Math.sin(t * 1.6); am.sh.rotation.z = sd * (-.09 - .35 * air - .05 * runK);
+    am.el.rotation.x = -(.28 + .9 * runK) * (.6 + .4 * m) - .25 * air;
+  };
+  pose(L.leg, Rt.arm, A.phase, -1); pose(Rt.leg, L.arm, A.phase + Math.PI, 1);          // left leg swings with the right arm
+  const s1 = Math.sin(A.phase), breathe = Math.sin(t * 1.7) * (1 - m);
+  pelvis.position.y = .86 + (.018 + .035 * runK) * Math.cos(2 * A.phase) * m - .17 * A.land - .03 * runK + (A.grounded ? 0 : .05);
+  pelvis.position.x = .02 * s1 * m * (1 - runK); pelvis.rotation.y = .09 * s1 * m; pelvis.rotation.z = .055 * s1 * m * (1 - runK); spine.rotation.z = -.045 * s1 * m * (1 - runK); spine.rotation.y = -.14 * s1 * m;
+  spine.rotation.x = .03 + .15 * runK * m + .25 * A.land + .012 * breathe + (A.bump > 0 ? -.12 * A.bump : 0);
+  head.rotation.x = -spine.rotation.x * .7 + (A.view === 'third' ? inp.pitch * .35 : 0); head.rotation.y = -spine.rotation.y * .8;
+  // ---- cloth and hair follow the body: skirt (spring + knees + wind), long hair (a pendulum on her head)
+  const idt = 1 / Math.max(dt, 1e-3), awx = (A.vx - pvx) * idt, awz = (A.vz - pvz) * idt, cyw = Math.cos(A.yaw), syw = Math.sin(A.yaw);
+  const alx = awx * cyw - awz * syw, alz = awx * syw + awz * cyw; stepSkirt(dt, t, clamp(alx, -12, 12), clamp(alz, -12, 12), hv);
+  const Wd = G.windState, wBack = -(Wd.dx * syw + Wd.dz * cyw) * Wd.gain;
+  hairPivot.rotation.x = clamp(G.physics.stepPendulum(hairSw, 38, clamp(alz, -12, 12) * 1.1 + hv * hv * .9 + wBack * 2 + Math.sin(2 * A.phase) * m * 3 - (A.grounded ? 0 : A.vy * 2), 3.2, dt), -.15, 1.1) + spine.rotation.x * -.5;
+  hairPivot.rotation.z = clamp(G.physics.stepPendulum(hairSwZ, 38, -clamp(alx, -12, 12) * .9 + Math.sin(A.phase) * m * 1.5, 3.2, dt), -.4, .4);
+  // ---- footfalls: when each foot strikes the ground, it sounds like what it lands on
+  if (A.grounded && hv > .3) for (let k = 0; k < 2; k++) { const sv = Math.sin(A.phase + k * Math.PI); if (lastStepSin[k] < .97 && sv >= .97) {
+      const fxp = A.x + Math.sin(A.yaw) * .25 + Math.cos(A.yaw) * (k ? .09 : -.09), fzp = A.z + Math.cos(A.yaw) * .25 - Math.sin(A.yaw) * (k ? .09 : -.09), w = waterAt(fxp, fzp, t), g = hFn(fxp, fzp), kind = surfaceAt(fxp, fzp, w - g);
+      A.surface = kind; sfx().step(kind, .7 + .5 * runK); if (kind === 'water') splashAt(fxp, w, fzp, Math.round(14 + 30 * runK)); }
+    lastStepSin[k] = sv; }
+  // ---- brushing through the garden: plants part (wind shader follows you) and their leaves rustle
+  rustleT -= dt; if (frame % 6 === 0 && hv > .45 && rustleT <= 0) { let k = 0; for (const p of G.plants) { const d = Math.hypot(p.x - A.x, p.z - A.z); if (d < p.r * .7 + .3) k += 1 - d / (p.r * .7 + .3); }
+    if (k > .05) { sfx().rustle(clamp(k, .45, 1.2) * (.7 + .5 * runK)); rustleT = .2 + Math.random() * .15;
+      if (hv > 2.2 && Math.random() < .35) { const near = G.plants.find(p => Math.hypot(p.x - A.x, p.z - A.z) < p.r * .7 + .3); if (near) G.petalBurst(new V3(near.x, near.y + near.H * .7, near.z), 5); } } }   // running through flowers knocks a few petals loose
+  // ---- place the body
+  root.position.set(A.x, A.y, A.z); root.rotation.y = A.yaw;
+  hot.pos.set(A.x, A.y + 1.1, A.z);
+  const W = G.windState; W.px = A.x; W.py = A.y + .5; W.pz = A.z; W.playerR = .9 + .5 * m;              // plants bend away from your body, not the camera
+  trail.push([t, A.x, A.z]); while (trail.length > 2 && t - trail[0][0] > .4) trail.shift();                    // where you were ~0.4 s ago: plants spring back behind you
+  W.contact = 1; W.tx = trail[0][1]; W.tz = trail[0][2]; W.trailK = clamp(Math.hypot(W.tx - A.x, W.tz - A.z) * 2, 0, 1); W.bodyR = .48;
+};
+
+/* ---------- the camera ---------- */
+const _eye = new V3(), _tgt = new V3(), _cam = new V3();
+A.placeCamera = (dt, yaw, pitch) => {
+  if (A.view === 'first') {
+    head.computeWorldMatrix(true); V3.TransformCoordinatesFromFloatsToRef(0, .115, .07, head.getWorldMatrix(), _eye);     // between the eyes
+    camera.position.copyFrom(_eye); camera.rotation.set(pitch, yaw, 0);
+  } else {
+    const T = C.third, p = clamp(pitch, -.55, 1.0); _tgt.set(A.x, A.y + 1.45, A.z);
+    if (G.params.has('face')) { const d = parseFloat(G.params.get('face')) || 1.1, a = A.yaw + .35; camera.position.set(A.x + Math.sin(a) * d, A.y + 1.5, A.z + Math.cos(a) * d); camera.setTarget(new V3(A.x, A.y + 1.38 - d * .12, A.z)); return; }   // dev: look at her from the front
+    _cam.set(_tgt.x - Math.sin(yaw) * Math.cos(p) * T.dist, _tgt.y + Math.sin(p) * T.dist + T.height, _tgt.z - Math.cos(yaw) * Math.cos(p) * T.dist);
+    _cam.y = Math.max(_cam.y, hFn(_cam.x, _cam.z) + .35);                                              // never under the ground
+    const k = Math.min(1, dt * T.lag); camera.position.x += (_cam.x - camera.position.x) * k; camera.position.y += (_cam.y - camera.position.y) * k; camera.position.z += (_cam.z - camera.position.z) * k;
+    camera.setTarget(_tgt);
+  }
+};
+})();
