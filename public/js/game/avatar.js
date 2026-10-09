@@ -161,7 +161,8 @@ const SK = { rings: 12, seg: 36, top: .07, hem: -.47, r0: .155, r1: .3 };
 const skirt = (() => {
   const mb = new MB(); mb.grid(SK.seg, SK.rings, (u, v) => { const a = u * 6.283, r = SK.r0 + (SK.r1 - SK.r0) * Math.pow(v, .9); return [Math.sin(a) * r, SK.top + (SK.hem - SK.top) * v, Math.cos(a) * r * .88]; },
     (u, v) => v > .93 ? TRIM : print(u, v));
-  const m = mb.build('av_skirt', G.vc); m.parent = pelvis; m.isPickable = false; G.cast(m); meshes.push(m);
+  const m = mb.build('av_skirt', G.vc.clone('skirtMat')); m.material.backFaceCulling = false; m.material.twoSidedLighting = true;   // two-sided cloth: no see-through gap when it folds over a lap
+  m.material = m.material; m.parent = pelvis; m.isPickable = false; G.cast(m); meshes.push(m);
   const pos = m.getVerticesData(B.VertexBuffer.PositionKind); m.markVerticesDataAsUpdatable(B.VertexBuffer.PositionKind, true); m.markVerticesDataAsUpdatable(B.VertexBuffer.NormalKind, true);
   return { m, pos: Float32Array.from(pos), idx: m.getIndices(), nrm: [] };
 })();
@@ -177,10 +178,13 @@ function stepSkirt(dt, t, ax, az, speed) {
     // how far forward the leg reaches at this height: cloth rests on any part of the leg at or above this ring and falls straight down from it
     // (walking: follows the knee; crouching or sitting: covers the thighs like a lap and hangs from the knees - no bare knees poking through)
     const legAt = knees.map(k => { let reach = 0; for (let q = 0; q <= 1.001; q += .2) { const pz = k.kz * q, py = -.03 + (k.ky + .03) * q; if (py >= y - .085 && Math.abs(pz) > Math.abs(reach)) reach = pz; const sz = k.kz + (k.az - k.kz) * q, sy = k.ky + (k.ay - k.ky) * q; if (sy >= y - .085 && Math.abs(sz) > Math.abs(reach)) reach = sz; } return [k.x, reach]; });
-    for (let i = 0; i <= SK.seg; i++) { const a = i / SK.seg * 6.283, dx = Math.sin(a), dz = Math.cos(a) * .88; let r = rb;
-      for (const [lx, lz] of legAt) { const along = lx * dx + lz * Math.cos(a), dl = Math.hypot(lx, lz) || 1, cosA = along / dl; if (cosA > .5) r = Math.max(r, (along + .09) * ((cosA - .5) / .5) + rb * (1 - (cosA - .5) / .5)); }   // knees push the cloth out
+    // both legs forward (sitting, crouching): the ring slides forward and widens, so the cloth covers the lap and hangs from the knees
+    // instead of staying centred on the hips with the thighs sticking out of it. Walking: one leg is always back, so nothing changes.
+    const fr = Math.max(0, Math.min(legAt[0][1], legAt[1][1])), czo = fr * .5, rbb = rb;
+    for (let i = 0; i <= SK.seg; i++) { const a = i / SK.seg * 6.283, dx = Math.sin(a), dz = Math.cos(a) * .88; let r = rbb;
+      for (const [lx, lz0] of legAt) { const lz = lz0 - czo, along = lx * dx + lz * Math.cos(a), dl = Math.hypot(lx, lz) || 1, cosA = along / dl; if (cosA > .5) r = Math.max(r, (along + .09) * ((cosA - .5) / .5) + rbb * (1 - (cosA - .5) / .5)); }   // knees push the cloth out
       const pleat = Math.sin(a * 11 + v * 1.5) * .006 * vv * (1 + .35 * speed) + Math.sin(a * 4 - A.phase * 2) * .007 * vv * vv * Math.min(1, speed), flut = Math.sin(t * 5.3 + a * 3 + v * 2) * .008 * W.gain * vv + Math.sin(t * 3.1 - a * 5) * .004 * speed * vv + pleat;
-      const o = (j * n1 + i) * 3; const lx = cloth.lx + (cloth.hx - cloth.lx) * v, lz = cloth.lz + (cloth.hz - cloth.lz) * v; p[o] = dx * (r + flut) + (lx + wlx * .025) * vv; p[o + 1] = y + (Math.abs(lz) + Math.abs(lx)) * .25 * vv; p[o + 2] = dz * (r + flut) + (lz + wlz * .025) * vv; } }
+      const o = (j * n1 + i) * 3; const lx = cloth.lx + (cloth.hx - cloth.lx) * v, lz = cloth.lz + (cloth.hz - cloth.lz) * v; p[o] = dx * (r + flut) + (lx + wlx * .025) * vv; p[o + 1] = y + (Math.abs(lz) + Math.abs(lx)) * .25 * vv + fr * .7 * v + fr * .12 * (1 - v); p[o + 2] = dz * (r + flut) + czo * (1 + Math.cos(a)) + (lz + wlz * .025) * vv; } }   // lap: the front reaches the knees, the back stays at the hips; the hem rises by what the thighs take up
   skirt.m.updateVerticesData(B.VertexBuffer.PositionKind, p); B.VertexData.ComputeNormals(p, skirt.idx, skirt.nrm); skirt.m.updateVerticesData(B.VertexBuffer.NormalKind, skirt.nrm);
 }
 root.setEnabled(false);
