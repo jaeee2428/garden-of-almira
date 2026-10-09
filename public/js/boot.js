@@ -27,7 +27,7 @@ const MODULES = [
   // 5 · folk-tale lights, then the animals
   'fx/magic', 'fauna/common', 'fauna/chickens', 'fauna/birds', 'fauna/insects', 'fauna/night-glow',
   // 6 · player, interaction, HUD, loop (starts rendering), sound, dev switches
-  'game/controls', 'game/avatar', 'game/interaction', 'ui/hud', 'game/loop', 'audio/soundscape', 'dev/debug',
+  'game/controls', 'game/avatar', 'game/avatar-glb', 'game/interaction', 'ui/hud', 'game/loop', 'audio/soundscape', 'dev/debug',
 ];
 const t = window.__t = window.__t || [];
 for (const m of MODULES) {
