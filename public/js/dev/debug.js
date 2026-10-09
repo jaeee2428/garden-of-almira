@@ -70,5 +70,10 @@ if (params.has('perf')) { G.perfOn = true; setInterval(() => {
   const sys = G.systems.list().filter(s => s.ms > .05).sort((a, b) => b.ms - a.ms).slice(0, 8).map(s => s.name + ':' + s.ms.toFixed(2)).join(' ');
   console.log('PERF fps=' + engine.getFps().toFixed(1) + ' scale=' + engine.getHardwareScalingLevel().toFixed(2) + ' tris=' + Math.round(tri / 1000) + 'k active=' + scene.getActiveMeshes().length + ' draw=' + (engine._drawCalls ? engine._drawCalls.current : '?') + ' plants=' + (G.stats && G.stats.drawn) + ' | ' + sys);
 }, 5000); }
+// ?gaittest=1 (with walk=1&hold=KeyW): how far the planted (lowest) foot slides per second while walking - should be ~0
+if (params.has('gaittest')) { let last = null, slide = 0, n = 0, tAcc = 0; G.systems.add('gaitTest', (t, dt) => { if (!G.avatarLegs || !G.avatar) return;
+  const f = G.avatarLegs.map(l => l.ankle.getAbsolutePosition().clone()), lo = f[0].y < f[1].y ? 0 : 1;
+  if (last && last.i === lo && G.avatar.speed > .3) { slide += Math.hypot(f[lo].x - last.p.x, f[lo].z - last.p.z); tAcc += dt; }
+  last = { i: lo, p: f[lo] }; if (tAcc > 1) { console.log('GAIT speed=' + G.avatar.speed.toFixed(2) + ' footSlide m/s=' + (slide / tAcc).toFixed(3) + ' amp=' + (G.avatar.amp || 0).toFixed(3)); slide = 0; tAcc = 0; } }, { order: 99 }); }
 })();
 
