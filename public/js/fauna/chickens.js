@@ -59,7 +59,7 @@ const chicken = [];
   const sets = { hen1: chickenParts('hen1'), hen2: chickenParts('hen2'), hen3: chickenParts('hen3'), roo: chickenParts('roo') }, chicks = [chickParts(false), chickParts(true)];
   const HOME = new V3(8, 0, 10.5);
   const mk = (kind, set, x, z, leader) => {
-    const root = new B.TransformNode('chk', scene), a = { kind, root, x, z, yaw: rand() * 6.28, tx: x, tz: z, state: 'idle', timer: R(.5, 3), ph: rand() * 6.28, spd: 0, leader, hip: set.hip, S: set.S || 1, crow: 0, flap: 0 };
+    const root = new B.TransformNode('chk', scene), a = { kind, root, x, z, yaw: rand() * 6.28, tx: x, tz: z, state: 'idle', timer: R(.5, 3), ph: rand() * 6.28, spd: 0, leader, hip: set.hip, S: set.S || 1, crow: 0, flap: 0, pk: G.physics.spring(), wk: 0 };   // pk / wk: eased blends between poses (no snapping)
     const inst = (src, par, pos) => { const m = src.createInstance('i'); m.parent = par; if (pos) m.position.copyFrom(pos); m.isPickable = false; return m; };
     // Everything above the legs hangs off a torso pivot at hip height, so pecking / crowing tilts the
     // body, head, tail and wings TOGETHER over the planted legs (the head used to stay put and float off the neck).
@@ -89,11 +89,13 @@ function updateChicken(t, dt, cam) {
     else if (a.state === 'crow') { a.spd = 0; if (a.timer <= 0) { a.state = 'idle'; a.timer = R(3, 8); } }
     else if (a.state === 'walk') { const dx = a.tx - a.x, dz = a.tz - a.z, d = Math.hypot(dx, dz); if (d < .25 || a.timer <= 0) { a.state = 'idle'; a.timer = R(.6, 2.5); } else { const want = Math.atan2(dx, dz); let dy = want - a.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); a.yaw += dy * Math.min(1, dt * 5); a.spd += ((chick ? .85 : .55) - a.spd) * Math.min(1, dt * 4); } }
     if (a.spd > .01) { const nx = a.x + Math.sin(a.yaw) * a.spd * dt, nz = a.z + Math.cos(a.yaw) * a.spd * dt, p = avoid(a, nx, nz, chick ? .15 : .25); a.x = p[0]; a.z = p[1]; }
-    const gy = hFn(a.x, a.z), w = a.spd > .05 ? 1 : 0, sw = Math.sin(t * (chick ? 16 : 9) + a.ph) * w; a.root.position.set(a.x, gy, a.z); a.root.rotation.y = a.yaw;
+    const gy = hFn(a.x, a.z), w = a.wk = G.physics.damp(a.wk, a.spd > .05 ? 1 : 0, 8, dt), sw = Math.sin(t * (chick ? 16 : 9) + a.ph) * w; a.root.position.set(a.x, gy, a.z); a.root.rotation.y = a.yaw;
     if (chick) { a.legL.rotation.x = sw * .9; a.legR.rotation.x = -sw * .9; a.torso.position.y = a.hipY + Math.abs(sw) * .006; a.torso.rotation.x = a.state === 'peck' ? .5 + Math.sin(t * 12 + a.ph) * .3 : 0; }
     else { a.legL.rotation.x = sw * .75; a.legR.rotation.x = -sw * .75; a.torso.position.y = a.hipY + Math.abs(Math.sin(t * 9 + a.ph)) * w * .008;
-      const peck = a.state === 'peck' ? 1 : 0, crow = a.state === 'crow' ? Math.sin(Math.min(1, (1.6 - a.timer) / 1.6) * Math.PI) : 0;
-      a.head.rotation.x = peck * (.95 + Math.sin(t * 11 + a.ph) * .3) - crow * .6 + w * Math.sin(t * 9 + a.ph) * .12; a.head.position.z = a.neckTop.z + w * Math.sin(t * 9 + a.ph + 1.2) * .012; a.head.position.y = a.neckTop.y + crow * .02; a.torso.rotation.x = peck * .32 - crow * .22;
+      const peck = G.physics.stepSpring(a.pk, a.state === 'peck' ? 1 : 0, 14, .65, dt), crow = a.state === 'crow' ? G.ease.inOutSine(Math.sin(Math.min(1, (1.6 - a.timer) / 1.6) * Math.PI)) : 0;   // the head dips in with a little overshoot
+      // a walking hen keeps her head still in the air, then thrusts it forward (hold-and-thrust head bob), once per step
+      const f = (((t * 9 + a.ph) / Math.PI) % 1 + 1) % 1, bob = f < .72 ? 1 - 2 * f / .72 : -1 + 2 * G.ease.outCubic((f - .72) / .28);
+      a.head.rotation.x = peck * (.95 + Math.pow(Math.abs(Math.sin(t * 6 + a.ph)), 4) * .35) - crow * .6 + w * bob * .06; a.head.position.z = a.neckTop.z + w * bob * .016; a.head.position.y = a.neckTop.y + crow * .02; a.torso.rotation.x = peck * .32 - crow * .22;
       a.tail.rotation.x = -.15 + Math.sin(t * 1.3 + a.ph) * .05 + crow * .2 + w * Math.sin(t * 9) * .05; a.flap = Math.max(0, a.flap - dt); const fl = a.flap > 0 ? Math.sin(t * 34) * .9 : 0; a.wingR.rotation.z = -fl - crow * .6; a.wingL.rotation.z = fl + crow * .6; a.wingR.rotation.y = a.wingL.rotation.y = 0; }
     a.hot.pos.set(a.x, gy + (chick ? .08 : .3), a.z);
   }
