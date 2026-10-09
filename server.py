@@ -15,6 +15,10 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=PUBLIC, **kw)
 
+    def end_headers(self):            # always fetch fresh code: an old cached boot.js asked for files that no longer exist
+        self.send_header("Cache-Control", "no-cache")
+        super().end_headers()
+
     def log_message(self, fmt, *args):   # keep the terminal quiet
         pass
 
