@@ -68,18 +68,48 @@ const headParts = [
     mb.grid(28, 16, (u, v) => { const th = u * 6.283, ph = v * Math.PI * .62, front = Math.max(0, Math.cos(th - Math.PI / 2)), lift = front * front * .38;   // a cap that stops at the hairline
       const ph2 = Math.min(ph, Math.PI * (.62 - lift)); return [Math.cos(th) * Math.sin(ph2) * .081, .128 + Math.cos(ph2) * .088, Math.sin(th) * Math.sin(ph2) * .095 - .008]; },
       (u, v) => shade(HAIR, .85 + .3 * Math.pow(Math.max(0, Math.sin(u * 80 + v * 3)), 4)));
-    mb.grid(16, 4, (u, v) => { const a = -.25 + u * 1.6; return [Math.cos(a) * .07 - .006, .205 - v * .03 - u * .012, Math.sin(a) * .03 + .062 - v * .004]; }, (u, v) => shade(HAIR, .9 + .25 * Math.sin(u * 40)));   // side-swept bangs, above the brow
-    for (const sd of [-1, 1]) mb.grid(4, 10, (u, v) => [sd * (.07 + .012 * Math.sin(v * 3)) + sd * u * .02, .15 - v * .2, .03 - u * .045 - v * .02], (u, v) => shade(HAIR, .85 + .2 * Math.sin(v * 30 + u * 9)));   // locks framing the face
+    // hair strands lie ON the head: each point is placed on the skin surface (cranium ellipsoid) plus the strand's own thickness
+    const onHead = (x, y, lift) => { const q = 1 - (x / .073) ** 2 - ((y - .1) / .097) ** 2; return new V3(x, y, Math.sqrt(Math.max(q, 0)) * .087 + lift); };
+    const hc = (t, a) => shade(HAIR, .88 + .22 * Math.pow(Math.max(0, Math.sin(a * 6.283 * 3 + t * 9)), 3));
+    for (let k = 0; k < 5; k++) {                                                    // a soft side-swept fringe: 5 overlapping rounded locks from the parting
+      const x0 = -.035 + k * .006, x1 = .012 + k * .013, y1 = .178 - k * .009;
+      mb.tube([onHead(x0, .197, .006), onHead((x0 + x1) / 2, .19 - k * .003, .008), onHead(x1, y1, .006), onHead(x1 + .012, y1 - .02, .004)], t => (.0105 - .006 * t) * (1 - .1 * k / 4), 8, hc, null, true);
+    }
+    for (const sd of [-1, 1]) for (let k = 0; k < 3; k++) {                          // locks framing the face: rounded strands in front of the ears, down to the jaw
+      const x = sd * (.071 + k * .004), z0 = .028 - k * .012;
+      mb.tube([new V3(x * .97, .17, z0 + .004), new V3(x * 1.06, .12, z0), new V3(x * 1.1, .07, z0 - .006), new V3(x * 1.06, .02 - k * .012, z0 - .004)], t => .0085 - .0045 * t, 8, hc, null, true);
+    }
     G.geo.sampaguitaFlower(mb, G.basis(new V3(.55, .3, .25).normalize(), V3.Up(), new V3(.068, .165, .012), 0, 1.6), G.rng(7));                                  // a sampaguita in her hair
     G.geo.sampaguitaFlower(mb, G.basis(new V3(.7, .55, -.1).normalize(), V3.Up(), new V3(.074, .155, -.012), 0, 1.3), G.rng(8));
   }),
 ];
-// long hair hanging down her back: its own pendulum (swings back when she runs, bounces with her steps, moves in the wind)
-const hairPivot = node('hairPivot', head, 0, .15, -.068);
-const hairFall = part('hairFall', hairPivot, mb => {
-  mb.grid(14, 16, (u, v) => { const a = (u - .5) * 2.4, rad = .085 + .03 * v, len = .44; return [Math.sin(a) * rad, -v * len - .01, -.02 + Math.cos(a) * rad * .55 - .03 * v - Math.cos(a) * .045]; },
-    (u, v) => shade(HAIR, .82 + .25 * Math.pow(Math.max(0, Math.sin(u * 70 + v * 4)), 5) - .1 * v), null, null);
+// long hair: ONE closed volume that starts inside the hair cap at the crown, hugs the back of the head and the nape
+// (no gap, no flat sheet) and falls down her back in soft clumps with uneven tips. Only the part below the nape moves:
+// it bends progressively (more at the tips) from a two-stage pendulum, so it swings, lags and settles like real hair,
+// and it is never allowed to swing into her back.
+const HF = { nu: 40, nv: 22, top: .15, nape: .02, bot: -.36, pivot: new V3(0, .02, -.07) };
+const hairShape = v => {                                                            // centre-z, half-width, half-depth of the hair mass at height v (0 crown .. 1 tips)
+  const y = HF.top + (HF.bot - HF.top) * v, n = sm(HF.top, HF.nape, y), lo = sm(HF.nape, HF.bot, y);
+  return { y, zc: -.048 - .02 * n - .055 * sm(HF.nape, -.12, y) - .012 * lo, rx: .086 - .006 * n + .018 * sm(HF.nape, -.12, y) - .03 * lo * lo, rz: .056 - .028 * n - .012 * lo };
+};
+const hairFall = part('hairFall', head, mb => {
+  mb.grid(HF.nu, HF.nv, (u, v) => { const S = hairShape(v), a = u * 6.283, clump = 1 + .07 * Math.sin(a * 9 + 1.3) * sm(.25, 1, v), jag = v > .9 ? (v - .9) * 10 * .045 * (.5 + .5 * Math.sin(u * 61.7)) : 0;
+      return [Math.sin(a) * S.rx * clump, S.y + jag, S.zc - Math.cos(a) * S.rz * clump]; },
+    (u, v) => shade(HAIR, .8 + .28 * Math.pow(Math.max(0, Math.sin(u * 150 + v * 5)), 4) - .08 * v), null, null);
 });
+hairFall.markVerticesDataAsUpdatable(B.VertexBuffer.PositionKind, true); hairFall.markVerticesDataAsUpdatable(B.VertexBuffer.NormalKind, true);
+const hairBase = Float32Array.from(hairFall.getVerticesData(B.VertexBuffer.PositionKind)), hairPos = new Float32Array(hairBase.length), hairIdx = hairFall.getIndices(), hairNrm = [];
+const hairW = new Float32Array(hairBase.length / 3).map((_, i) => Math.pow(sm(HF.nape, HF.bot, hairBase[i * 3 + 1]), 1.4));   // bend weight: 0 above the nape -> 1 at the tips
+hairFall.alwaysSelectAsActiveMesh = true;                                           // vertices move every frame: keep it from being culled on a stale box
+function bendHair(ax, az, tipX, tipZ) {                                             // rotate each vertex about the nape by an angle that grows down the hair (a curve, not a hinge)
+  const P = HF.pivot;
+  for (let i = 0, n = hairW.length; i < n; i++) { const w = hairW[i], o = i * 3; let x = hairBase[o] - P.x, y = hairBase[o + 1] - P.y, z = hairBase[o + 2] - P.z;
+    if (w > 0) { const rx = ax * w + tipX * w * w, rz = az * w + tipZ * w * w, cx = Math.cos(rx), sx = Math.sin(rx), cz = Math.cos(rz), sz = Math.sin(rz);
+      const y1 = y * cx - z * sx, z1 = y * sx + z * cx; y = y1; z = z1; const x2 = x * cz - y * sz, y2 = x * sz + y * cz; x = x2; y = y2; }
+    hairPos[o] = x + P.x; hairPos[o + 1] = y + P.y; hairPos[o + 2] = z + P.z; }
+  hairFall.updateVerticesData(B.VertexBuffer.PositionKind, hairPos); B.VertexData.ComputeNormals(hairPos, hairIdx, hairNrm); hairFall.updateVerticesData(B.VertexBuffer.NormalKind, hairNrm);
+}
+bendHair(0, 0, 0, 0);
 headParts.push(hairFall);
 const arm = sd => {
   const sh = node('shoulder' + sd, spine, sd * .162, .355, -.006);
@@ -183,7 +213,7 @@ A.setView = v => { A.view = v; headParts.forEach(m => m.setEnabled(v === 'third'
 /* ---------- physics + gait, once per frame while walking ---------- */
 let lastStepSin = [0, 0], rustleT = 0, frame = 0; const hairSw = G.physics.pendulum(), hairSwZ = G.physics.pendulum(), trail = [];
 const PH = G.physics, EZ = G.ease, sp = PH.spring;
-const knee = sp(), leanF = sp(), leanS = sp(), lookY = sp(), armS = [sp(), sp()], elbS = [sp(), sp()];   // follow-through springs
+const hairTip = sp(), hairTipZ = sp(), knee = sp(), leanF = sp(), leanS = sp(), lookY = sp(), armS = [sp(), sp()], elbS = [sp(), sp()];   // follow-through springs
 const idle = { t: 0, side: 1, shift: 0, from: 0, to: 0, k: 1, glance: 0, gFrom: 0, gTo: 0, gk: 1 };          // eased idle weight shift and glances
 let windup = 0;                                                                                            // jump anticipation timer
 A.step = (dt, inp, t) => {
@@ -252,8 +282,11 @@ A.step = (dt, inp, t) => {
   const idt = 1 / Math.max(dt, 1e-3), awx = (A.vx - pvx) * idt, awz = (A.vz - pvz) * idt, cyw = Math.cos(A.yaw), syw = Math.sin(A.yaw);
   const alx = awx * cyw - awz * syw, alz = awx * syw + awz * cyw; stepSkirt(dt, t, clamp(alx, -12, 12), clamp(alz, -12, 12), hv);
   const Wd = G.windState, wBack = -(Wd.dx * syw + Wd.dz * cyw) * Wd.gain;
-  hairPivot.rotation.x = clamp(G.physics.stepPendulum(hairSw, 38, clamp(alz, -12, 12) * 1.1 + hv * hv * .9 + wBack * 2 + Math.sin(2 * A.phase) * m * 3 - (A.grounded ? 0 : A.vy * 2), 3.2, dt), -.15, 1.1) + spine.rotation.x * -.5;
-  hairPivot.rotation.z = clamp(G.physics.stepPendulum(hairSwZ, 38, -clamp(alx, -12, 12) * .9 + Math.sin(A.phase) * m * 1.5, 3.2, dt), -.4, .4);
+  const tilt = spine.rotation.x + head.rotation.x + leanF.x;                        // how far her head is pitched: the hair keeps hanging down
+  const hx = G.physics.stepPendulum(hairSw, 30, clamp(alz, -12, 12) * 1.1 + hv * hv * .8 + wBack * 2 + Math.sin(2 * A.phase) * m * 2.4 - (A.grounded ? 0 : A.vy * 1.6), 4.2, dt);
+  const hz = G.physics.stepPendulum(hairSwZ, 30, -clamp(alx, -12, 12) * .9 + Math.sin(A.phase) * m * 1.2, 4.2, dt);
+  const htx = PH.stepSpring(hairTip, hx, 14, .45, dt) - hx, htz = PH.stepSpring(hairTipZ, hz, 14, .45, dt) - hz;   // the tips lag the upper hair (follow-through)
+  bendHair(clamp(hx + tilt * .8, 0, 1.0), clamp(hz, -.35, .35), clamp(htx, -.25, .25), clamp(htz, -.2, .2));
   // ---- footfalls: when each foot strikes the ground, it sounds like what it lands on
   if (A.grounded && hv > .3) for (let k = 0; k < 2; k++) { const sv = Math.sin(A.phase + k * Math.PI); if (lastStepSin[k] < .97 && sv >= .97) {
       const fxp = A.x + Math.sin(A.yaw) * .25 + Math.cos(A.yaw) * (k ? .09 : -.09), fzp = A.z + Math.cos(A.yaw) * .25 - Math.sin(A.yaw) * (k ? .09 : -.09), w = waterAt(fxp, fzp, t), g = hFn(fxp, fzp), kind = surfaceAt(fxp, fzp, w - g);
@@ -269,8 +302,11 @@ A.step = (dt, inp, t) => {
   root.position.set(A.x, A.y, A.z); root.rotation.set(PH.stepSpring(leanF, pitchT, 9, .75, dt), A.yaw, PH.stepSpring(leanS, bankT, 9, .75, dt));
   hot.pos.set(A.x, A.y + 1.1, A.z);
   const W = G.windState; W.px = A.x; W.py = A.y + .5; W.pz = A.z; W.playerR = .9 + .5 * m;              // plants bend away from your body, not the camera
-  trail.push([t, A.x, A.z]); while (trail.length > 2 && t - trail[0][0] > .4) trail.shift();                    // where you were ~0.4 s ago: plants spring back behind you
-  W.contact = 1; W.tx = trail[0][1]; W.tz = trail[0][2]; W.trailK = clamp(Math.hypot(W.tx - A.x, W.tz - A.z) * 2, 0, 1); W.bodyR = .48;
+  trail.push([t, A.x, A.z]); while (trail.length > 2 && t - trail[1][0] > .85) trail.shift();                   // where you were: plants spring back behind you
+  const past = (ago, o) => { const tt = t - ago; let k = trail.length - 1; while (k > 0 && trail[k - 1][0] > tt) k--; const a0 = trail[Math.max(0, k - 1)], a1 = trail[k], f = a1[0] > a0[0] ? clamp((tt - a0[0]) / (a1[0] - a0[0]), 0, 1) : 1;
+    W.trail[o] = a0[1] + (a1[1] - a0[1]) * f; W.trail[o + 1] = a0[2] + (a1[2] - a0[2]) * f; };
+  W.trail = W.trail || [0, 0, 0, 0, 0, 0]; past(.18, 0); past(.45, 2); past(.8, 4);
+  W.contact = 1; W.tx = W.trail[0]; W.tz = W.trail[1]; W.trailK = clamp(Math.hypot(W.trail[4] - A.x, W.trail[5] - A.z) * 1.5, 0, 1); W.bodyR = .5;
 };
 
 /* ---------- the camera ---------- */
@@ -281,7 +317,7 @@ A.placeCamera = (dt, yaw, pitch) => {
     camera.position.copyFrom(_eye); camera.rotation.set(pitch, yaw, 0);
   } else {
     const T = C.third, p = clamp(pitch, -.55, 1.0); _tgt.set(A.x, A.y + 1.45, A.z);
-    if (G.params.has('face')) { const d = parseFloat(G.params.get('face')) || 1.1, a = A.yaw + .35; camera.position.set(A.x + Math.sin(a) * d, A.y + 1.5, A.z + Math.cos(a) * d); camera.setTarget(new V3(A.x, A.y + 1.38 - d * .12, A.z)); return; }   // dev: look at her from the front
+    if (G.params.has('face')) { const d = parseFloat(G.params.get('face')) || 1.1, a = A.yaw + (G.params.has('facea') ? parseFloat(G.params.get('facea')) : .35); camera.position.set(A.x + Math.sin(a) * d, A.y + 1.5, A.z + Math.cos(a) * d); camera.setTarget(new V3(A.x, A.y + 1.38 - d * .12, A.z)); return; }   // dev: look at her from the front
     _cam.set(_tgt.x - Math.sin(yaw) * Math.cos(p) * T.dist, _tgt.y + Math.sin(p) * T.dist + T.height, _tgt.z - Math.cos(yaw) * Math.cos(p) * T.dist);
     _cam.y = Math.max(_cam.y, hFn(_cam.x, _cam.z) + .35);                                              // never under the ground
     const k = 1 - Math.exp(-dt * T.lag); camera.position.x += (_cam.x - camera.position.x) * k; camera.position.y += (_cam.y - camera.position.y) * k; camera.position.z += (_cam.z - camera.position.z) * k;
