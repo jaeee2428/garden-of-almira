@@ -11,15 +11,20 @@ let LOD = 0; const K = () => LOD === 0 ? 1 : LOD === 1 ? .78 : .58; G.setLOD = v
 
 /* ---------- primitives ---------- */
 // a leaf lies along +z, blade facing +y. fold = V-shaped midrib, curl = tip lift (negative = droop)
+// leaves and petals mark their UVs (x + 2, rows of the detail texture) so the shared vein texture applies only to them (engine/wind.js) - costs no triangles
+function tagUV(mb, from, row) { const uv = mb.uv; for (let i = from; i < uv.length; i += 2) { uv[i] = 2 + uv[i] / (mb.su || 1); uv[i + 1] = row + .46 * (uv[i + 1] / (mb.sv || 1)); } }
 function leaf(mb, L, W, M, c0, c1, o = {}) {
+  const uv0 = mb.uv.length;
   const nu = LOD ? Math.max(2, Math.round((o.nu || 6) * (LOD === 1 ? .6 : .4))) : Math.round((o.nu || 6) * 1.5), nv = LOD ? Math.min(o.nv || 4, 2) : Math.max(4, (o.nv || 4) + 2), fold = o.fold ?? .25, curl = o.curl ?? .12, base = o.base ?? .75, sharp = o.sharp ?? .8, ser = o.ser || 0, rib = o.rib || shade(c1, 1.3);
   mb.grid(nu, nv, (u, v) => {
     const s = v * 2 - 1, prof = Math.pow(Math.max(0, Math.sin(Math.PI * Math.pow(u, base))), sharp), wob = 1 + ser * Math.sin(u * 44);
     return [s * W * .5 * prof * wob, fold * Math.abs(s) * prof * W * .5 + curl * u * u * L, u * L];
   }, (u, v) => { const s = Math.abs(v * 2 - 1); if (s < .06 && u > .03 && u < .95) return rib; return shade(mixA(c0, c1, u), (1 - .18 * s) * (1 + .07 * Math.sin(u * 30 + s * 6))); }, M, (u, v) => .12 + .88 * u);
+  tagUV(mb, uv0, .02);
 }
 // a petal lies along +z, concave side toward +y. cols = [throat, body, edge]
 function petal(mb, L, W, M, cols, o = {}) {
+  const uv0 = mb.uv.length;
   if (LOD === 2) { L *= 1.25; W *= 1.3; }
   const nu = LOD ? Math.max(2, Math.round((o.nu || 7) * (LOD === 1 ? .6 : .35))) : Math.round((o.nu || 7) * 1.35), nv = LOD ? Math.max(2, Math.round((o.nv || 6) * (LOD === 1 ? .6 : .35))) : Math.round((o.nv || 6) * 1.35), cup = o.cup ?? .5, curl = o.curl ?? .2, ruf = o.ruf || 0, tw = o.tw || 0, pw = o.pw ?? .7, sh = o.sh ?? .55, th = o.throat ?? .25, tipN = o.notch || 0;
   mb.grid(nu, nv, (u, v) => {
@@ -28,6 +33,7 @@ function petal(mb, L, W, M, cols, o = {}) {
     const z = u * L * (1 - .05 * s * s); if (tw) { const a = tw * u, c = Math.cos(a), sn = Math.sin(a), x2 = x * c - y * sn; y = x * sn + y * c; x = x2; }
     return [x, y, z];
   }, (u, v) => { const s = Math.abs(v * 2 - 1); let c = u < th ? mixA(cols[0], cols[1], u / th) : mixA(cols[1], cols[2], clamp((u - th) / (1 - th), 0, 1) * .85 + s * .15); return shade(c, 1 - .05 * Math.abs(Math.sin(v * 21 + u * 2)) * (o.veins ?? 1)); }, M, (u, v) => .1 + .55 * u);
+  tagUV(mb, uv0, .52);
 }
 const pm = (d, yh, o, roll, sc) => basis(d, yh, o, roll || 0, sc || 1);                    // basis shorthand
 const dirOn = (spread, a) => new V3(Math.sin(spread) * Math.cos(a), Math.sin(spread) * Math.sin(a), Math.cos(spread));  // direction `spread` rad off the +z axis

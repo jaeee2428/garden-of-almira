@@ -115,7 +115,7 @@ class LeafDetailPlugin extends B.MaterialPluginBase {
   getCustomCode(shaderType) {
     if (shaderType === 'vertex') return { CUSTOM_VERTEX_DEFINITIONS: 'varying vec2 vLeafUV;', CUSTOM_VERTEX_MAIN_END: '#ifdef UV1\nvLeafUV = uv;\n#else\nvLeafUV = vec2(0.0);\n#endif\n' };
     return { CUSTOM_FRAGMENT_DEFINITIONS: 'varying vec2 vLeafUV; uniform sampler2D leafDetailSampler;',
-      CUSTOM_FRAGMENT_UPDATE_DIFFUSE: 'float lk_ = step(1.5, vLeafUV.x); vec3 ld_ = texture2D(leafDetailSampler, vLeafUV).rgb * 1.09; ' + (G.params.has('leafdebug') ? 'baseColor.rgb = mix(vec3(1.0, 0.0, 1.0), ld_, lk_);' : 'float d_ = ld_.r - 1.0; baseColor.rgb *= 1.0 + lk_ * min(d_, 0.0) * 1.7; baseColor.rgb += lk_ * max(d_, 0.0) * vec3(0.33, 0.36, 0.18);') + '\n' };
+      CUSTOM_FRAGMENT_UPDATE_DIFFUSE: 'float lk_ = step(1.5, vLeafUV.x) * (1.0 - smoothstep(0.015, 0.06, fwidth(vLeafUV.x))); vec3 ld_ = texture2D(leafDetailSampler, vLeafUV).rgb * 1.09; ' + (G.params.has('leafdebug') ? 'baseColor.rgb = mix(vec3(1.0, 0.0, 1.0), ld_, lk_);' : 'float d_ = ld_.r - 1.0; baseColor.rgb *= 1.0 + lk_ * min(d_, 0.0) * 1.7; baseColor.rgb += lk_ * max(d_, 0.0) * vec3(0.2, 0.22, 0.11);') + '\n' };
   }
 }
 G.leafDetail = !G.params.has('noleaftex');

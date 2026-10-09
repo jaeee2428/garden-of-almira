@@ -37,6 +37,7 @@ const bump = (t, c, w) => Math.exp(-(((t - c) / w) ** 2));
 const ell = (mb, x, y, z, rx, ry, rz, n, m, cf) => mb.ellipsoid(x, y, z, rx, ry, rz, n, m, typeof cf === 'function' ? cf : () => cf);
 
 const root = new B.TransformNode('avatar', scene);
+const SCALE = C.scale || 1; root.scaling.setAll(SCALE);                               // overall height (1.58 m x scale); everything below is in unscaled body units
 const pelvis = node('pelvis', root, 0, .86, 0);
 part('hips', pelvis, mb => { ell(mb, 0, 0, -.005, .158, .11, .105, 24, 14, print); ell(mb, 0, .07, 0, .118, .03, .085, 20, 6, TRIM); });   // dress over the hips + white sash
 const spine = node('spine', pelvis, 0, .06, 0);
@@ -227,7 +228,7 @@ let lastStepSin = [0, 0], rustleT = 0, frame = 0; const hairSw = G.physics.pendu
 const PH = G.physics, EZ = G.ease, sp = PH.spring;
 const hairTip = sp(), hairTipZ = sp(), knee = sp(), leanF = sp(), leanS = sp(), lookY = sp(), armS = [sp(), sp()], elbS = [sp(), sp()];   // follow-through springs
 const idle = { t: 0, side: 1, shift: 0, from: 0, to: 0, k: 1, glance: 0, gFrom: 0, gTo: 0, gk: 1 };          // eased idle weight shift and glances
-let windup = 0;                                                                                            // jump anticipation timer
+let windup = 0, wave = 0, prevYaw = null;                                                                  // wave: seconds left of a greeting wave (G)                                                                                            // jump anticipation timer
 A.step = (dt, inp, t) => {
   frame++; const yawC = inp.yaw, pvx = A.vx, pvz = A.vz;
   // ---- where you want to go (relative to the camera), how fast the ground lets you
@@ -235,7 +236,8 @@ A.step = (dt, inp, t) => {
   const gy0 = hFn(A.x, A.z), e = .5, gx = (hFn(A.x + e, A.z) - hFn(A.x - e, A.z)) / (2 * e), gz = (hFn(A.x, A.z + e) - hFn(A.x, A.z - e)) / (2 * e);
   const uphill = il > .01 ? (gx * fx + gz * fz) / Math.max(il, 1) : 0, slopeK = uphill > 0 ? 1 / (1 + 1.6 * uphill) : 1 + .15 * Math.min(-uphill, 1);
   const water = waterAt(A.x, A.z, t), depth = Math.max(0, water - gy0); A.wade = clamp(depth / C.maxWade, 0, 1);
-  const top = (inp.run ? C.run : C.walk) * slopeK * (1 - C.wadeSlow * A.wade);
+  A.crouch = PH.damp(A.crouch || 0, inp.crouch && A.grounded ? 1 : 0, 7, dt); A.slope = PH.damp(A.slope || 0, clamp(uphill, -.6, .6), 5, dt);
+  const top = (inp.run && A.crouch < .3 ? C.run : C.walk) * slopeK * (1 - C.wadeSlow * A.wade) * (1 - .55 * A.crouch) * (1 - .22 * Math.min(1, A.brush || 0));   // foliage drags at your legs: you slow as you push through a bed
   const tx = fx * top, tz = fz * top, ctrl = A.grounded ? 1 : C.airControl;
   let dvx = tx - A.vx, dvz = tz - A.vz; const dl = Math.hypot(dvx, dvz), lim = (Math.hypot(tx, tz) > Math.hypot(A.vx, A.vz) ? C.accel : C.decel) * (1 - .5 * A.wade) * ctrl * dt;
   if (dl > lim) { dvx *= lim / dl; dvz *= lim / dl; } A.vx += dvx; A.vz += dvz;
@@ -251,7 +253,7 @@ A.step = (dt, inp, t) => {
   if (windup > 0 && A.grounded) { windup -= dt; if (windup <= 0) { windup = 0; A.vy = C.jump; A.grounded = false; knee.v -= 9; sfx().jump(); G.poke(A.x, A.z, .3); } }
   if (!A.grounded) { A.vy -= C.gravity * dt; A.y += A.vy * dt; if (A.y <= gy) { const hit = -A.vy; A.y = gy; A.vy = 0; A.grounded = true; A.land = clamp(hit / 4.5, .25, 1); knee.v += 3 + hit * 1.6;
       const w = waterAt(A.x, A.z, t), kind = surfaceAt(A.x, A.z, w - gy); sfx().land(kind); G.poke(A.x, A.z, .45); if (kind === 'water') splashAt(A.x, w, A.z, 70); } }
-  else { if (gy < A.y - .35) { A.grounded = false; A.vy = 0; } else A.y = gy; }               // walk off an edge -> fall
+  else { if (gy < A.y - .35) { A.grounded = false; A.vy = 0; } else A.y = Math.max(gy - .02, PH.damp(A.y, gy, 22, dt)); }               // walk off an edge -> fall
   // the legs are a spring: landing compresses them, they rebound a little past straight and settle (no linear fade)
   const dip = windup > 0 ? EZ.outCubic(1 - windup / ((C.windup || .14))) * .55 : 0;
   PH.stepSpring(knee, dip, 15, .55, dt); A.land = clamp(knee.x, -.12, 1.1);
@@ -263,15 +265,18 @@ A.step = (dt, inp, t) => {
   // feet must not skate: cadence rises with speed (~2.3 steps/s at a walk), the step length is speed / cadence, and the
   // thigh swing is solved from the leg length so the planted foot covers exactly that ground (heel-to-toe roll and the
   // pelvis turn add ~10 cm; when running, part of each step is in the air)
-  const LEG = .83, cadence = 1.7 + .32 * hv, stepLen = hv / cadence, runA = sm(C.walk + .3, C.run, hv);
+  const LEG = .83 * SCALE, cadence = 1.7 + .32 * hv, stepLen = hv / cadence, runA = sm(C.walk + .3, C.run, hv);
   const amp = Math.asin(clamp((stepLen * (1 - .4 * runA) - .1 * clamp(hv, 0, 1)) / (2 * LEG), 0, .6));
   A.amp = PH.damp(A.amp || 0, amp, 12, dt);
-  if (A.grounded) A.phase += Math.PI * cadence * dt * clamp(hv / .15, 0, 1);
+  const yawRate = prevYaw === null ? 0 : Math.abs(Math.atan2(Math.sin(A.yaw - prevYaw), Math.cos(A.yaw - prevYaw))) / Math.max(dt, 1e-3); prevYaw = A.yaw;
+  A.turnK = PH.damp(A.turnK || 0, clamp((yawRate - .6) / 2, 0, 1) * (1 - clamp(hv / .6, 0, 1)), 8, dt);     // turning on the spot: shuffle the feet round
+  A.amp = Math.max(A.amp, .1 * A.turnK);
+  if (A.grounded) A.phase += Math.PI * Math.max(cadence * clamp(hv / .15, 0, 1), 2.4 * A.turnK) * dt;
   A.gm = PH.damp(A.gm || 0, clamp(hv / C.walk, 0, 1), 9, dt); const m = A.gm, runK = sm(C.walk + .3, C.run, hv), wadeLift = A.wade * .5;
   const pose = (lg, am, ph, sd) => {
     const s = Math.sin(ph), cph = Math.cos(ph), air = A.grounded ? 0 : 1;
     const tri = Math.asin(clamp(s, -1, 1)) * .6366, sw = s * .4 + tri * .6;   // mostly a straight sweep: the planted foot moves back at ground speed, it doesn't speed up and slow down mid-step
-    const thigh = (-A.amp * sw - .06 * runK * m) * (1 - air) - .55 * air - .5 * Math.max(0, A.land), shin = ((.5 + .75 * runK + wadeLift) * Math.pow(Math.max(0, cph), 1.4) * m + .05) * (1 - air) + .85 * air + 1.0 * Math.max(0, A.land);
+    const mT = Math.max(m, .5 * A.turnK), thigh = (-A.amp * sw - .06 * runK * m) * (1 - air) - .55 * air - .5 * Math.max(0, A.land), shin = ((.5 + .75 * runK + wadeLift) * Math.pow(Math.max(0, cph), 1.4) * mT + .05) * (1 - air) + .85 * air + 1.0 * Math.max(0, A.land);
     lg.hip.rotation.x = thigh; lg.knee.rotation.x = shin; lg.ankle.rotation.x = -(thigh + shin) * .85 + .25 * Math.max(0, -cph) * Math.max(0, -s) * m;   // sole level, heel lifts at push-off
     lg.hip.rotation.z = sd * .03;
     const ai = sd < 0 ? 0 : 1;                                                         // arms follow the gait through springs: they swing on and settle when you stop
@@ -281,7 +286,7 @@ A.step = (dt, inp, t) => {
   };
   pose(L.leg, Rt.arm, A.phase, -1); pose(Rt.leg, L.arm, A.phase + Math.PI, 1);          // left leg swings with the right arm
   const s1 = Math.sin(A.phase), breathe = Math.sin(t * 1.7) * (1 - m);
-  pelvis.position.y = .86 - LEG * .7 * (1 - Math.cos(A.amp * s1)) * (1 - runK) + .035 * runK * Math.cos(2 * A.phase) * m - .17 * Math.max(0, A.land) - .03 * runK + (A.grounded ? 0 : .05);
+  pelvis.position.y = .86 - .83 * .7 * (1 - Math.cos(A.amp * s1)) * (1 - runK) + .035 * runK * Math.cos(2 * A.phase) * m - .17 * Math.max(0, A.land) - .03 * runK + (A.grounded ? 0 : .05);
   pelvis.position.x = .02 * s1 * m * (1 - runK); pelvis.rotation.y = .09 * s1 * m; pelvis.rotation.z = .055 * s1 * m * (1 - runK); spine.rotation.z = -.045 * s1 * m * (1 - runK); spine.rotation.y = -.14 * s1 * m;
   spine.rotation.x = .03 + .15 * runK * m + .25 * A.land + .012 * breathe + (A.bump > 0 ? -.12 * A.bump : 0);
   // idle: every few seconds she shifts her weight to the other hip and now and then glances around (eased, not linear)
@@ -293,6 +298,15 @@ A.step = (dt, inp, t) => {
   const ws = idle.shift * (1 - m);                                                   // contrapposto: one hip drops, that knee softens
   pelvis.rotation.z += .045 * ws; spine.rotation.z -= .05 * ws;
   [L.leg, Rt.leg].forEach((lg, k) => { const soft = Math.max(0, (k ? -1 : 1) * ws); lg.hip.rotation.x -= .07 * soft; lg.knee.rotation.x += .15 * soft; lg.ankle.rotation.x -= .08 * soft; });
+  // ---- crouch (hold C): hips sink ~25 cm, thighs fold forward, knees bend, ankles keep the soles flat, the back leans in
+  const ck = EZ.inOutSine(A.crouch);
+  if (ck > .001) { pelvis.position.y -= .25 * ck; spine.rotation.x += .32 * ck; [L.leg, Rt.leg].forEach(lg => { lg.hip.rotation.x -= .9 * ck; lg.knee.rotation.x += 1.6 * ck; lg.ankle.rotation.x -= .6 * ck; });
+    [L.arm, Rt.arm].forEach(am => { am.sh.rotation.x -= .35 * ck; am.el.rotation.x -= .45 * ck; }); }
+  spine.rotation.x += .3 * A.slope * m;                                              // lean into a hill, sit back going down
+  // ---- wave (G): the right arm rises out to the side, the hand waves three times, then the arm settles (eased in and out)
+  if (inp.wave && wave <= 0) wave = 2.2;
+  if (wave > 0) { wave = Math.max(0, wave - dt); const k = 2.2 - wave, env = EZ.inOutSine(clamp(k / .35, 0, 1)) * EZ.inOutSine(clamp(wave / .45, 0, 1)), am = Rt.arm;
+    am.sh.rotation.z = am.sh.rotation.z * (1 - env) + (-2.35 + .22 * Math.sin(k * 9.5)) * env; am.sh.rotation.x *= 1 - env; am.el.rotation.x = am.el.rotation.x * (1 - env) - .55 * env; }
   head.rotation.x = -spine.rotation.x * .7 + (A.view === 'third' ? inp.pitch * .35 : 0);
   // anticipation: in third person the head turns toward where you are about to go before the body follows
   const lookT = A.view === 'third' ? clamp(dy * .8, -.6, .6) + idle.glance : 0;
@@ -312,6 +326,8 @@ A.step = (dt, inp, t) => {
       A.surface = kind; sfx().step(kind, .7 + .5 * runK); if (kind === 'water') splashAt(fxp, w, fzp, Math.round(14 + 30 * runK)); }
     lastStepSin[k] = sv; }
   // ---- brushing through the garden: plants part (wind shader follows you) and their leaves rustle
+  if (frame % 6 === 3) { let kb = 0; for (const p of G.plants) { const dx = p.x - A.x, dz = p.z - A.z, rr = p.r * .7 + .3; if (dx * dx + dz * dz < rr * rr) kb += 1 - Math.hypot(dx, dz) / rr; } A.brushT = clamp(kb, 0, 1.5); }
+  A.brush = PH.damp(A.brush || 0, A.brushT || 0, 6, dt);
   rustleT -= dt; if (frame % 6 === 0 && hv > .45 && rustleT <= 0) { let k = 0; for (const p of G.plants) { const d = Math.hypot(p.x - A.x, p.z - A.z); if (d < p.r * .7 + .3) k += 1 - d / (p.r * .7 + .3); }
     if (k > .05) { sfx().rustle(clamp(k, .45, 1.2) * (.7 + .5 * runK)); rustleT = .2 + Math.random() * .15;
       if (hv > 2.2 && Math.random() < .35) { const near = G.plants.find(p => Math.hypot(p.x - A.x, p.z - A.z) < p.r * .7 + .3); if (near) G.petalBurst(new V3(near.x, near.y + near.H * .7, near.z), 5); } } }   // running through flowers knocks a few petals loose
@@ -325,7 +341,7 @@ A.step = (dt, inp, t) => {
   const past = (ago, o) => { const tt = t - ago; let k = trail.length - 1; while (k > 0 && trail[k - 1][0] > tt) k--; const a0 = trail[Math.max(0, k - 1)], a1 = trail[k], f = a1[0] > a0[0] ? clamp((tt - a0[0]) / (a1[0] - a0[0]), 0, 1) : 1;
     W.trail[o] = a0[1] + (a1[1] - a0[1]) * f; W.trail[o + 1] = a0[2] + (a1[2] - a0[2]) * f; };
   W.trail = W.trail || [0, 0, 0, 0, 0, 0]; past(.18, 0); past(.45, 2); past(.8, 4);
-  W.contact = 1; W.tx = W.trail[0]; W.tz = W.trail[1]; W.trailK = clamp(Math.hypot(W.trail[4] - A.x, W.trail[5] - A.z) * 1.5, 0, 1); W.bodyR = .5;
+  W.contact = 1; W.tx = W.trail[0]; W.tz = W.trail[1]; W.trailK = clamp(Math.hypot(W.trail[4] - A.x, W.trail[5] - A.z) * 1.5, 0, 1); W.bodyR = .58 * SCALE;
 };
 
 /* ---------- the camera ---------- */
