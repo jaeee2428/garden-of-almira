@@ -46,7 +46,7 @@ window.GARDEN_CONFIG = {
 
   // The avatar (game/avatar.js): a ~1.60 m young woman in a sundress. Speeds in m/s (a real walk is ~1.4, a jog ~3, a run ~5).
   avatar: {
-    walk: 1.9, run: 4.6, accel: 9, decel: 12, airControl: .25, jump: 3.4, windup: .14, gravity: 9.81, radius: .3,
+    scale: 1.12, walk: 2.0, run: 4.8, accel: 9, decel: 12, airControl: .25, jump: 3.4, windup: .14, gravity: 9.81, radius: .3,
     eye: 1.5, third: { dist: 2.9, height: .3, lag: 10 }, wadeSlow: .6, maxWade: .8,
     skin: '#c4916c', hair: '#17100d', dress: '#ee9c8a', trim: '#fbf6ee', sandal: '#c39466', lips: '#c2676d',   // morena skin, black hair, blush-coral sundress
   },

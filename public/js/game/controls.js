@@ -95,7 +95,7 @@ function walkStep(dt) {
     if (keys.ArrowLeft || keys.KeyQ) P.yaw -= 1.7 * dt; if (keys.ArrowRight || keys.KeyE) P.yaw += 1.7 * dt;
     if (keys.PageUp) P.pitch = clamp(P.pitch - 1.2 * dt, -1.3, 1.3); if (keys.PageDown) P.pitch = clamp(P.pitch + 1.2 * dt, -1.3, 1.3);
     const fwd = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0), strafe = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
-    G.avatar.step(dt, { fwd, strafe, run: !!(keys.ShiftLeft || keys.ShiftRight), jump: !!P.jump, yaw: P.yaw, pitch: P.pitch }, G.clock); P.jump = false;
+    G.avatar.step(dt, { fwd, strafe, run: !!(keys.ShiftLeft || keys.ShiftRight), jump: !!P.jump, crouch: !!keys.KeyC, wave: !!keys.KeyG, yaw: P.yaw, pitch: P.pitch }, G.clock); P.jump = false;
     G.walkSpeed = G.avatar.speed; G.avatar.placeCamera(dt, P.yaw, P.pitch); return;
   }
   const sp = (keys.ShiftLeft || keys.ShiftRight ? 6 : 3.2) * dt * (P.fly ? 1.6 : 1); let fx = 0, fz = 0;
