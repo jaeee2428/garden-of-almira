@@ -54,6 +54,7 @@ scene.executeWhenReady(() => {
 });
 G.applyTime(G.timeU); G.hud.showName();
 if (params.has('hideui')) document.body.classList.add('noui');
+if (params.has('notitle') && document.getElementById('title')) document.getElementById('title').style.display = 'none';   // archive renders: no title card
 if (params.has('showkeys')) G.hud.toggleKeys();
 window.__garden = G;
 })();

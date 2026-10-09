@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flower Archive</title>
+<style>
+:root { --bg:#f6f1e7; --ink:#2b241c; --mute:#7a6e60; --card:#fffdf8; --line:#e2d8c6; --gold:#a8792a; }
+@media (prefers-color-scheme: dark) { :root { --bg:#17130f; --ink:#efe6d6; --mute:#a99c88; --card:#211b15; --line:#3a3027; --gold:#d6a75a; } }
+* { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 Georgia, 'Times New Roman', serif; }
+header { padding:28px 16px 8px; max-width:1200px; margin:auto; } h1 { margin:0; font-weight:normal; font-size:30px; } header p { color:var(--mute); margin:6px 0 0; }
+main { max-width:1200px; margin:auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:18px; }
+article { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.pics { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--line); } .pics figure { margin:0; position:relative; } .pics img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#0002; }
+.pics figcaption { position:absolute; left:6px; top:6px; font:12px/1 system-ui, sans-serif; background:#000a; color:#fff; padding:3px 6px; border-radius:4px; }
+.body { padding:12px 14px 14px; } h2 { margin:0; font-size:22px; font-weight:normal; display:flex; gap:8px; align-items:center; } h2 i { width:12px; height:12px; border-radius:50%; display:inline-block; }
+.sci { font-style:italic; color:var(--mute); } .meta { font-size:14px; color:var(--mute); margin:4px 0 8px; } .look { font-size:15px; } .fact { font-size:15px; margin-top:6px; }
+.tabs { display:flex; gap:6px; padding:8px 14px 0; } .tabs button { font:13px system-ui, sans-serif; border:1px solid var(--line); background:transparent; color:var(--ink); border-radius:20px; padding:3px 10px; cursor:pointer; } .tabs button.on { background:var(--gold); color:#fff; border-color:var(--gold); }
+</style></head><body>
+<header><h1>Ang Hardin ni Almira · flower archive</h1><p>The 18 hero flowers: each card and studio renders of its 3D model (before / after the realism pass). Local only.</p></header>
+<main id="grid"></main>
+<script>
+window.G = { INFO: {} }; G.flowerCard = c => { G.INFO[c.id] = c; };
+const IDS = ['sampaguita','gumamela','kalachuchi','santan','dama','bogambilya','kadena','ilangilang','rosas','canna','heliconia','kamia','orkidyas','liryo','adelfa','pukingan','tsampaka','rosal'];
+let left = IDS.length; IDS.forEach(id => { const s = document.createElement('script'); s.src = id + '/card.js'; s.onload = s.onerror = () => { if (!--left) draw(); }; document.head.appendChild(s); });
+function draw() {
+  const grid = document.getElementById('grid');
+  IDS.forEach(id => { const c = G.INFO[id]; if (!c) return; const a = document.createElement('article');
+    a.innerHTML = `<div class="tabs"><button data-l="after" class="on">after</button><button data-l="before">before</button></div>
+      <div class="pics"><figure><img loading="lazy" alt=""><figcaption>plant</figcaption></figure><figure><img loading="lazy" alt=""><figcaption>close-up</figcaption></figure></div>
+      <div class="body"><h2><i style="background:${c.color}"></i>${c.ceb}</h2><div class="sci">${c.sci}</div>
+      <div class="meta">${[c.english, ...(c.names || [])].join(' · ')}<br>${c.family} · scent: ${c.scent}</div>
+      <div class="look">${c.look}</div><div class="fact">${c.fact}</div></div>`;
+    const imgs = a.querySelectorAll('img'), set = l => { imgs[0].src = `${id}/renders/${l}-plant.png`; imgs[1].src = `${id}/renders/${l}-close.png`; a.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.l === l)); };
+    imgs.forEach(im => im.onerror = () => { if (im.src.includes('after-')) im.src = im.src.replace('after-', 'before-'); });
+    a.querySelectorAll('.tabs button').forEach(b => b.onclick = () => set(b.dataset.l)); set('after'); grid.appendChild(a); });
+}
+</script></body></html>
