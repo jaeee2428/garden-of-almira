@@ -1,0 +1,4 @@
+Ikaw's body: "Formal" from the Ultimate Modular Women pack by Quaternius (https://quaternius.com/packs/ultimatemodularwomen.html)
+License: CC0 1.0 Universal (public domain) - https://creativecommons.org/publicdomain/zero/1.0/
+Downloaded 2026-10-09. Animations included in the file: Idle, Idle_Neutral, Walk, Run, Wave, Interact, Roll and others.
+Materials are recoloured in code (game/avatar-glb.js); the file is unchanged.

@@ -233,7 +233,8 @@ function collide(x, z, r) {                                            // slide 
 /* ---------- enter / leave ---------- */
 A.enter = (x, z, yaw) => { A.x = x; A.z = z; A.y = hFn(x, z); A.vx = A.vz = A.vy = 0; A.yaw = yaw; A.grounded = true; A.active = true; root.setEnabled(true); A.setView(A.view); };
 A.exit = () => { A.active = false; root.setEnabled(false); hot.r = 0; G.windState.contact = 0; };
-A.setView = v => { A.view = v; headParts.forEach(m => m.setEnabled(v === 'third')); hot.r = v === 'third' ? .5 : 0; G.windState.playerR = 1.3; };
+A.procMeshes = meshes;                                                              // the hand-built body; hidden once the glTF body (game/avatar-glb.js) is ready
+A.setView = v => { A.view = v; headParts.forEach(m => m.setEnabled(v === 'third' && !A.glb)); if (A.onView) A.onView(v); hot.r = v === 'third' ? .5 : 0; G.windState.playerR = 1.3; };
 
 /* ---------- physics + gait, once per frame while walking ---------- */
 let lastStepSin = [0, 0], rustleT = 0, frame = 0; const hairSw = G.physics.pendulum(), hairSwZ = G.physics.pendulum(), trail = [];
@@ -337,7 +338,7 @@ A.step = (dt, inp, t) => {
     [L.arm, Rt.arm].forEach(am => { am.sh.rotation.x -= .35 * ck; am.el.rotation.x -= .45 * ck; }); }
   spine.rotation.x += .3 * A.slope * m;                                              // lean into a hill, sit back going down
   // ---- wave (G): the right arm rises out to the side, the hand waves three times, then the arm settles (eased in and out)
-  if (inp.wave && wave <= 0) wave = 2.2;
+  if (inp.wave && wave <= 0) wave = 2.2; A.waveT = wave;
   if (wave > 0) { wave = Math.max(0, wave - dt); const k = 2.2 - wave, env = EZ.inOutSine(clamp(k / .35, 0, 1)) * EZ.inOutSine(clamp(wave / .45, 0, 1)), am = Rt.arm;
     const wv = Math.sin(k * 9) * EZ.inOutSine(clamp((k - .3) / .3, 0, 1));              // three side-to-side waves once the arm is up
     am.sh.rotation.z = am.sh.rotation.z * (1 - env) + (2.45 + .2 * wv) * env; am.sh.rotation.x = am.sh.rotation.x * (1 - env) - .25 * env; am.el.rotation.x = am.el.rotation.x * (1 - env) - (.35 + .12 * wv) * env;
@@ -348,13 +349,13 @@ A.step = (dt, inp, t) => {
   head.rotation.y = -spine.rotation.y * .8 + PH.stepSpring(lookY, lookT, 10, .9, dt);
   // ---- cloth and hair follow the body: skirt (spring + knees + wind), long hair (a pendulum on her head)
   const idt = 1 / Math.max(dt, 1e-3), awx = (A.vx - pvx) * idt, awz = (A.vz - pvz) * idt, cyw = Math.cos(A.yaw), syw = Math.sin(A.yaw);
-  const alx = awx * cyw - awz * syw, alz = awx * syw + awz * cyw; stepSkirt(dt, t, clamp(alx, -12, 12), clamp(alz, -12, 12), hv);
+  const alx = awx * cyw - awz * syw, alz = awx * syw + awz * cyw; if (!A.glb) stepSkirt(dt, t, clamp(alx, -12, 12), clamp(alz, -12, 12), hv);   // the glTF body has its own dress
   const Wd = G.windState, wBack = -(Wd.dx * syw + Wd.dz * cyw) * Wd.gain;
   const tilt = spine.rotation.x + head.rotation.x + leanF.x;                        // how far her head is pitched: the hair keeps hanging down
   const hx = G.physics.stepPendulum(hairSw, 30, clamp(alz, -12, 12) * 1.1 + hv * hv * .8 + wBack * 2 + Math.sin(2 * A.phase) * m * 2.4 - (A.grounded ? 0 : A.vy * 1.6), 4.2, dt);
   const hz = G.physics.stepPendulum(hairSwZ, 30, -clamp(alx, -12, 12) * .9 + Math.sin(A.phase) * m * 1.2, 4.2, dt);
   const htx = PH.stepSpring(hairTip, hx, 14, .45, dt) - hx, htz = PH.stepSpring(hairTipZ, hz, 14, .45, dt) - hz;   // the tips lag the upper hair (follow-through)
-  bendHair(clamp(hx + tilt * .8, 0, 1.0), clamp(hz, -.35, .35), clamp(htx, -.25, .25), clamp(htz, -.2, .2));
+  if (!A.glb) bendHair(clamp(hx + tilt * .8, 0, 1.0), clamp(hz, -.35, .35), clamp(htx, -.25, .25), clamp(htz, -.2, .2));
   // ---- footfalls: when each foot strikes the ground, it sounds like what it lands on
   if (A.grounded && hv > .3) for (let k = 0; k < 2; k++) { const sv = Math.sin(A.phase + k * Math.PI); if (lastStepSin[k] < .97 && sv >= .97) {
       const fxp = A.x + Math.sin(A.yaw) * .25 + Math.cos(A.yaw) * (k ? .09 : -.09), fzp = A.z + Math.cos(A.yaw) * .25 - Math.sin(A.yaw) * (k ? .09 : -.09), w = waterAt(fxp, fzp, t), g = hFn(fxp, fzp), kind = surfaceAt(fxp, fzp, w - g);
