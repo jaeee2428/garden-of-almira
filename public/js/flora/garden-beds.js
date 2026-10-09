@@ -105,6 +105,7 @@ kinds.forEach((k, ki) => {
   const g = groups[ki]; if (!g.list.length) return; g.lod = [];
   for (let l = 0; l < 3; l++) {
     G.setLOD(l); const mbs = k.build(100 + ki * 7), meshes = mbs.map((mb, mi) => { const m = mb.build(k.sp + k.v + mi + 'L' + l, G.mats.shrub); m.alwaysSelectAsActiveMesh = true; if (k.sp === 'dama' && mi === 1) m.material = G.damaMat; return m; });
+    if (G.params.has('perf')) console.log('LODTRI ' + k.sp + k.v + ' L' + l + ' n=' + g.list.length + ' tris/plant=' + Math.round(meshes.reduce((a, m) => a + m.getTotalIndices() / 3, 0)));
     const buf = new Float32Array(g.list.length * 16); meshes.forEach(m => { m.thinInstanceSetBuffer('matrix', buf, 16, false); m.isVisible = false; }); g.lod.push({ meshes, buf, n: 0 });
   }
   G.setLOD(0);

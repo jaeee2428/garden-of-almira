@@ -22,7 +22,7 @@ const MODULES = [
   // 3 · content data (cards)
   'data/flowers', ...FLOWERS.map(f => `flowers/${f}/card`), 'data/lore',
   // 4 · plant geometry library, then the built world
-  'flora/plant-geometry', ...FLOWERS.map(f => `flowers/${f}/model`),
+  'flora/plant-geometry', 'flora/plant-geometry-extra', 'flora/plant-geometry-heritage',
   'world/layout', 'world/structures', 'flora/garden-beds', 'fx/particles', 'world/props', 'world/hill-forest', 'flora/wild-plants',
   // 5 · folk-tale lights, then the animals
   'fx/magic', 'fauna/common', 'fauna/chickens', 'fauna/birds', 'fauna/insects', 'fauna/night-glow',

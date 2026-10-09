@@ -5,9 +5,9 @@
    ===================================================================== */
 window.GARDEN_CONFIG = {
   render: {
-    maxPixelRatio: 1.5,                 // never render more than 1.5x device pixels
+    maxPixelRatio: 1.75,                // never render more than 1.75x device pixels (1.5 looked soft on retina screens)
     msaa: 4,                            // multisample anti-aliasing (geometry edges)
-    fxaa: true,                         // + post FXAA: softens thin leaves / grass that MSAA misses
+    fxaa: false,                        // FXAA smeared the whole picture (that was the blur); MSAA x4 handles the edges
     bloom: { threshold: .92, weight: .14, kernel: 32, scale: .4 },     // gentle: only real lights glow
     contrast: 1.04, exposure: 1, vignette: 1.0,
     shadows: { size: 2048, cascades: 3, lambda: .88, blend: .14, maxZ: 100, bias: .0035, normalBias: .022, darkness: .52 },
@@ -55,7 +55,7 @@ window.GARDEN_CONFIG = {
   lodTiers: [
     { name: 'Low',    d0: 0,  d1: 15, cull: 42, grass: 34, shadow: false, bloom: false, scale: 1.5 },
     { name: 'Medium', d0: 8,  d1: 24, cull: 62, grass: 48, shadow: true,  bloom: true,  scale: 1.25 },
-    { name: 'High',   d0: 14, d1: 38, cull: 88, grass: 72, shadow: true,  bloom: true,  scale: 1 },
+    { name: 'High',   d0: 11, d1: 26, cull: 84, grass: 58, shadow: true,  bloom: true,  scale: 1 },
   ],
 
   // Time of day keyframes (fogD = exponential-squared fog density: ~7% haze at 40 m, ~38% at 100 m by day)
