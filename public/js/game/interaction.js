@@ -14,15 +14,19 @@ function occluders() { if (!occReady) { occReady = true; ['ground', 'stoneWalls'
 function occlusion(r) { let d = 1e9; for (const mm of occluders()) { const pi = r.intersectsMesh(mm, false); if (pi && pi.hit && pi.distance < d) d = pi.distance; } return d; }
 const PEN = { candle: .5, diwata: .5, hen: .55, alibangbang: .55, parol: .6, puso: .6, bangka: 1.2, fairyring: 1.4, shrine: 1.2 };      // lower = easier to pick
 function pickThing(r) {
+  // the label must name what you actually see: every candidate is a rough solid (a plant's stem-to-crown capsule, a sphere for other things);
+  // the one whose surface the ray reaches FIRST wins - a plant behind another can no longer steal the label, and the big
+  // invisible hot zones (a whole pond, a tree) count only as deep as the thing really is
   const tOcc = occlusion(r) - .1, o = r.origin, d = r.direction, cull = G.QUAL.cull * G.QUAL.cull; let best = null, bs = 1e9;
-  const score = (cx, cy, cz, rad, pen) => { const vx = cx - o.x, vy = cy - o.y, vz = cz - o.z, t = vx * d.x + vy * d.y + vz * d.z; if (t < .3 || t > 45 || t > tOcc) return -1; const ex = vx - d.x * t, ey = vy - d.y * t, ez = vz - d.z * t, dist = Math.sqrt(ex * ex + ey * ey + ez * ez); if (dist > rad) return -1; return dist / rad * pen + t * .004; };
-  function scorePlant(p, rad) {           // distance from the ray to the plant's own stem-to-crown line, so you pick what you are really pointing at
+  const enter = (t, dist, rad, body) => t - body * Math.sqrt(Math.max(0, 1 - (dist / rad) * (dist / rad)));     // depth where the ray meets the surface
+  const score = (cx, cy, cz, rad, pen, body) => { const vx = cx - o.x, vy = cy - o.y, vz = cz - o.z, t = vx * d.x + vy * d.y + vz * d.z; if (t < .3 || t > 45 || t > tOcc) return -1; const ex = vx - d.x * t, ey = vy - d.y * t, ez = vz - d.z * t, dist = Math.sqrt(ex * ex + ey * ey + ez * ez); if (dist > rad) return -1; return enter(t, dist, rad, body) + dist / rad * .3 * pen; };
+  function scorePlant(p, rad) {           // closest point between the ray and the plant's stem-to-crown line
     const uy = p.H, wx = p.x - o.x, wy = p.y - o.y, wz = p.z - o.z, a = uy * uy, b = uy * d.y, d1 = uy * wy, e1 = d.x * wx + d.y * wy + d.z * wz; let s = a - b * b > 1e-6 ? (b * e1 - d1) / (a - b * b) : 0; s = s < 0 ? 0 : s > 1 ? 1 : s;
-    const t = e1 + s * b; if (t < .3 || t > 45 || t > tOcc) return -1; const ex = wx - d.x * t, ey = wy + s * uy - d.y * t, ez = wz - d.z * t, dist = Math.sqrt(ex * ex + ey * ey + ez * ez); return dist > rad ? -1 : dist / rad + t * .01;
+    const t = e1 + s * b; if (t < .3 || t > 45 || t > tOcc) return -1; const ex = wx - d.x * t, ey = wy + s * uy - d.y * t, ez = wz - d.z * t, dist = Math.sqrt(ex * ex + ey * ey + ez * ez); return dist > rad ? -1 : enter(t, dist, rad, rad * .9) + dist / rad * .3;
   }
-  for (const p of G.plants) { const dx = p.x - o.x, dz = p.z - o.z; if (dx * dx + dz * dz > cull) continue; const rad = p.r * .85 + .08, s = scorePlant(p, rad); if (s >= 0 && s < bs) { bs = s; best = { kind: 'plant', sp: p.sp, p, pos: new V3(p.x, p.y + p.H * .6, p.z) }; } }
-  for (const h of G.hot) { const pos = h.local ? G.houseLocalToWorld(h.local.x, h.local.y, h.local.z) : h.pos, rad = h.r2 || h.r; if (!rad) continue; const s = score(pos.x, pos.y, pos.z, rad, h.kind === 'plant' ? 1.7 : (PEN[h.kind] ?? 1.3)); if (s >= 0 && s < bs) { bs = s; best = { ...h, pos }; } }
-  for (const b of G.butterflies) { const q = b.root.position, s = score(q.x, q.y, q.z, .45, PEN.alibangbang); if (s >= 0 && s < bs) { bs = s; best = { kind: 'alibangbang', pos: q.clone() }; } }
+  for (const p of G.plants) { const dx = p.x - o.x, dz = p.z - o.z; if (dx * dx + dz * dz > cull) continue; const rad = (p.pr || p.r * .85) + .08, s = scorePlant(p, rad); if (s >= 0 && s < bs) { bs = s; best = { kind: 'plant', sp: p.sp, p, pos: new V3(p.x, p.y + p.H * .6, p.z) }; } }
+  for (const h of G.hot) { const pos = h.local ? G.houseLocalToWorld(h.local.x, h.local.y, h.local.z) : h.pos, rad = h.r2 || h.r; if (!rad) continue; const s = score(pos.x, pos.y, pos.z, rad, h.kind === 'plant' ? 1.7 : (PEN[h.kind] ?? 1.3), Math.min(rad * .5, .7)); if (s >= 0 && s < bs) { bs = s; best = { ...h, pos }; } }
+  for (const b of G.butterflies) { const q = b.root.position, s = score(q.x, q.y, q.z, .45, PEN.alibangbang, .15); if (s >= 0 && s < bs) { bs = s; best = { kind: 'alibangbang', pos: q.clone() }; } }
   return best;
 }
 const infoFor = hit => hit.kind === 'plant' ? G.INFO[hit.sp] : G.INFO_OTHER[hit.kind];

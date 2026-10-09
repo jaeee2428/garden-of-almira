@@ -53,7 +53,8 @@ const groups = kinds.map(() => ({ list: [] }));
 const clusters = []; for (let i = 0; i < 34; i++) { const b = beds[i % beds.length]; clusters.push({ x: b.x + R(-b.rx, b.rx), z: b.z + R(-b.rz, b.rz), k: bag[Math.floor(rand() * bag.length)] }); }
 function addPlant(ki, x, z, o) {
   const k = kinds[ki], p = { x, z, y: o && o.y !== undefined ? o.y : hFn(x, z) - .02, s: o && o.s ? o.s : R(k.sc[0], k.sc[1]) * 1.12, yaw: rand() * 6.28, lx: R(-.04, .04), lz: R(-.04, .04), ph: rand() * 6.28, ki, sp: k.sp, H: k.H };
-  p.H *= p.s; p.r = .55 * p.s; groups[ki].list.push(p); G.plants.push(p); return p;
+  // pr: pick radius, follows the real crown (trees are wider than shrubs)
+  p.H *= p.s; p.r = .55 * p.s; p.pr = Math.max(p.r * .85, p.H * .28); groups[ki].list.push(p); G.plants.push(p); return p;
 }
 const idxOf = (sp, v) => kinds.findIndex(k => k.sp === sp && (!v || k.v === v));
 (function plant(N) {
