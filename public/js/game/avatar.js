@@ -38,7 +38,7 @@ const ell = (mb, x, y, z, rx, ry, rz, n, m, cf) => mb.ellipsoid(x, y, z, rx, ry,
 const root = new B.TransformNode('avatar', scene);
 const SCALE = C.scale || 1; root.scaling.setAll(SCALE);                               // overall height (1.58 m x scale); everything below is in unscaled body units
 const pelvis = node('pelvis', root, 0, .86, 0);
-part('hips', pelvis, mb => { ell(mb, 0, 0, -.005, .158, .11, .105, 24, 14, print); ell(mb, 0, .07, 0, .118, .03, .085, 20, 6, TRIM); });   // dress over the hips + white sash
+part('hips', pelvis, mb => { ell(mb, 0, 0, -.005, .158, .11, .105, 24, 14, print); ell(mb, 0, .068, 0, .166, .028, .148, 28, 6, TRIM); });   // dress over the hips + white sash
 const spine = node('spine', pelvis, 0, .06, 0);
 part('torso', spine, mb => {
   mb.grid(32, 18, (u, v) => {                                                               // the bodice as one smooth turned shape: waist -> fuller front -> neckline
@@ -157,7 +157,7 @@ G.avatarLegs = [L.leg, Rt.leg];                                                 
 /* ---------- the skirt: real cloth, simulated on the CPU (~400 vertices) ----------
    An A-line skirt from the waist to just below the knee. Each frame it is pushed out by the knees, trails behind
    when she moves (a damped spring on her acceleration), and ripples in the wind. */
-const SK = { rings: 12, seg: 36, top: .07, hem: -.47, r0: .155, r1: .3 };
+const SK = { rings: 12, seg: 36, top: .07, hem: -.44, r0: .155, r1: .265 };   // ends just below the knee; a soft A-line, not a bell
 const skirt = (() => {
   const mb = new MB(); mb.grid(SK.seg, SK.rings, (u, v) => { const a = u * 6.283, r = SK.r0 + (SK.r1 - SK.r0) * Math.pow(v, .9); return [Math.sin(a) * r, SK.top + (SK.hem - SK.top) * v, Math.cos(a) * r * .88]; },
     (u, v) => v > .93 ? TRIM : print(u, v));
@@ -170,14 +170,21 @@ const cloth = { lx: 0, lz: 0, vx: 0, vz: 0, hx: 0, hz: 0, hvx: 0, hvz: 0 };     
 function stepSkirt(dt, t, ax, az, speed) {
   // spring-damper: the hem lags behind acceleration and leans back against the air at speed
   const kx = -ax * .012, kz = -az * .012 - speed * speed * .006; cloth.vx += ((kx - cloth.lx) * 60 - cloth.vx * 9) * dt; cloth.vz += ((kz - cloth.lz) * 60 - cloth.vz * 9) * dt; cloth.lx += cloth.vx * dt; cloth.lz += cloth.vz * dt;
-  cloth.hvx += ((kx * 1.6 - cloth.hx) * 28 - cloth.hvx * 4.5) * dt; cloth.hvz += ((kz * 1.6 - cloth.hz) * 28 - cloth.hvz * 4.5) * dt; cloth.hx += cloth.hvx * dt; cloth.hz += cloth.hvz * dt;   // the hem is a softer, slower spring: it trails the waist and swings past
+  cloth.hvx += ((kx * 1.25 - cloth.hx) * 30 - cloth.hvx * 6.5) * dt; cloth.hvz += ((kz * 1.25 - cloth.hz) * 30 - cloth.hvz * 6.5) * dt; cloth.hx += cloth.hvx * dt; cloth.hz += cloth.hvz * dt;   // the hem is a softer, slower spring: it trails the waist and swings past
   const W = G.windState, cy = Math.cos(A.yaw), sy = Math.sin(A.yaw), wlx = (W.dx * cy - W.dz * sy) * W.gain, wlz = (W.dx * sy + W.dz * cy) * W.gain;   // wind in her frame
   const knees = [L.leg, Rt.leg].map((lg, k) => { const th = lg.hip.rotation.x, sh = lg.knee.rotation.x; return { x: (k ? 1 : -1) * .08, kz: -.41 * Math.sin(th), ky: -.03 - .41 * Math.cos(th), az: -.41 * Math.sin(th) - .395 * Math.sin(th + sh), ay: -.03 - .41 * Math.cos(th) - .395 * Math.cos(th + sh) }; });
   const p = skirt.pos, n1 = SK.seg + 1;
   for (let j = 0; j <= SK.rings; j++) { const v = j / SK.rings, y = SK.top + (SK.hem - SK.top) * v, rb = SK.r0 + (SK.r1 - SK.r0) * Math.pow(v, .9), vv = Math.pow(v, 1.6);
     // how far forward the leg reaches at this height: cloth rests on any part of the leg at or above this ring and falls straight down from it
     // (walking: follows the knee; crouching or sitting: covers the thighs like a lap and hangs from the knees - no bare knees poking through)
-    const legAt = knees.map(k => { let reach = 0; for (let q = 0; q <= 1.001; q += .2) { const pz = k.kz * q, py = -.03 + (k.ky + .03) * q; if (py >= y - .085 && Math.abs(pz) > Math.abs(reach)) reach = pz; const sz = k.kz + (k.az - k.kz) * q, sy = k.ky + (k.ay - k.ky) * q; if (sy >= y - .085 && Math.abs(sz) > Math.abs(reach)) reach = sz; } return [k.x, reach]; });
+    // where the leg is at this ring's height (walking: the cloth follows the leg, front or back) - plus, only for a raised thigh
+    // (sitting, crouching), the cloth rests on the thigh and falls from the knee, so the lap is covered
+    const legAt = knees.map(k => { let at = 0; const hy = -.03;
+      if (y >= Math.min(hy, k.ky)) { const q = Math.abs(k.ky - hy) > .02 ? clamp((y - hy) / (k.ky - hy), 0, 1) : 1; at = k.kz * q; }
+      else { const q = Math.abs(k.ay - k.ky) > .02 ? clamp((y - k.ky) / (k.ay - k.ky), 0, 1) : 0; at = k.kz + (k.az - k.kz) * q; }
+      const raised = sm(-.3, -.12, k.ky);                                            // 0 standing/walking .. 1 thigh near level
+      if (raised > 0 && y <= k.ky + .085 && k.kz > at) at = at + (k.kz - at) * raised;
+      return [k.x, at]; });
     // both legs forward (sitting, crouching): the ring slides forward and widens, so the cloth covers the lap and hangs from the knees
     // instead of staying centred on the hips with the thighs sticking out of it. Walking: one leg is always back, so nothing changes.
     const fr = Math.max(0, Math.min(legAt[0][1], legAt[1][1])), czo = fr * .5, rbb = rb;
@@ -293,7 +300,7 @@ A.step = (dt, inp, t) => {
     lg.hip.rotation.z = sd * .03;
     const ai = sd < 0 ? 0 : 1;                                                         // arms follow the gait through springs: they swing on and settle when you stop
     am.sh.rotation.x = PH.stepSpring(armS[ai], (.75 * A.amp + .25 * runK) * sw * m * (1 - air) - .35 * air + .015 * Math.sin(t * 1.6) * (1 - m) - .3 * Math.max(0, A.land) * (1 - air), 11, .75, dt);   // in step with the legs; damped so it never wobbles
-    am.sh.rotation.z = sd * (.07 + .35 * air + .05 * runK + .08 * Math.max(0, A.land) + .06 * A.crouch);   // + = away from the body (clears the hips and skirt)
+    am.sh.rotation.z = sd * (.16 + .35 * air + .05 * runK + .08 * Math.max(0, A.land) + .06 * A.crouch);   // + = away from the body (clears the hips and skirt)
     am.el.rotation.x = Math.min(0, PH.stepSpring(elbS[ai], -(.28 + .9 * runK) * (.6 + .4 * m) - .25 * air, 10, .8, dt) + .006 * armS[ai].v);   // forearm lags the upper arm
   };
   pose(L.leg, Rt.arm, A.phase, -1); pose(Rt.leg, L.arm, A.phase + Math.PI, 1);          // left leg swings with the right arm
