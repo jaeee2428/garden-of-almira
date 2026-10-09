@@ -49,7 +49,7 @@ function rockMesh(seed, name) {
 /* ---------- mango trees ---------- */
 (function mangoes() {
   const trunk = new MB(), r = rng(66), leafG = new MB(), leafC = new MB(), fruit = new MB();
-  const cl = (mb, cA, cB) => { for (let i = 0; i < 9; i++) { const a = i / 9 * 6.283 + Rr(-.2, .2, r), el = .35 + Rr(0, .5, r); geo.leaf(mb, .3, .07, basis(new V3(Math.sin(a) * Math.cos(el), Math.sin(el), Math.cos(a) * Math.cos(el)), UP, ORG0, 0), cA, cB, { nu: 6, nv: 2, fold: .25, curl: -.15, base: .7, sharp: .5, rib: rgb('#b8c870') }); } };
+  const cl = (mb, cA, cB) => { for (let i = 0; i < 9; i++) { const a = i / 9 * 6.283 + Rr(-.2, .2, r), el = .35 + Rr(0, .5, r); geo.leaf(mb, .3, .07, basis(new V3(Math.sin(a) * Math.cos(el), Math.sin(el), Math.cos(a) * Math.cos(el)), UP, ORG0, 0), cA, cB, { nu: 6, nv: 2, fold: .25, curl: -.15, base: .7, sharp: .5, rib: shade(cB, 1.12) }); } };   // subtle midrib: the bright yellow one glittered at a distance
   const ORG0 = V3.Zero(); cl(leafG, rgb('#1c4a22'), rgb('#3f8a34')); cl(leafC, rgb('#6a2a1e'), rgb('#b0602e'));
   const f = fruit; f.ellipsoid(0, -.1, 0, .055, .095, .045, 12, 8, (u, v) => mixA(mixA(rgb('#7ab030'), rgb('#ffc02a'), v), rgb('#e0602a'), Math.max(0, u - .6) * .8)); f.tube([new V3(0, -.0, 0), new V3(0, .12, 0)], .004, 3, () => rgb('#5a6a2a'));
   const gb = [], cb = [], fb = [], centers = [];
