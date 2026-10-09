@@ -9,6 +9,7 @@
 (() => {
 G.hot = [];            // click-able special things  {pos:V3, r, kind, name, ...}
 G.obstacles = [];      // things you bump into when walking {x,z,r}  or  {box:true,x,z,hw,hd,yaw}
+G.seats = G.seats || [];   // places you can sit (press L): { x, z, y seat height, yaw facing, r reach, kind, swing? }
 G.L = { house: { x: 19, z: 4, yaw: Math.PI / 2 }, tree: { x: 0, z: 7.5 }, shrine: { x: -12, z: -8.5 }, arch: { x: -33.5 }, ring: { x: 13, z: -17 }, kubo: { x: -24.5, z: -27, yaw: .7 }, well: { x: 15.5, z: 15 }, hammock: { x: -33, z1: 12, z2: 7.6 },
   mango: [[28, -18], [-38, -30], [31, 27], [-4, 37], [8, -31]], bamboo: [[38, -12], [36, 24], [-8, 34], [-40, -22]] };
 G.L.keepOut = [{ x: G.POND.x, z: G.POND.z, r: G.POND.r + 3.2 }, { x: G.L.kubo.x, z: G.L.kubo.z, r: 5 }, { x: G.L.well.x, z: G.L.well.z, r: 2.6 }, { x: -33, z: 9.8, r: 5 },

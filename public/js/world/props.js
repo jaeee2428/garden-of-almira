@@ -137,6 +137,10 @@ function rockMesh(seed, name) {
   mb.grid(36, 10, (u, v) => pos(u, v), (u, v) => { const k = Math.floor(v * 9) % 3, c = [rgb('#e0522a'), rgb('#f4e6c0'), rgb('#2a7a8a')][k]; return shade(c, .88 + .12 * Math.sin(u * 160)); });
   for (const e of [0, 1]) for (let i = 0; i < 7; i++) { const t = e ? .97 : .03, p0 = pos(t, i / 6), end = e ? Bp.subtract(A) : V3.Zero(); mb.tube([new V3(p0[0], p0[1], p0[2]), end.add(new V3(0, .1, 0))], .006, 3, () => rgb('#d8c9a0')); }
   const m = mb.build('duyan', G.mats.hang); m.position.copyFrom(A); G.cast(m);
+  // you can no longer walk through it: a solid box along the cloth; and you can sit in it (L): it swings with you
+  const mid = V3.Lerp(A, Bp, .5), lowY = A.y - sag - .12;
+  G.obstacles.push({ box: true, x: mid.x, z: mid.z, yaw: Math.atan2(dir.x, dir.z), hw: .42, hd: len / 2 - .1 });
+  G.seats.push({ x: mid.x + side.x * .05, z: mid.z + side.z * .05, y: lowY + .06, yaw: Math.atan2(side.x, side.z), r: 1.7, kind: 'hammock', mesh: m, axisY: A.y });
   addHot((A.x + Bp.x) / 2, A.y - .5, (A.z + Bp.z) / 2, 1.5, 'duyan');
 })();
 

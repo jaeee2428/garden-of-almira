@@ -91,14 +91,20 @@ const pathCtrl = [[-41, -1.2], [-33.5, 0], [-25, 2.2], [-17, -.6], [-9, -3.4], [
 const pathPts = B.Curve3.CreateCatmullRomSpline(pathCtrl, 40, false).getPoints();
 G.path = { pts: pathPts, dist(x, z) { let d = 1e9; for (let i = 0; i < pathPts.length; i += 2) d = Math.min(d, Math.hypot(x - pathPts[i].x, z - pathPts[i].z)); return d; }, at(u) { const f = clamp(u, 0, .9999) * (pathPts.length - 1), i = Math.floor(f); return V3.Lerp(pathPts[i], pathPts[i + 1], f - i); } };
 (function stonePath() {
-  const mb = new MB(), r = rng(12), step = 1.0; let acc = 0;
+  // weathered coral-stone slabs: domed tops sunk into the lawn, grey-buff with lichen flecks, a mossy rim where they meet the grass
+  const mb = new MB(), r = rng(12), step = 1.0, moss = rgb('#56703a'), lichen = rgb('#b7a86a'); let acc = 0;
   for (let i = 1; i < pathPts.length; i++) {
     const a = pathPts[i - 1], b = pathPts[i]; acc += V3.Distance(a, b); if (acc < step) continue; acc = 0;
-    const T = b.subtract(a).normalize(), cx = b.x + Rr(-.3, .3, r) - T.z * Rr(-.3, .3, r), cz = b.z + Rr(-.3, .3, r) + T.x * Rr(-.3, .3, r), n = 8, rad = Rr(.4, .62, r), rot = r() * 6.3, tone = r(), col = mixA(rgb('#d2c6a4'), rgb('#aea286'), tone), sq = Rr(.7, 1, r);
-    const ring = []; for (let k = 0; k < n; k++) { const an = rot + k / n * 6.283, rr = rad * Rr(.82, 1.08, r); ring.push([cx + Math.cos(an) * rr, cz + Math.sin(an) * rr * sq]); }
-    const base = mb.n; for (const [x, z] of ring) { const y = hFn(x, z); mb.p.push(x, y + .045, z); mb.c.push(...shade(col, 1.05), 1); mb.p.push(x, y - .04, z); mb.c.push(...shade(col, .6), 1); }
-    mb.p.push(cx, hFn(cx, cz) + .06, cz); mb.c.push(...shade(col, 1.1), 1); const ctr = mb.n - 1;
-    for (let k = 0; k < n; k++) { const a1 = base + k * 2, b1 = base + ((k + 1) % n) * 2; mb.i.push(a1, b1, ctr, a1, a1 + 1, b1, b1, a1 + 1, b1 + 1); }
+    const T = b.subtract(a).normalize(), cx = b.x + Rr(-.3, .3, r) - T.z * Rr(-.3, .3, r), cz = b.z + Rr(-.3, .3, r) + T.x * Rr(-.3, .3, r), n = 12, rad = Rr(.4, .62, r), rot = r() * 6.3, tone = r(), col = mixA(rgb('#bdb49c'), rgb('#948d7c'), tone), sq = Rr(.7, 1, r);
+    const ring = []; for (let k = 0; k < n; k++) { const an = rot + k / n * 6.283, rr = rad * Rr(.86, 1.06, r) * (1 + .05 * Math.sin(an * 3 + tone * 9)); ring.push([cx + Math.cos(an) * rr, cz + Math.sin(an) * rr * sq, an]); }
+    const base = mb.n;
+    for (const [x, z, an] of ring) { const y = hFn(x, z), fl = .5 + .5 * Math.sin(an * 5 + tone * 13);
+      mb.p.push(x, y + .028, z); mb.c.push(...mixA(shade(col, .95), moss, .28 + .2 * fl), 1);                                      // rounded edge, moss creeping in
+      mb.p.push(x + (x - cx) * .08, y - .05, z + (z - cz) * .08); mb.c.push(...mixA(shade(col, .55), moss, .5), 1);                 // flared foot under the turf
+      const ix = cx + (x - cx) * .62, iz = cz + (z - cz) * .62; mb.p.push(ix, hFn(ix, iz) + .05, iz); mb.c.push(...mixA(shade(col, 1.04 + .06 * fl), lichen, fl > .85 ? .35 : 0), 1); }   // inner ring: the worn top, a few lichen patches
+    mb.p.push(cx, hFn(cx, cz) + .058, cz); mb.c.push(...shade(col, 1.08), 1); const ctr = mb.n - 1;
+    for (let k = 0; k < n; k++) { const a1 = base + k * 3, b1 = base + ((k + 1) % n) * 3;
+      mb.i.push(a1 + 2, b1 + 2, ctr,  a1, b1, a1 + 2,  b1, b1 + 2, a1 + 2,  a1, a1 + 1, b1,  b1, a1 + 1, b1 + 1); }
   }
   const m = mb.build('stepping'); m.receiveShadows = true; G.stepping = m;
 })();
@@ -297,7 +303,16 @@ G.flags = [];
 (function banderitas() {
   const strings = new MB(), polesMB = new MB(), cols = ['#d62c2c', '#f6c522', '#1f5fb8', '#f4efe2', '#2f9a4a'], tri = cols.map((c, i) => { const m = new MB(); m.grid(1, 1, (u, v) => [(u - .5) * (1 - v) * .2, -v * .29, 0], (u, v) => shade(rgb(c), 1 - v * .12)); return m.build('flag' + i); });
   const lines = [], H = G.L.house;
-  const poleAt = (x, z, h) => { const y = hFn(x, z); bamboo(polesMB, new V3(x, y - .1, z), new V3(x + .15, y + h, z), .05); return new V3(x + .15, y + h, z); };
+  const poleAt = (x, z, h) => { const y = hFn(x, z); bamboo(polesMB, new V3(x, y - .1, z), new V3(x + .15, y + h, z), .05);
+    // set in the ground properly: a mound of packed earth ringed with stones, three wedges hammered in, rattan lashing where the strings tie, a palm-leaf tuft on top (fiesta style)
+    polesMB.ellipsoid(x, y - .04, z, .26, .09, .26, 10, 4, (u, v) => shade(rgb('#6e5a40'), .8 + .25 * (1 - v)));
+    for (let k = 0; k < 6; k++) { const an = k / 6 * 6.283 + .3, sx = x + Math.cos(an) * .27, sz = z + Math.sin(an) * .27; polesMB.ellipsoid(sx, hFn(sx, sz) + .01, sz, .07, .045, .06, 6, 3, () => shade(rgb('#a39a86'), .85 + .1 * (k % 2))); }
+    for (let k = 0; k < 3; k++) { const an = k / 3 * 6.283, bx = x + Math.cos(an) * .07, bz = z + Math.sin(an) * .07; polesMB.tube([new V3(bx, y + .14, bz), new V3(bx + Math.cos(an) * .03, y - .05, bz + Math.sin(an) * .03)], [.018, .008], 4, () => rgb('#8a6a3c')); }
+    const tx = x + .15 * (h - .45) / (h + .1), ty = y + h - .45;
+    for (let k = 0; k < 4; k++) polesMB.tube([new V3(tx - .055, ty + k * .025, z), new V3(tx, ty + k * .025, z - .055), new V3(tx + .055, ty + k * .025, z), new V3(tx, ty + k * .025, z + .055), new V3(tx - .055, ty + k * .025, z)], .006, 3, () => rgb('#b89a5c'));
+    const top = new V3(x + .15, y + h, z);
+    for (let k = 0; k < 7; k++) { const an = k / 7 * 6.283, d = new V3(Math.cos(an) * .55, .7 - (k % 2) * .25, Math.sin(an) * .55).normalize(); G.geo.leaf(polesMB, .42, .035, G.basis(d, V3.Up(), top, 0), rgb('#5a7a2a'), rgb('#9aae4a'), { nu: 5, nv: 1, fold: .3, curl: -.25 }); }
+    return new V3(x + .15, y + h, z); };
   const pA = poleAt(-22, -5, 5.2), pB = poleAt(-22, 6.5, 5.0), pC = poleAt(-6, 7.5, 5.4), pD = poleAt(-6, -7, 5.2), pE = poleAt(5, -6, 5.6);
   const eave = G.houseLocalToWorld(-5.98, 5.4, -5.76), eave2 = G.houseLocalToWorld(5.98, 5.4, -5.76);                // tied to the front corners of the roof edge
   lines.push([pB, pC, .9], [pD, pE, .9], [pE, eave, 1.0], [pC, eave2, 1.1]);
@@ -333,6 +348,7 @@ G.flags = [];
   for (let i = 0; i < 13; i++) bamboo(mb, P(-.9 + i * .15, .53, -.46), P(-.9 + i * .15, .53, .46), .026);
   for (const lx of [-.95, .95]) bamboo(mb, P(lx, .48, -.42), P(lx, .48, .42), .035);
   G.cast(mb.build('papag')); G.obstacles.push({ x, z, r: 1.0 });
+  G.seats.push({ x: x + .18 * s, z: z + .18 * c, y: y + .56, yaw, r: 1.9, kind: 'bench' });                       // sit on the front edge, facing out
 })();
 
 /* ---------- bangka (outrigger boats), a sail, a beached one ---------- */

@@ -128,7 +128,7 @@ G.updateMagic = (t, dt) => {
     w.halo.position.set(x, y, z); w.halo.size = (.42 + .03 * Math.sin(t * 1.1 + w.ph) + .25 * K + .3 * night) * (.35 + .65 * near); w.halo.color.a = (.1 + .22 * night + .12 * K) * near; w.hot.pos.set(x, y, z);
   }
   for (const o of G.orbs) { const dd = Math.hypot(o.base.x - cam.x, o.base.y - cam.y, o.base.z - cam.z), nr = clamp((dd - 1.2) / 4, 0, 1), f = (.9 + .1 * night * Math.sin(t * .9 + o.ph)) * nr; o.s.position.set(o.base.x + Math.sin(t * .3 + o.ph) * .15, o.base.y + Math.sin(t * .5 + o.ph * 2) * .12, o.base.z); o.s.size = o.size * (.92 + .1 * f) * (1 + .4 * K); o.s.color.a = (.34 + .3 * f) * (o.nightOnly ? clamp(night * 1.5, 0, 1) : (.1 + .85 * night + .5 * K)); }      // orbs belong to dusk and night: barely there by day
-  G.motes.emitRate = 1.5 + 9 * night + 20 * K; G.ringPS.emitRate = 2 + 12 * night + 16 * K;               // few, soft sparkles (user: 'minimize the sparkly, a little')
+  G.motes.emitRate = 1 + 6 * night + 14 * K; G.ringPS.emitRate = 2 + 12 * night + 16 * K;               // few, soft sparkles (user: 'minimize the sparkly, a little')
   const s = G.shoot;
   if (night > .55) { s.next -= dt; if (s.t < 0 && s.next <= 0) { const az = rand() * 6.283, el = R(.45, .9); s.from = new V3(Math.cos(az) * 300, 150 + Math.sin(el) * 150, Math.sin(az) * 300).add(G.camera.position); s.v = new V3(R(-1, 1), R(-.5, -.25), R(-1, 1)).normalize().scale(260); s.t = 0; s.star.setEnabled(true); s.tr.emitRate = 140; s.star.position.copyFrom(s.from); s.next = R(7, 14); } }
   if (s.t >= 0) { s.t += dt; s.star.position.addInPlace(s.v.scale(dt)); if (s.t > 1.1) { s.t = -1; s.star.setEnabled(false); s.tr.emitRate = 0; } }

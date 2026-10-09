@@ -119,7 +119,9 @@ class LeafDetailPlugin extends B.MaterialPluginBase {
   }
 }
 G.leafDetail = !G.params.has('noleaftex');
-G.windMat = (name, o) => { const m = G.mat(name, { emissive: new C3(.035, .03, .025), specular: new C3(.045, .045, .04), power: 20 }); m.__wind = new WindPlugin(m, o); if (G.leafDetail) m.__leaf = new LeafDetailPlugin(m); return m; };
+// tree canopies (thousands of small leaves seen from afar) get no vein texture and no shine: both only glittered up there
+const CANOPY = ['tree', 'palm', 'banana', 'hang'];
+G.windMat = (name, o, k) => { const can = CANOPY.includes(k), m = G.mat(name, { emissive: new C3(.035, .03, .025), specular: can ? new C3(.01, .01, .01) : new C3(.045, .045, .04), power: 20 }); m.__wind = new WindPlugin(m, o); if (G.leafDetail && !can) m.__leaf = new LeafDetailPlugin(m); return m; };
 // one material per stiffness class; names + numbers come from G.CONFIG.wind.materials
-G.mats = {}; for (const [k, o] of Object.entries(G.CONFIG.wind.materials)) G.mats[k] = G.windMat('wind' + k[0].toUpperCase() + k.slice(1), o);
+G.mats = {}; for (const [k, o] of Object.entries(G.CONFIG.wind.materials)) G.mats[k] = G.windMat('wind' + k[0].toUpperCase() + k.slice(1), o, k);
 })();
