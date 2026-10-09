@@ -152,6 +152,7 @@ const leg = sd => {
   return { hip, knee, ankle };
 };
 const L = { arm: arm(-1), leg: leg(-1) }, Rt = { arm: arm(1), leg: leg(1) };
+G.avatarLegs = [L.leg, Rt.leg];                                                    // for ?gaittest (dev/debug.js)
 
 /* ---------- the skirt: real cloth, simulated on the CPU (~400 vertices) ----------
    An A-line skirt from the waist to just below the knee. Each frame it is pushed out by the knees, trails behind
@@ -259,11 +260,18 @@ A.step = (dt, inp, t) => {
   const want = A.view === 'first' || hv < .25 ? (A.view === 'first' ? yawC : A.yaw) : Math.atan2(A.vx, A.vz);
   let dy = want - A.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); A.yaw += dy * (1 - Math.exp(-dt * (A.view === 'first' ? 30 : 9)));
   // ---- the gait: phase advances with distance travelled (cycle = two steps)
-  const cycle = 1.25 + .28 * hv; if (A.grounded) A.phase += 2 * Math.PI * hv * dt / cycle;
+  // feet must not skate: cadence rises with speed (~2.3 steps/s at a walk), the step length is speed / cadence, and the
+  // thigh swing is solved from the leg length so the planted foot covers exactly that ground (heel-to-toe roll and the
+  // pelvis turn add ~10 cm; when running, part of each step is in the air)
+  const LEG = .83, cadence = 1.7 + .32 * hv, stepLen = hv / cadence, runA = sm(C.walk + .3, C.run, hv);
+  const amp = Math.asin(clamp((stepLen * (1 - .4 * runA) - .1 * clamp(hv, 0, 1)) / (2 * LEG), 0, .6));
+  A.amp = PH.damp(A.amp || 0, amp, 12, dt);
+  if (A.grounded) A.phase += Math.PI * cadence * dt * clamp(hv / .15, 0, 1);
   A.gm = PH.damp(A.gm || 0, clamp(hv / C.walk, 0, 1), 9, dt); const m = A.gm, runK = sm(C.walk + .3, C.run, hv), wadeLift = A.wade * .5;
   const pose = (lg, am, ph, sd) => {
     const s = Math.sin(ph), cph = Math.cos(ph), air = A.grounded ? 0 : 1;
-    const thigh = (-(.32 + .26 * runK) * s * m) * (1 - air) - .55 * air - .5 * Math.max(0, A.land), shin = ((.5 + .75 * runK + wadeLift) * Math.pow(Math.max(0, cph), 1.4) * m + .05) * (1 - air) + .85 * air + 1.0 * Math.max(0, A.land);
+    const tri = Math.asin(clamp(s, -1, 1)) * .6366, sw = s * .4 + tri * .6;   // mostly a straight sweep: the planted foot moves back at ground speed, it doesn't speed up and slow down mid-step
+    const thigh = (-A.amp * sw - .06 * runK * m) * (1 - air) - .55 * air - .5 * Math.max(0, A.land), shin = ((.5 + .75 * runK + wadeLift) * Math.pow(Math.max(0, cph), 1.4) * m + .05) * (1 - air) + .85 * air + 1.0 * Math.max(0, A.land);
     lg.hip.rotation.x = thigh; lg.knee.rotation.x = shin; lg.ankle.rotation.x = -(thigh + shin) * .85 + .25 * Math.max(0, -cph) * Math.max(0, -s) * m;   // sole level, heel lifts at push-off
     lg.hip.rotation.z = sd * .03;
     const ai = sd < 0 ? 0 : 1;                                                         // arms follow the gait through springs: they swing on and settle when you stop
@@ -273,7 +281,7 @@ A.step = (dt, inp, t) => {
   };
   pose(L.leg, Rt.arm, A.phase, -1); pose(Rt.leg, L.arm, A.phase + Math.PI, 1);          // left leg swings with the right arm
   const s1 = Math.sin(A.phase), breathe = Math.sin(t * 1.7) * (1 - m);
-  pelvis.position.y = .86 + (.018 + .035 * runK) * Math.cos(2 * A.phase) * m - .17 * Math.max(0, A.land) - .03 * runK + (A.grounded ? 0 : .05);
+  pelvis.position.y = .86 - LEG * .7 * (1 - Math.cos(A.amp * s1)) * (1 - runK) + .035 * runK * Math.cos(2 * A.phase) * m - .17 * Math.max(0, A.land) - .03 * runK + (A.grounded ? 0 : .05);
   pelvis.position.x = .02 * s1 * m * (1 - runK); pelvis.rotation.y = .09 * s1 * m; pelvis.rotation.z = .055 * s1 * m * (1 - runK); spine.rotation.z = -.045 * s1 * m * (1 - runK); spine.rotation.y = -.14 * s1 * m;
   spine.rotation.x = .03 + .15 * runK * m + .25 * A.land + .012 * breathe + (A.bump > 0 ? -.12 * A.bump : 0);
   // idle: every few seconds she shifts her weight to the other hip and now and then glances around (eased, not linear)
