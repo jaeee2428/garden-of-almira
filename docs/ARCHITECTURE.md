@@ -22,12 +22,12 @@ public/
       render.js           lights, camera, cascaded shadows, post-processing (MSAA + FXAA, bloom, ACES)
       time-of-day.js      G.applyTime(u): blends the keyframes from config
     data/                 content only (no Babylon code)
-      flowers.js          the 14 hero flowers (cards) + bayong order
+      flowers.js          registry of the 18 hero flowers (G.INFO filled by public/flowers/<id>/card.js) + bayong order
       lore.js             cards for every other clickable thing
     world/                the land and the made things
       terrain.js sky.js sea.js layout.js structures.js props.js
     flora/                plants
-      plant-geometry.js plant-geometry-extra.js plant-geometry-heritage.js   (geometry library: G.geo)
+      plant-geometry.js   the plant toolkit (G.geo: leaf, petal, branch, shrub generator, palms, grass)
       garden-beds.js      hero flowers, hedges, pots, ground cover, trees + LOD
       wild-plants.js      unlabeled flower-like weeds, chunked + culled
     fauna/                animals: common.js chickens.js birds.js insects.js night-glow.js
@@ -101,3 +101,17 @@ tools/shot.sh out.png "hideui=1&nomusic=1&u=.45"           # screenshot
 # console on screen: add &log=1&showlog=1 to any shot (&audit=1 lists overlapping footprints)
 ```
 See the header of `js/dev/debug.js` for camera presets (`?cam=`, `?atsp=`, `?at=hen`, `?walk=1`).
+
+## Hero flowers: one folder each (Oct 2026)
+```
+public/flowers/<id>/
+  card.js     G.flowerCard({...})  name, English + local names, family, scent, look (botanical description), fact, sources
+  model.js    the 3D model; registers its builder(s) on G.geo (built with the toolkit, mostly geo.shrub)
+  README.md   the card as text + how to re-render
+  renders/    before-/after- plant + close-up studio shots
+public/flowers/index.html    local gallery of every card and render (http://localhost:8765/flowers/)
+```
+boot.js lists the ids once (FLOWERS) and loads every card after data/flowers, every model after flora/plant-geometry.
+To add a flower: make the folder (card.js + model.js), add its id to FLOWERS in boot.js and to G.FLOWER_ORDER, add a kind in
+flora/garden-beds.js. Studio view: `?specimen=<id>[&close=1]`; batch: `tools/flower-archive.sh <label> [ids...]`.
+Leaves/petals get a shared vein texture (LeafDetailPlugin in engine/wind.js) via UVs tagged x+2 by geo.leaf / geo.petal.

@@ -85,7 +85,41 @@ worldPos.xyz += windOffset(worldPos.xyz, root_, hh_, aw_);
     };
   }
 }
-G.windMat = (name, o) => { const m = G.mat(name, { emissive: new C3(.035, .03, .025), specular: new C3(.045, .045, .04), power: 20 }); m.__wind = new WindPlugin(m, o); return m; };
+/* ---------- leaf & petal surface detail ----------
+   Vertex colours alone made leaves look like smooth plastic. Leaves and petals (and only they: geo.leaf / geo.petal tag
+   their UVs with x + 2) get a shared procedural texture: a raised midrib, curving secondary veins with darker channels,
+   a fine vein net and mottling for leaves (lower half), fine radiating veins and a translucent rim for petals (upper half).
+   Stems, fruit, flower centres keep plain UVs (x < 1.5) and are untouched. */
+const leafTex = (() => {
+  const S = 512, t = new B.DynamicTexture('leafDetail', { width: S, height: S }, scene, true), g = t.getContext(), r = G.rng(77);
+  g.fillStyle = 'rgb(236,236,236)'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 900; i++) { const v = 200 + r() * 55; g.fillStyle = `rgba(${v},${v},${v},${.05 + r() * .08})`; g.beginPath(); g.ellipse(r() * S, r() * S / 2, 2 + r() * 14, 2 + r() * 8, r() * 3, 0, 6.3); g.fill(); }   // mottling
+  const H = S / 2, mid = H / 2, line = (pts, w, c) => { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); g.moveTo(...pts[0]); g.quadraticCurveTo(...pts[1], ...pts[2]); g.stroke(); };
+  for (let i = 0; i < 260; i++) { const x = r() * S, y = 8 + r() * (H - 16), a = r() * 6.28, l = 6 + r() * 16; g.strokeStyle = 'rgba(205,205,205,.35)'; g.lineWidth = .8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }   // fine vein net
+  for (let k = 0; k < 9; k++) { const x0 = 20 + k * 54; for (const sd of [-1, 1]) { const end = [x0 + 70, mid + sd * (mid - 6)], ctl = [x0 + 18, mid + sd * mid * .55];
+      line([[x0, mid], ctl, end], 6, 'rgba(150,150,150,.45)'); line([[x0, mid], ctl, end], 2.2, 'rgba(255,255,255,.85)'); } }   // secondary veins: a light vein in a darker channel
+  g.fillStyle = 'rgba(150,150,150,.5)'; g.fillRect(0, mid - 5, S, 10); g.fillStyle = 'rgba(255,255,255,.95)'; g.fillRect(0, mid - 2, S, 4);   // midrib
+  const eg = g.createLinearGradient(0, 0, 0, H); eg.addColorStop(0, 'rgba(120,120,120,.35)'); eg.addColorStop(.12, 'rgba(0,0,0,0)'); eg.addColorStop(.88, 'rgba(0,0,0,0)'); eg.addColorStop(1, 'rgba(120,120,120,.35)'); g.fillStyle = eg; g.fillRect(0, 0, S, H);
+  g.fillStyle = 'rgb(242,242,242)'; g.fillRect(0, H, S, H);                                                                 // petals
+  for (let i = 0; i < 70; i++) { const y = H + 6 + i / 70 * (H - 12) + (r() - .5) * 2; g.strokeStyle = `rgba(${170 + r() * 40},${170 + r() * 40},${170 + r() * 40},${.25 + r() * .25})`; g.lineWidth = .7 + r(); g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(S * .3, y + (r() - .5) * 6, S * .6, y + (r() - .5) * 8, S, y + (r() - .5) * 10); g.stroke(); }
+  const pg = g.createLinearGradient(0, 0, S, 0); pg.addColorStop(0, 'rgba(0,0,0,.18)'); pg.addColorStop(.25, 'rgba(0,0,0,0)'); pg.addColorStop(.9, 'rgba(255,255,255,0)'); pg.addColorStop(1, 'rgba(255,255,255,.35)'); g.fillStyle = pg; g.fillRect(0, H, S, H);   // darker at the base, glowing rim
+  t.update(true); t.wrapU = t.wrapV = B.Texture.WRAP_ADDRESSMODE; t.anisotropicFilteringLevel = 4; return t;
+})();
+class LeafDetailPlugin extends B.MaterialPluginBase {
+  constructor(material) { super(material, 'LeafDetail', 220, { LEAFDETAIL: false }); this._enable(true); }
+  prepareDefinesBeforeAttributes(defines) { defines._needUVs = true; }
+  prepareDefines(defines) { defines.LEAFDETAIL = true; }
+  getClassName() { return 'LeafDetailPlugin'; }
+  getSamplers(samplers) { samplers.push('leafDetailSampler'); }
+  bindForSubMesh(ub) { ub.setTexture('leafDetailSampler', leafTex); }
+  getCustomCode(shaderType) {
+    if (shaderType === 'vertex') return { CUSTOM_VERTEX_DEFINITIONS: 'varying vec2 vLeafUV;', CUSTOM_VERTEX_MAIN_END: '#ifdef UV1\nvLeafUV = uv;\n#else\nvLeafUV = vec2(0.0);\n#endif\n' };
+    return { CUSTOM_FRAGMENT_DEFINITIONS: 'varying vec2 vLeafUV; uniform sampler2D leafDetailSampler;',
+      CUSTOM_FRAGMENT_UPDATE_DIFFUSE: 'float lk_ = step(1.5, vLeafUV.x); vec3 ld_ = texture2D(leafDetailSampler, vLeafUV).rgb * 1.09; ' + (G.params.has('leafdebug') ? 'baseColor.rgb = mix(vec3(1.0, 0.0, 1.0), ld_, lk_);' : 'float d_ = ld_.r - 1.0; baseColor.rgb *= 1.0 + lk_ * min(d_, 0.0) * 1.7; baseColor.rgb += lk_ * max(d_, 0.0) * vec3(0.33, 0.36, 0.18);') + '\n' };
+  }
+}
+G.leafDetail = !G.params.has('noleaftex');
+G.windMat = (name, o) => { const m = G.mat(name, { emissive: new C3(.035, .03, .025), specular: new C3(.045, .045, .04), power: 20 }); m.__wind = new WindPlugin(m, o); if (G.leafDetail) m.__leaf = new LeafDetailPlugin(m); return m; };
 // one material per stiffness class; names + numbers come from G.CONFIG.wind.materials
 G.mats = {}; for (const [k, o] of Object.entries(G.CONFIG.wind.materials)) G.mats[k] = G.windMat('wind' + k[0].toUpperCase() + k.slice(1), o);
 })();

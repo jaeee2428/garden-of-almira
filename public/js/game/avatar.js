@@ -30,6 +30,10 @@ const tube = (mb, a, b, r, col, sides = 14) => mb.tube([new V3(...a), V3.Lerp(ne
 const skinC = (k = 1) => (u, v) => shade(SKIN, k * (.93 + .08 * v));
 const print = (u, v) => { const cu = Math.floor(u * 44), cv = Math.floor(v * 24), hsh = Math.sin(cu * 12.9898 + cv * 78.233) * 43758.5; const f = hsh - Math.floor(hsh), du = u * 44 % 1 - .5, dv = v * 24 % 1 - .5;   // tiny white florets on coral
   return f > .6 && du * du + dv * dv < .035 ? mixA(TRIM, rgb('#ffd9e0'), .3) : shade(DRESS, .95 + .07 * Math.sin(u * 50 + v * 20)); };
+// a limb shaped like a real one: a turned surface whose radius (rx side-to-side, rz front-to-back) and centre offset follow
+// an anatomical profile along its length (deltoid, biceps, forearm taper to a slim wrist; thigh, calf bulge behind, ankle)
+const limb = (mb, y0, y1, prof, cf, nu = 22, nv = 18) => mb.grid(nu, nv, (u, v) => { const a = u * 6.283, [rx, rz, zo, xo] = prof(v); return [Math.cos(a) * rx + (xo || 0), y0 + (y1 - y0) * v, Math.sin(a) * rz + (zo || 0)]; }, typeof cf === 'function' ? cf : () => cf);
+const bump = (t, c, w) => Math.exp(-(((t - c) / w) ** 2));
 const ell = (mb, x, y, z, rx, ry, rz, n, m, cf) => mb.ellipsoid(x, y, z, rx, ry, rz, n, m, typeof cf === 'function' ? cf : () => cf);
 
 const root = new B.TransformNode('avatar', scene);
@@ -38,7 +42,7 @@ part('hips', pelvis, mb => { ell(mb, 0, 0, -.005, .158, .11, .105, 24, 14, print
 const spine = node('spine', pelvis, 0, .06, 0);
 part('torso', spine, mb => {
   mb.grid(32, 18, (u, v) => {                                                               // the bodice as one smooth turned shape: waist -> fuller front -> neckline
-    const a = u * 6.283, y = -.01 + v * .32, rx = .106 + .034 * G.smooth(0, .62, v) - .01 * G.smooth(.82, 1, v), rz = .078 + .012 * G.smooth(0, .6, v) - .012 * G.smooth(.82, 1, v);
+    const a = u * 6.283, back = Math.max(0, -Math.cos(a)), y = -.01 + v * (.32 + .012 * back * back), rx = .106 + .034 * G.smooth(0, .62, v) - .01 * G.smooth(.82, 1, v), rz = .078 + .012 * G.smooth(0, .6, v) - .012 * G.smooth(.82, 1, v);
     const front = Math.max(0, Math.cos(a)), bust = .016 * Math.exp(-Math.pow((v - .62) / .16, 2)) * front * front;
     return [Math.sin(a) * rx, y, Math.cos(a) * (rz + bust) + .006]; }, print);
   ell(mb, 0, .312, -.004, .148, .075, .086, 28, 14, skinC());                              // shoulders and upper chest, sloping into the neck
@@ -95,7 +99,12 @@ const hairShape = v => {                                                        
 const hairFall = part('hairFall', head, mb => {
   mb.grid(HF.nu, HF.nv, (u, v) => { const S = hairShape(v), a = u * 6.283, clump = 1 + .07 * Math.sin(a * 9 + 1.3) * sm(.25, 1, v), jag = v > .9 ? (v - .9) * 10 * .045 * (.5 + .5 * Math.sin(u * 61.7)) : 0;
       return [Math.sin(a) * S.rx * clump, S.y + jag, S.zc - Math.cos(a) * S.rz * clump]; },
-    (u, v) => shade(HAIR, .8 + .28 * Math.pow(Math.max(0, Math.sin(u * 150 + v * 5)), 4) - .08 * v), null, null);
+    (u, v) => mixA(shade(HAIR, .8 + .28 * Math.pow(Math.max(0, Math.sin(u * 150 + v * 5)), 4) - .08 * v), rgb('#4a2c1c'), .25 * Math.pow(Math.max(0, Math.sin(u * 23 + v * 2.5)), 6) * (1 - v)), null, null);
+  // separate strands lying on the outside of the hair mass: they catch the light and break up the outline (bent with it)
+  const sr = G.rng(41);
+  for (let k = 0; k < 26; k++) { const a = (sr() - .5) * 3.5, ph = sr() * 6.28, len = .75 + sr() * .25, pts = [];
+    for (let j = 0; j <= 12; j++) { const v = .08 + len * .9 * j / 12, S = hairShape(Math.min(v, .995)), aa = a + .05 * Math.sin(v * 9 + ph); pts.push(new V3(Math.sin(aa) * (S.rx + .004), S.y, S.zc - Math.cos(aa) * (S.rz + .004))); }
+    mb.tube(pts, t => .0075 * (1 - t * .75), 6, (t, w) => mixA(shade(HAIR, .9 + .35 * Math.pow(Math.max(0, Math.sin(w * 6.283)), 3)), rgb('#3a2418'), .2 * (1 - t)), null, true); }
 });
 hairFall.markVerticesDataAsUpdatable(B.VertexBuffer.PositionKind, true); hairFall.markVerticesDataAsUpdatable(B.VertexBuffer.NormalKind, true);
 const hairBase = Float32Array.from(hairFall.getVerticesData(B.VertexBuffer.PositionKind)), hairPos = new Float32Array(hairBase.length), hairIdx = hairFall.getIndices(), hairNrm = [];
@@ -114,12 +123,12 @@ headParts.push(hairFall);
 const arm = sd => {
   const sh = node('shoulder' + sd, spine, sd * .162, .355, -.006);
   part('upperArm' + sd, sh, mb => {
-    tube(mb, [0, .015, 0], [0, -.265, 0], [.036, .03], SKIN);
-    mb.grid(20, 4, (u, v) => { const a = u * 6.283, r = .043 + .03 * v; return [Math.cos(a) * r, .02 - v * .085, Math.sin(a) * r * .95]; }, print);   // flutter sleeve
+    limb(mb, .015, -.27, t => { const r = .0295 + .011 * bump(t, .1, .16) + .0045 * bump(t, .5, .2) + .002 * (1 - t); return [r * (1 + .06 * bump(t, .1, .2)), r * .94, .002 * bump(t, .5, .25)]; }, skinC());   // shoulder cap, slim upper arm
+    mb.grid(40, 5, (u, v) => { const a = u * 6.283, r = .045 + .032 * v + .006 * v * Math.sin(a * 7); return [Math.cos(a) * r, .022 - v * .09 + .008 * v * Math.cos(a * 7), Math.sin(a) * r * .95]; }, print);   // flutter sleeve with a soft ruffled hem
   });
   const el = node('elbow' + sd, sh, 0, -.265, 0);
   part('forearm' + sd, el, mb => {
-    tube(mb, [0, 0, 0], [0, -.235, 0], [.029, .022], SKIN); ell(mb, 0, 0, 0, .031, .031, .031, 12, 8, skinC());   // elbow
+    limb(mb, .005, -.24, t => { const r = .0195 + .0105 * bump(t, .18, .32) + .002 * (1 - t); return [r * (1 + .12 * t), r * (1 - .14 * t), .003 * bump(t, .2, .2)]; }, skinC()); ell(mb, 0, 0, -.002, .029, .03, .029, 14, 10, skinC());   // forearm tapering to a slim, flatter wrist; elbow
     ell(mb, 0, -.268, .006, .021, .036, .03, 12, 10, skinC());                                            // palm
     for (let f = 0; f < 4; f++) { const x = (f - 1.5) * .0115; mb.tube([new V3(x, -.296, .012), new V3(x, -.33 + Math.abs(f - 1.5) * .006, .022), new V3(x, -.353 + Math.abs(f - 1.5) * .01, .03)], [.0068, .0048], 7, () => SKIN, null, true); }   // fingers, gently curled
     mb.tube([new V3(sd * -.016, -.262, .022), new V3(sd * -.028, -.29, .036), new V3(sd * -.03, -.31, .045)], [.0078, .0055], 7, () => SKIN, null, true);   // thumb
@@ -129,9 +138,10 @@ const arm = sd => {
 };
 const leg = sd => {
   const hip = node('hip' + sd, pelvis, sd * .08, -.03, 0);
-  part('thigh' + sd, hip, mb => tube(mb, [0, .02, 0], [0, -.41, 0], [.066, .046], SKIN));
+  part('thigh' + sd, hip, mb => limb(mb, .02, -.415, t => { const r = .045 + .022 * Math.pow(1 - t, 1.15) + .003 * bump(t, .55, .2); return [r, r * .96, .006 * Math.sin(Math.PI * t), sd * -.004 * bump(t, .2, .3)]; }, skinC()));
   const knee = node('knee' + sd, hip, 0, -.41, 0);
-  part('shin' + sd, knee, mb => { tube(mb, [0, 0, 0], [0, -.39, 0], [.043, .028], SKIN); ell(mb, 0, 0, .004, .045, .045, .045, 12, 8, skinC()); ell(mb, 0, -.12, -.014, .041, .095, .04, 14, 10, skinC()); });
+  part('shin' + sd, knee, mb => { limb(mb, 0, -.395, t => { const r = .0235 + .016 * bump(t, .3, .22) + .009 * bump(t, .02, .12) + .003 * (1 - t); return [r * (1 - .08 * bump(t, .3, .25)), r * (1 + .1 * bump(t, .3, .25)), -.011 * bump(t, .3, .2), sd * .003 * bump(t, .3, .2)]; }, skinC());   // knee, calf swelling behind, slim ankle
+    ell(mb, 0, 0, .006, .044, .044, .044, 14, 10, skinC()); });
   const ankle = node('ankle' + sd, knee, 0, -.395, 0);
   part('foot' + sd, ankle, mb => {
     ell(mb, 0, -.008, .04, .031, .02, .086, 14, 8, skinC());                                              // foot

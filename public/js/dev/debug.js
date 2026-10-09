@@ -4,6 +4,7 @@
      ?atplant=N               close-up of plant N     ?at=hen&i=0&d=1        close-up of an animal (frozen), + &pose=peck|crow
      ?walk=1&x=&z=&yaw=&view=third&hold=KeyW,ShiftLeft   walk there as the avatar (3rd person, holding keys)
         ?test=flower|candle|puso   click tests -> console
+     ?specimen=gumamela&v=red[&close=1]   one plant of a hero flower alone in a studio high above the garden (archive renders)
      ?u=.45 time of day · ?hideui=1 · ?nomusic=1 · ?no=cover,trees,plants,orbs · ?q=low · ?debug=1
    ===================================================================== */
 (() => {
@@ -41,6 +42,24 @@ if (params.has('audit')) { const O = G.obstacles.filter(o => !o.box), bad = [];
   for (let i = 0; i < O.length; i++) for (let j = i + 1; j < O.length; j++) { const a = O[i], b = O[j]; if (a.tag && a.tag === b.tag && a.tag === 'bangka') continue; const d = Math.hypot(a.x - b.x, a.z - b.z); if (d < (a.r + b.r) * .9) bad.push(`${a.tag || 'r' + a.r}@${a.x.toFixed(1)},${a.z.toFixed(1)} x ${b.tag || 'r' + b.r}@${b.x.toFixed(1)},${b.z.toFixed(1)}`); }
   console.log('AUDIT overlaps ' + bad.length + (bad.length ? ': ' + bad.slice(0, 30).join(' | ') : '')); console.log('AUDIT nudged ' + G.moved.length + ': ' + G.moved.join(' | ')); }
 
+/* ---------- ?specimen=id : a clean studio portrait of one hero flower (for flowers/<id>/renders) ---------- */
+if (params.has('specimen') && params.get('specimen') === 'kadena' && G.pergola) {           // kadena grows ON the pergola: photograph it there
+  const c = G.pergola.center, close = params.has('close'); P.mode = 'static';
+  G.systems.add('specimenCam', () => { camera.position.set(c.x + (close ? 1.2 : 3.2), c.y + (close ? 2.2 : 1.6), c.z + (close ? .9 : 2.6)); camera.setTarget(new V3(c.x, c.y + (close ? 2.3 : 1.7), c.z)); }, { order: 99 });
+} else if (params.has('specimen')) {
+  const id = params.get('specimen'), v = params.get('v'), geo = G.geo, k = G.kinds.find(q => q.sp === id && (!v || q.v === v)), O = new V3(0, 300, 0);
+  G.setLOD(0);
+  const mbs = id === 'liryo' ? [...geo.lotus(9), ...geo.lilyPad(5)] : id === 'orkidyas' ? geo.orchid(1) : id === 'ilangilang' ? geo.ilangIlang(11) : k ? k.build(100 + G.kinds.indexOf(k) * 7) : [];
+  const H = id === 'ilangilang' ? 6.8 : k ? k.H : id === 'liryo' ? .7 : .5, mat = id === 'orkidyas' ? G.mats.hang : id === 'ilangilang' ? G.mats.tree : G.mats.shrub;
+  mbs.forEach((mb, i) => { const m = mb.build('specimen' + i, id === 'liryo' ? G.vc : mat); m.position.copyFrom(O); if (id === 'liryo' && i > 0) m.position.x += .35; m.alwaysSelectAsActiveMesh = true; G.cast && G.cast(m); });
+  const ground = B.MeshBuilder.CreateDisc('studioGround', { radius: 4, tessellation: 48 }, scene); ground.rotation.x = Math.PI / 2; ground.position.copyFrom(O); ground.position.y -= .01;
+  ground.material = G.mat('studioMat', { diffuse: id === 'liryo' ? new B.Color3(.05, .16, .15) : new B.Color3(.33, .3, .22) }); ground.receiveShadows = true;
+  const close = params.has('close'), d = close ? Math.max(.45, H * .5) : H * 1.7 + .7, ty = close ? H * .78 : H * .5;
+  P.mode = 'static'; scene.fogEnabled = false;
+  G.systems.add('specimenCam', () => { camera.position.set(O.x + d * .82, O.y + ty + d * .22, O.z + d * .57); camera.setTarget(new V3(O.x, O.y + ty, O.z)); }, { order: 99 });
+}
+
+if (params.has('shaderdefs')) setTimeout(() => { const m = G.mats[params.get('shaderdefs')] || G.mats.shrub, sm = scene.meshes.find(q => q.material === m && q.subMeshes && q.subMeshes[0] && q.subMeshes[0].effect); const d = sm && sm.subMeshes[0].effect.defines || ''; console.log('DEFS ' + (sm ? sm.name : 'none') + ' UV1=' + /#define UV1/.test(d) + ' LEAF=' + /#define LEAFDETAIL/.test(d) + ' uvs=' + (sm && sm.isVerticesDataPresent('uv'))); }, 4000);   // ?shaderdefs=shrub
 /* ---------- ?debug=1: frame stats every 3 s ---------- */
 if (params.has('debug')) setInterval(() => console.log('DEBUG fps=' + engine.getFps().toFixed(1) + ' meshes=' + scene.getActiveMeshes().length + ' plantsDrawn=' + (G.stats && G.stats.drawn) + ' systems=' + G.systems.list().filter(s => s.enabled).map(s => s.name).join(',')), 3000);
 })();
