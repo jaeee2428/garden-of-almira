@@ -49,7 +49,10 @@ function refreshChips() { chips.querySelectorAll('.chip').forEach(c => c.classLi
 refreshChips();
 if (collected.size === ORDER.length) G.awaken();
 let cardTimer;
-function showCard(info, extra) { $('cname').textContent = info.ceb; $('csci').textContent = info.sci; $('cfact').textContent = info.fact; $('cextra').textContent = extra || ''; $('cdot').style.background = info.color; card.classList.add('show'); clearTimeout(cardTimer); cardTimer = setTimeout(() => card.classList.remove('show'), 14000); }
+function showCard(info, extra) { $('cname').textContent = info.ceb;
+  $('cnames').textContent = [info.english, ...(info.names || []).filter(n => n.toLowerCase() !== info.ceb.toLowerCase())].filter(Boolean).join(' · ');   // English + other local names (flower cards)
+  $('cmeta').textContent = info.family ? info.family + (info.scent ? ' · scent: ' + info.scent : '') : '';
+  $('csci').textContent = info.sci; $('cfact').textContent = info.fact; $('cextra').textContent = extra || ''; $('cdot').style.background = info.color; card.classList.add('show'); clearTimeout(cardTimer); cardTimer = setTimeout(() => card.classList.remove('show'), 14000); }
 $('cclose').onclick = () => card.classList.remove('show');
 function onClick(e) {
   if (e.target !== canvas && !P.locked) return;

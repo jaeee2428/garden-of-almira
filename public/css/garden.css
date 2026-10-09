@@ -44,6 +44,10 @@
   #card .row { display:flex; align-items:center; gap:10px; }
   #cdot { width:14px; height:14px; border-radius:50%; flex:none; border:2px solid rgba(255,255,255,.7); }
   #cname { font-size:30px; font-weight:600; line-height:1; }
+  #cnames { font-size:15px; opacity:.85; margin:2px 0 0 24px; }
+  #cnames:empty { display:none; }
+  #cmeta { font-size:14px; opacity:.7; margin:6px 0 0; }
+  #cmeta:empty { display:none; }
   #csci { font-style:italic; opacity:.75; font-size:16px; margin:2px 0 8px 24px; }
   #cfact { font-size:18px; line-height:1.28; }
   #cextra { margin-top:8px; color:var(--gold); font-size:16px; font-style:italic; }

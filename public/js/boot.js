@@ -12,13 +12,15 @@ if (/[?&]log=1/.test(location.search)) {
   for (const k of ['log', 'warn', 'error']) { const f = console[k].bind(console); console[k] = (...a) => { put(k.toUpperCase(), a); f(...a); }; }
   addEventListener('error', e => put('UNCAUGHT', [e.message + ' @ ' + (e.filename || '').split('/js/')[1] + ':' + e.lineno]));
 }
+// the hero flowers: one folder each in public/flowers/<id>/ (card + model + renders)
+const FLOWERS = ['sampaguita', 'gumamela', 'kalachuchi', 'santan', 'dama', 'bogambilya', 'kadena', 'ilangilang', 'rosas', 'canna', 'heliconia', 'kamia', 'orkidyas', 'liryo', 'adelfa', 'pukingan', 'tsampaka', 'rosal'];
 const MODULES = [
   // 1 · config + engine core
   'config/settings', 'engine/engine', 'engine/systems', 'engine/wind', 'engine/physics', 'engine/mesh-builder',
   // 2 · the world's base: land, sky, sea, then lights/camera/post and the day cycle (needs sky + sea)
   'world/terrain', 'world/sky', 'world/sea', 'engine/render', 'engine/time-of-day',
   // 3 · content data (cards)
-  'data/flowers', 'data/lore',
+  'data/flowers', ...FLOWERS.map(f => `flowers/${f}/card`), 'data/lore',
   // 4 · plant geometry library, then the built world
   'flora/plant-geometry', 'flora/plant-geometry-extra', 'flora/plant-geometry-heritage',
   'world/layout', 'world/structures', 'flora/garden-beds', 'fx/particles', 'world/props', 'world/hill-forest', 'flora/wild-plants',
@@ -29,7 +31,7 @@ const MODULES = [
 ];
 const t = window.__t = window.__t || [];
 for (const m of MODULES) {
-  const s = document.createElement('script'); s.src = `/js/${m}.js`; s.async = false;
+  const s = document.createElement('script'); s.src = m.startsWith('flowers/') ? `/${m}.js` : `/js/${m}.js`; s.async = false;
   s.onload = () => t.push([m, Math.round(performance.now())]);
   s.onerror = () => { console.error('[boot] failed to load ' + m); document.getElementById('loading').textContent = 'could not load ' + m; };
   document.body.appendChild(s);

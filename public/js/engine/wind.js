@@ -19,8 +19,9 @@ G.poke = (x, z, amp = 1) => { const w = G.windState; w.pokeX = x; w.pokeZ = z; w
 const UNIFORMS = 'uniform vec4 uWind0; uniform vec4 uWind1; uniform vec4 uWind2; uniform vec4 uPlayer; uniform vec4 uPoke; uniform vec4 uTrail; uniform vec4 uTrail2;';
 const WIND_DEFS = `
 #ifdef WIND
-vec2 bodyPush(vec2 p, vec2 c, float r) {                                 // smooth (no kink) push away from a body of radius r
-  vec2 v = p - c; float d = length(v); return v / max(d, 1e-3) * (1.0 - smoothstep(r * 0.2, r, d));
+vec2 bodyPush(vec2 q, vec2 p, vec2 c, float r) {                         // smooth (no kink) push away from a body of radius r:
+  vec2 v = q - c; float d = length(p - c);                               // the DIRECTION comes from the stem's root q (the whole plant leans
+  return v / max(length(v), 0.05) * (1.0 - smoothstep(r * 0.2, r, d));   // one way: no hollow scooped around her), the amount from p
 }
 vec3 windOffset(vec3 wp, vec3 root, float hh, float aw) {
   vec2 d = uWind0.xy; float gain = uWind0.z, t = uWind0.w;
@@ -33,8 +34,8 @@ vec3 windOffset(vec3 wp, vec3 root, float hh, float aw) {
   float hz = uWind2.x, ph = dot(rp, vec2(0.71, 1.37)) * 2.3;             // natural sway, phase per plant
   float sway = 0.22 * sin(t * hz + ph) + 0.08 * sin(t * hz * 1.73 + ph * 1.9);
   vec2 push = d * amp * b * (1.0 + sway) + side * amp * b * 0.12 * sin(t * hz * 0.61 + ph * 0.7);
-  vec2 pd = wp.xz - uPlayer.xz; float pl = length(pd);                   // plants part around you
-  push += normalize(pd + vec2(1e-4)) * (1.0 - smoothstep(0.0, uWind1.w, pl)) * b * 2.2;
+  vec2 pd = rp - uPlayer.xz; float pl = length(pd);                      // whole plants part around the free camera - not while you walk as Ikaw
+  push += normalize(pd + vec2(1e-4)) * (1.0 - smoothstep(0.0, uWind1.w, pl)) * b * 2.2 * (1.0 - step(0.001, uPlayer.w));
   float pt = t - uPoke.y;                                                // a click sends a ripple outward
   if (pt > 0.0 && pt < 4.0) { vec2 pr = wp.xz - uPoke.xz; float rr = length(pr); float fr = pt * 6.0; float w = sin((rr - fr) * 2.1) * exp(-abs(rr - fr) * 0.55) * exp(-pt * 0.8) * uPoke.w; push += normalize(pr + vec2(1e-4)) * w * b * 1.5; }
   float sl = length(push), smax = uWind2.y * hh;                         // cap the bend angle
@@ -43,9 +44,9 @@ vec3 windOffset(vec3 wp, vec3 root, float hh, float aw) {
   // growing with height like a real cantilever), and when she has passed it springs back, swings a little past upright
   // and settles: positions where she was 0.18 s / 0.45 s / 0.8 s ago are mixed in with the weights of a damped spring.
   if (uPlayer.w > 0.0) {
-    vec2 rp2 = mix(root.xz, wp.xz, 0.25); float R = uTrail2.w;
-    vec2 cp = bodyPush(rp2, uPlayer.xz, R)
-            + (bodyPush(rp2, uTrail.xy, R * 0.92) * 0.55 - bodyPush(rp2, uTrail.zw, R * 0.85) * 0.28 + bodyPush(rp2, uTrail2.xy, R * 0.8) * 0.1) * uTrail2.z;
+    vec2 q = root.xz, p2 = mix(root.xz, wp.xz, 0.3); float R = uTrail2.w;
+    vec2 cp = bodyPush(q, p2, uPlayer.xz, R)
+            + (bodyPush(q, p2, uTrail.xy, R * 0.92) * 0.55 - bodyPush(q, p2, uTrail.zw, R * 0.85) * 0.28 + bodyPush(q, p2, uTrail2.xy, R * 0.8) * 0.1) * uTrail2.z;
     float bend = min(hh * (0.35 + 2.0 * hh), 0.8 * hh);                       // most at the top, nothing at the root
     float reach = 1.0 - smoothstep(1.0, 1.45, wp.y - uPlayer.y + 0.5);       // only up to about her shoulders
     push += cp * bend * reach * uPlayer.w; sl = length(push); smax = max(smax, .85 * hh);
