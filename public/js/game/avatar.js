@@ -164,10 +164,11 @@ const skirt = (() => {
   const pos = m.getVerticesData(B.VertexBuffer.PositionKind); m.markVerticesDataAsUpdatable(B.VertexBuffer.PositionKind, true); m.markVerticesDataAsUpdatable(B.VertexBuffer.NormalKind, true);
   return { m, pos: Float32Array.from(pos), idx: m.getIndices(), nrm: [] };
 })();
-const cloth = { lx: 0, lz: 0, vx: 0, vz: 0 };                          // the skirt's lag behind the body (pelvis-local, metres)
+const cloth = { lx: 0, lz: 0, vx: 0, vz: 0, hx: 0, hz: 0, hvx: 0, hvz: 0 };                          // the skirt's lag behind the body (pelvis-local, metres)
 function stepSkirt(dt, t, ax, az, speed) {
   // spring-damper: the hem lags behind acceleration and leans back against the air at speed
   const kx = -ax * .012, kz = -az * .012 - speed * speed * .006; cloth.vx += ((kx - cloth.lx) * 60 - cloth.vx * 9) * dt; cloth.vz += ((kz - cloth.lz) * 60 - cloth.vz * 9) * dt; cloth.lx += cloth.vx * dt; cloth.lz += cloth.vz * dt;
+  cloth.hvx += ((kx * 1.6 - cloth.hx) * 28 - cloth.hvx * 4.5) * dt; cloth.hvz += ((kz * 1.6 - cloth.hz) * 28 - cloth.hvz * 4.5) * dt; cloth.hx += cloth.hvx * dt; cloth.hz += cloth.hvz * dt;   // the hem is a softer, slower spring: it trails the waist and swings past
   const W = G.windState, cy = Math.cos(A.yaw), sy = Math.sin(A.yaw), wlx = (W.dx * cy - W.dz * sy) * W.gain, wlz = (W.dx * sy + W.dz * cy) * W.gain;   // wind in her frame
   const knees = [L.leg, Rt.leg].map((lg, k) => { const th = lg.hip.rotation.x, sh = lg.knee.rotation.x; return { x: (k ? 1 : -1) * .08, kz: -.41 * Math.sin(th), ky: -.03 - .41 * Math.cos(th), az: -.41 * Math.sin(th) - .395 * Math.sin(th + sh), ay: -.03 - .41 * Math.cos(th) - .395 * Math.cos(th + sh) }; });
   const p = skirt.pos, n1 = SK.seg + 1;
@@ -175,8 +176,8 @@ function stepSkirt(dt, t, ax, az, speed) {
     const legAt = knees.map(k => { const tt = (y - (-.03)) / (k.ky + .03); if (tt <= 1) { const q = clamp(tt, 0, 1); return [k.x, k.kz * q]; } const q = clamp((y - k.ky) / (k.ay - k.ky), 0, 1); return [k.x, k.kz + (k.az - k.kz) * q]; });
     for (let i = 0; i <= SK.seg; i++) { const a = i / SK.seg * 6.283, dx = Math.sin(a), dz = Math.cos(a) * .88; let r = rb;
       for (const [lx, lz] of legAt) { const along = lx * dx + lz * Math.cos(a), dl = Math.hypot(lx, lz) || 1, cosA = along / dl; if (cosA > .5) r = Math.max(r, (along + .075) * ((cosA - .5) / .5) + rb * (1 - (cosA - .5) / .5)); }   // knees push the cloth out
-      const flut = Math.sin(t * 5.3 + a * 3 + v * 2) * .008 * W.gain * vv + Math.sin(t * 3.1 - a * 5) * .004 * speed * vv;
-      const o = (j * n1 + i) * 3; p[o] = dx * (r + flut) + (cloth.lx + wlx * .025) * vv; p[o + 1] = y + (Math.abs(cloth.lz) + Math.abs(cloth.lx)) * .25 * vv; p[o + 2] = dz * (r + flut) + (cloth.lz + wlz * .025) * vv; } }
+      const pleat = Math.sin(a * 11 + v * 1.5) * .006 * vv * (1 + .35 * speed) + Math.sin(a * 4 - A.phase * 2) * .007 * vv * vv * Math.min(1, speed), flut = Math.sin(t * 5.3 + a * 3 + v * 2) * .008 * W.gain * vv + Math.sin(t * 3.1 - a * 5) * .004 * speed * vv + pleat;
+      const o = (j * n1 + i) * 3; const lx = cloth.lx + (cloth.hx - cloth.lx) * v, lz = cloth.lz + (cloth.hz - cloth.lz) * v; p[o] = dx * (r + flut) + (lx + wlx * .025) * vv; p[o + 1] = y + (Math.abs(lz) + Math.abs(lx)) * .25 * vv; p[o + 2] = dz * (r + flut) + (lz + wlz * .025) * vv; } }
   skirt.m.updateVerticesData(B.VertexBuffer.PositionKind, p); B.VertexData.ComputeNormals(p, skirt.idx, skirt.nrm); skirt.m.updateVerticesData(B.VertexBuffer.NormalKind, skirt.nrm);
 }
 root.setEnabled(false);
@@ -259,7 +260,7 @@ A.step = (dt, inp, t) => {
   let dy = want - A.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); A.yaw += dy * (1 - Math.exp(-dt * (A.view === 'first' ? 30 : 9)));
   // ---- the gait: phase advances with distance travelled (cycle = two steps)
   const cycle = 1.25 + .28 * hv; if (A.grounded) A.phase += 2 * Math.PI * hv * dt / cycle;
-  const m = clamp(hv / C.walk, 0, 1), runK = sm(C.walk + .3, C.run, hv), wadeLift = A.wade * .5;
+  A.gm = PH.damp(A.gm || 0, clamp(hv / C.walk, 0, 1), 9, dt); const m = A.gm, runK = sm(C.walk + .3, C.run, hv), wadeLift = A.wade * .5;
   const pose = (lg, am, ph, sd) => {
     const s = Math.sin(ph), cph = Math.cos(ph), air = A.grounded ? 0 : 1;
     const thigh = (-(.32 + .26 * runK) * s * m) * (1 - air) - .55 * air - .5 * Math.max(0, A.land), shin = ((.5 + .75 * runK + wadeLift) * Math.pow(Math.max(0, cph), 1.4) * m + .05) * (1 - air) + .85 * air + 1.0 * Math.max(0, A.land);
