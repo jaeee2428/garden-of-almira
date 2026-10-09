@@ -62,4 +62,13 @@ if (params.has('specimen') && params.get('specimen') === 'kadena' && G.pergola) 
 if (params.has('shaderdefs')) setTimeout(() => { const m = G.mats[params.get('shaderdefs')] || G.mats.shrub, sm = scene.meshes.find(q => q.material === m && q.subMeshes && q.subMeshes[0] && q.subMeshes[0].effect); const d = sm && sm.subMeshes[0].effect.defines || ''; console.log('DEFS ' + (sm ? sm.name : 'none') + ' UV1=' + /#define UV1/.test(d) + ' LEAF=' + /#define LEAFDETAIL/.test(d) + ' uvs=' + (sm && sm.isVerticesDataPresent('uv'))); }, 4000);   // ?shaderdefs=shrub
 /* ---------- ?debug=1: frame stats every 3 s ---------- */
 if (params.has('debug')) setInterval(() => console.log('DEBUG fps=' + engine.getFps().toFixed(1) + ' meshes=' + scene.getActiveMeshes().length + ' plantsDrawn=' + (G.stats && G.stats.drawn) + ' systems=' + G.systems.list().filter(s => s.enabled).map(s => s.name).join(',')), 3000);
+// ?perf=1 : every 5 s log the frame budget: triangles drawn (thin instances counted), active meshes, and the slowest systems (ms, smoothed)
+if (params.has('perf')) { G.perfOn = true; setInterval(() => {
+  let tri = 0; for (const m of scene.getActiveMeshes().data.slice(0, scene.getActiveMeshes().length)) { if (!m.isVisible || !m.getTotalIndices) continue; const n = m.hasThinInstances ? m.thinInstanceCount : 1; tri += m.getTotalIndices() / 3 * n; }
+  const by = {}; for (const m of scene.getActiveMeshes().data.slice(0, scene.getActiveMeshes().length)) { if (!m.isVisible || !m.getTotalIndices) continue; const n = m.hasThinInstances ? m.thinInstanceCount : 1, k = m.name.replace(/\d+/g, '#'); by[k] = (by[k] || 0) + m.getTotalIndices() / 3 * n; }
+  console.log('TOPTRI ' + Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, v]) => k + ':' + Math.round(v / 1000) + 'k').join(' '));
+  const sys = G.systems.list().filter(s => s.ms > .05).sort((a, b) => b.ms - a.ms).slice(0, 8).map(s => s.name + ':' + s.ms.toFixed(2)).join(' ');
+  console.log('PERF fps=' + engine.getFps().toFixed(1) + ' scale=' + engine.getHardwareScalingLevel().toFixed(2) + ' tris=' + Math.round(tri / 1000) + 'k active=' + scene.getActiveMeshes().length + ' draw=' + (engine._drawCalls ? engine._drawCalls.current : '?') + ' plants=' + (G.stats && G.stats.drawn) + ' | ' + sys);
+}, 5000); }
 })();
+

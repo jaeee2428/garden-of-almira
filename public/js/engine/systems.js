@@ -26,7 +26,9 @@ G.systems = {
   run(t, dt, frame) {
     for (const s of sorted) {
       if (!s.enabled || frame % s.every) continue;
+      const t0 = G.perfOn ? performance.now() : 0;
       try { s.fn(t, dt, frame); } catch (e) { s.enabled = false; console.error('[systems] ' + s.name + ' disabled after error:', e); }
+      if (G.perfOn) s.ms = s.ms * .95 + (performance.now() - t0) * .05;     // ?perf=1: smoothed cost per system
     }
   },
 };
