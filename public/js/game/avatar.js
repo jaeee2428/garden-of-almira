@@ -228,7 +228,7 @@ let lastStepSin = [0, 0], rustleT = 0, frame = 0; const hairSw = G.physics.pendu
 const PH = G.physics, EZ = G.ease, sp = PH.spring;
 const hairTip = sp(), hairTipZ = sp(), knee = sp(), leanF = sp(), leanS = sp(), lookY = sp(), armS = [sp(), sp()], elbS = [sp(), sp()];   // follow-through springs
 const idle = { t: 0, side: 1, shift: 0, from: 0, to: 0, k: 1, glance: 0, gFrom: 0, gTo: 0, gk: 1 };          // eased idle weight shift and glances
-let windup = 0, wave = 0, prevYaw = null;                                                                  // wave: seconds left of a greeting wave (G)                                                                                            // jump anticipation timer
+let windup = 0, wave = 0, prevYaw = null; const yawS = sp();                                                                  // wave: seconds left of a greeting wave (G)                                                                                            // jump anticipation timer
 A.step = (dt, inp, t) => {
   frame++; const yawC = inp.yaw, pvx = A.vx, pvz = A.vz;
   // ---- where you want to go (relative to the camera), how fast the ground lets you
@@ -260,7 +260,7 @@ A.step = (dt, inp, t) => {
   // ---- facing: in first person the body turns with your eyes; in third person it turns toward where you walk
   const hv = Math.hypot(A.vx, A.vz); A.speed = hv;
   const want = A.view === 'first' || hv < .25 ? (A.view === 'first' ? yawC : A.yaw) : Math.atan2(A.vx, A.vz);
-  let dy = want - A.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); A.yaw += dy * (1 - Math.exp(-dt * (A.view === 'first' ? 30 : 9)));
+  let dy = want - A.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); if (A.view === 'first') A.yaw += dy * (1 - Math.exp(-dt * 30)); else { yawS.x = A.yaw; PH.stepSpring(yawS, A.yaw + dy, 7.5, 1, dt); A.yaw = yawS.x; }   // 3rd person: the turn speeds up and slows down (critically damped), never snaps
   // ---- the gait: phase advances with distance travelled (cycle = two steps)
   // feet must not skate: cadence rises with speed (~2.3 steps/s at a walk), the step length is speed / cadence, and the
   // thigh swing is solved from the leg length so the planted foot covers exactly that ground (heel-to-toe roll and the
@@ -281,7 +281,7 @@ A.step = (dt, inp, t) => {
     lg.hip.rotation.z = sd * .03;
     const ai = sd < 0 ? 0 : 1;                                                         // arms follow the gait through springs: they swing on and settle when you stop
     am.sh.rotation.x = PH.stepSpring(armS[ai], (.2 + .3 * runK) * s * m * (1 - air) - .35 * air + .02 * Math.sin(t * 1.6) - .3 * Math.max(0, A.land) * (1 - air), 13, .42, dt);
-    am.sh.rotation.z = sd * (-.09 - .35 * air - .05 * runK - .08 * Math.max(0, A.land));
+    am.sh.rotation.z = sd * (.07 + .35 * air + .05 * runK + .08 * Math.max(0, A.land) + .06 * A.crouch);   // + = away from the body (clears the hips and skirt)
     am.el.rotation.x = Math.min(0, PH.stepSpring(elbS[ai], -(.28 + .9 * runK) * (.6 + .4 * m) - .25 * air, 11, .5, dt) + .015 * armS[ai].v);   // forearm lags the upper arm
   };
   pose(L.leg, Rt.arm, A.phase, -1); pose(Rt.leg, L.arm, A.phase + Math.PI, 1);          // left leg swings with the right arm
@@ -306,7 +306,9 @@ A.step = (dt, inp, t) => {
   // ---- wave (G): the right arm rises out to the side, the hand waves three times, then the arm settles (eased in and out)
   if (inp.wave && wave <= 0) wave = 2.2;
   if (wave > 0) { wave = Math.max(0, wave - dt); const k = 2.2 - wave, env = EZ.inOutSine(clamp(k / .35, 0, 1)) * EZ.inOutSine(clamp(wave / .45, 0, 1)), am = Rt.arm;
-    am.sh.rotation.z = am.sh.rotation.z * (1 - env) + (-2.35 + .22 * Math.sin(k * 9.5)) * env; am.sh.rotation.x *= 1 - env; am.el.rotation.x = am.el.rotation.x * (1 - env) - .55 * env; }
+    const wv = Math.sin(k * 9) * EZ.inOutSine(clamp((k - .3) / .3, 0, 1));              // three side-to-side waves once the arm is up
+    am.sh.rotation.z = am.sh.rotation.z * (1 - env) + (2.45 + .2 * wv) * env; am.sh.rotation.x = am.sh.rotation.x * (1 - env) - .25 * env; am.el.rotation.x = am.el.rotation.x * (1 - env) - (.35 + .12 * wv) * env;
+    head.rotation.z = .06 * env; }
   head.rotation.x = -spine.rotation.x * .7 + (A.view === 'third' ? inp.pitch * .35 : 0);
   // anticipation: in third person the head turns toward where you are about to go before the body follows
   const lookT = A.view === 'third' ? clamp(dy * .8, -.6, .6) + idle.glance : 0;

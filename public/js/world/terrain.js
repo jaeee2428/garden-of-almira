@@ -52,7 +52,11 @@ G.hFn = (x, z) => {
   g.setVerticesData(B.VertexBuffer.ColorKind, col);
   const tex = new B.DynamicTexture('groundDetail', { width: 256, height: 256 }, scene, true), ctx = tex.getContext(), img = ctx.createImageData(256, 256), rr = G.rng(5);
   for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) { const v = 205 + (G.vnoise(x * .09, y * .09) * 40) + (rr() * 22) - 10 + G.vnoise(x * .4, y * .4) * 14; const o = (y * 256 + x) * 4; img.data[o] = img.data[o + 1] = img.data[o + 2] = G.clamp(v, 0, 255); img.data[o + 3] = 255; }
-  ctx.putImageData(img, 0, 0); tex.update(); tex.uScale = tex.vScale = 70; tex.anisotropicFilteringLevel = 8;
+  ctx.putImageData(img, 0, 0);
+  // a lawn, not paint: a few thousand short blade strokes, light and dark, leaning every way (drawn once, 256 px tile; costs nothing per frame)
+  for (let i = 0; i < 5200; i++) { const x = rr() * 256, y = rr() * 256, a = -1.57 + (rr() - .5) * 1.4, l = 4 + rr() * 9, v = rr() < .55 ? 150 + rr() * 50 : 235 + rr() * 20;
+    ctx.strokeStyle = `rgba(${v},${v},${v},${.35 + rr() * .35})`; ctx.lineWidth = .7 + rr() * .9; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(a) * l * .5 + (rr() - .5) * 2, y + Math.sin(a) * l * .5, x + Math.cos(a) * l, y + Math.sin(a) * l); ctx.stroke(); }
+  tex.update(); tex.uScale = tex.vScale = 70; tex.anisotropicFilteringLevel = 8;
   const m = G.mat('groundMat', { specular: C3.Black() }); m.diffuseTexture = tex; g.material = m; g.receiveShadows = true; g.isPickable = false; g.freezeWorldMatrix();
   G.ground = g;
 })();
