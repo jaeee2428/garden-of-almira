@@ -55,6 +55,7 @@ addEventListener('keydown', e => {
   if (digit) { G.hud.setTime([0, .2, .45, .7, 1][+digit[1] - 1]); flash(G.timeName(G.timeU)); return; }
   switch (e.code) {
     case 'KeyT': modeBtn.click(); break;
+    case 'KeyL': if (P.mode === 'walk' && !P.fly) P.sit = true; break;          // lingkod: sit down / stand up
     case 'KeyF': if (P.mode !== 'walk') setMode('walk'); P.fly = !P.fly; flash(P.fly ? 'fly mode: Space up · C down' : 'walking again');
       if (G.avatar) { if (P.fly) G.avatar.exit(); else G.avatar.enter(camera.position.x, camera.position.z, P.yaw); } break;
     case 'Tab': e.preventDefault(); toggleView(); break;
@@ -95,7 +96,7 @@ function walkStep(dt) {
     if (keys.ArrowLeft || keys.KeyQ) P.yaw -= 1.7 * dt; if (keys.ArrowRight || keys.KeyE) P.yaw += 1.7 * dt;
     if (keys.PageUp) P.pitch = clamp(P.pitch - 1.2 * dt, -1.3, 1.3); if (keys.PageDown) P.pitch = clamp(P.pitch + 1.2 * dt, -1.3, 1.3);
     const fwd = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0), strafe = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
-    G.avatar.step(dt, { fwd, strafe, run: !!(keys.ShiftLeft || keys.ShiftRight), jump: !!P.jump, crouch: !!keys.KeyC, wave: !!keys.KeyG, yaw: P.yaw, pitch: P.pitch }, G.clock); P.jump = false;
+    G.avatar.step(dt, { fwd, strafe, run: !!(keys.ShiftLeft || keys.ShiftRight), jump: !!P.jump, sit: !!P.sit, crouch: !!keys.KeyC, wave: !!keys.KeyG, yaw: P.yaw, pitch: P.pitch }, G.clock); P.jump = false; P.sit = false;
     G.walkSpeed = G.avatar.speed; G.avatar.placeCamera(dt, P.yaw, P.pitch); return;
   }
   const sp = (keys.ShiftLeft || keys.ShiftRight ? 6 : 3.2) * dt * (P.fly ? 1.6 : 1); let fx = 0, fz = 0;

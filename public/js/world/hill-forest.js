@@ -31,6 +31,9 @@ function treeType(kind, seed, lite) {
   } else if (kind === 'tall') {                                          // emergent dipterocarp (lauan): tall bare trunk, wide flat crown
     mb.tube([new V3(0, -.3, 0), new V3(-.08, 3.5, .05), new V3(0, 6.2, 0)], [.3, .14], 6, () => shade(bark, 1.1));
     crown(mb, 0, 6.6, 0, 2.3, 1.75, [rgb('#22441c'), rgb('#3e6c2e')], r); crown(mb, .3, 5.3, -.2, 1.6, 1.3, [rgb('#1d3c17'), rgb('#36622a')], r);
+  } else if (kind === 'umbrella') {                                     // narra-like: a short forked trunk under a wide, flat, lighter crown
+    mb.tube([new V3(0, -.3, 0), new V3(.12, 1.8, .05), new V3(.5, 3.1, .2)], [.24, .1], 6, () => shade(bark, .95)); mb.tube([new V3(.08, 1.6, .03), new V3(-.55, 2.9, -.25)], [.13, .07], 5, () => bark);
+    crown(mb, .2, 3.6, 0, 2.6, 1.0, [rgb('#2f5a22'), rgb('#5b8a36')], r);
   } else {                                                               // a young bushy tree / thicket
     mb.tube([new V3(0, -.2, 0), new V3(0, 1.2, 0)], [.12, .08], 5, () => bark);
     crown(mb, 0, 1.6, 0, 1.35, 1.25, [rgb('#234a1d'), rgb('#41733a')], r);
@@ -38,11 +41,11 @@ function treeType(kind, seed, lite) {
   G.setLOD(0);
   return mb;
 }
-const TYPES = [['broad', 501], ['broad', 502], ['tall', 503], ['bush', 504]];
+const TYPES = [['broad', 501], ['broad', 502], ['tall', 503], ['bush', 504], ['umbrella', 505]];
 const SECTORS = 12;
 
 (function plant() {
-  const r = rng(1611), bufs = TYPES.map(() => Array.from({ length: SECTORS }, () => []));
+  const r = rng(1611), bufs = TYPES.map(() => Array.from({ length: SECTORS }, () => [])), cols = TYPES.map(() => Array.from({ length: SECTORS }, () => []));
   const tmp = new M4(), q = new B.Quaternion(); let n = 0, tries = 0;
   const N = Math.round(2300 * G.Q);
   while (n < N && tries++ < N * 30) {
@@ -54,11 +57,14 @@ const SECTORS = 12;
     const dens = G.vnoise(x * .05 + 3, z * .05 - 7) * .7 + G.vnoise(x * .17, z * .17) * .3;          // clumps and clearings
     if (dens < .4 + .25 * G.smooth(.55, .9, G.vnoise(x * .045 + 9, z * .045)) || r() > .35 + dens) continue;   // grassy (cogon) tops stay open
     if (rad < 92 && !G.isFree(x, z, .6)) continue;                                                     // never on another asset
-    const ti = r() < .1 ? 2 : r() < .3 ? 3 : r() < .5 ? 1 : 0, s = Rr(.75, 1.3, r);
+    const ti = r() < .1 ? 2 : r() < .12 ? 4 : r() < .3 ? 3 : r() < .5 ? 1 : 0, s = Rr(.75, 1.3, r);
     B.Quaternion.RotationYawPitchRollToRef(r() * 6.283, Rr(-.04, .04, r), Rr(-.04, .04, r), q);
     M4.ComposeToRef(new V3(s, s * Rr(.9, 1.15, r), s), q, new V3(x, y - .05, z), tmp);
     const sec = Math.floor(((Math.atan2(z, x) + Math.PI) / 6.2832) * SECTORS) % SECTORS;
     bufs[ti][sec].push(...tmp.toArray()); n++;
+    // every tree its own shade (free: an instance colour): yellow-green, deep blue-green, or a few bronze-flushing crowns
+    const tv = G.vnoise(x * .08 + 40, z * .08) - .5, pick = r(), br = Rr(.82, 1.12, r);
+    cols[ti][sec].push(...(pick < .06 ? [1.18 * br, .95 * br, .72 * br] : [(1 + tv * .5) * br, (1 + tv * .2) * br, (1 - tv * .45) * br]), 1);
     if (rad < 92) G.claim(x, z, .35 * s, true, 'hill tree');                                          // you bump into the trunks you can reach
   }
   // two detail levels per sector: full leaf masses near you, a light version far away (switched by distance)
@@ -68,7 +74,7 @@ const SECTORS = 12;
   [false, true].forEach(lite => TYPES.forEach(([kind, seed], ti) => {
     const src = treeType(kind, seed, lite).build('hillTree' + ti + (lite ? 'F' : 'N'), G.mats.tree), vd = B.VertexData.ExtractFromMesh(src); src.dispose();
     bufs[ti].forEach((arr, si) => { if (!arr.length) return; const m = new B.Mesh('hillForest' + ti + '_' + si + (lite ? 'F' : 'N'), scene); vd.applyToMesh(m); m.material = G.mats.tree; m.isPickable = false;
-      m.thinInstanceSetBuffer('matrix', new Float32Array(arr), 16, true); m.thinInstanceRefreshBoundingInfo(true); m.freezeWorldMatrix(); m.setEnabled(lite);   // frustum-culled per sector
+      m.thinInstanceSetBuffer('matrix', new Float32Array(arr), 16, true); m.thinInstanceSetBuffer('color', new Float32Array(cols[ti][si]), 4, true); m.thinInstanceRefreshBoundingInfo(true); m.freezeWorldMatrix(); m.setEnabled(lite);   // frustum-culled per sector
       sectors[si][lite ? 'far' : 'near'].push(m); });
   }));
   const NEAR = 70;

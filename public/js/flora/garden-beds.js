@@ -192,4 +192,16 @@ G.updateTrees = () => { const c = G.camera.position; for (const tr of G.trees) {
 G.systems.add('plantLOD', t => G.swayPlants(t), { order: 10 });           // wind is on the GPU; this only picks detail levels
 G.systems.add('treeLOD', () => G.updateTrees(), { order: 12, every: 10 });
 
+
+/* ---------- the soil under the plants: shade and mulch darken the ground beneath every bush (vertex colours, done once: free per frame) ---------- */
+(function groundUnderPlants() {
+  const g = G.ground; if (!g || !G.plants.length) return;
+  const pos = g.getVerticesData(B.VertexBuffer.PositionKind), col = g.getVerticesData(B.VertexBuffer.ColorKind); if (!col) return;
+  const cell = 2, grid = new Map(); for (const p of G.plants) { const k = Math.floor(p.x / cell) + ',' + Math.floor(p.z / cell); (grid.get(k) || grid.set(k, []).get(k)).push(p); }
+  const soil = [.2, .17, .1];
+  for (let i = 0, n = pos.length / 3; i < n; i++) { const x = pos[i * 3], z = pos[i * 3 + 2], cx = Math.floor(x / cell), cz = Math.floor(z / cell); let k = 0;
+    for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const L = grid.get((cx + a) + ',' + (cz + b)); if (L) for (const p of L) { const d = Math.hypot(p.x - x, p.z - z), R = p.r * 1.5 + .5; if (d < R) k += (1 - d / R) * (1 - d / R); } }
+    k = Math.min(1, k) * .42; if (k > .001) for (let c = 0; c < 3; c++) col[i * 4 + c] = col[i * 4 + c] * (1 - k) + soil[c] * k; }
+  g.setVerticesData(B.VertexBuffer.ColorKind, col);
+})();
 })();

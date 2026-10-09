@@ -75,5 +75,7 @@ if (params.has('gaittest')) { let last = null, slide = 0, n = 0, tAcc = 0; G.sys
   const f = G.avatarLegs.map(l => l.ankle.getAbsolutePosition().clone()), lo = f[0].y < f[1].y ? 0 : 1;
   if (last && last.i === lo && G.avatar.speed > .3) { slide += Math.hypot(f[lo].x - last.p.x, f[lo].z - last.p.z); tAcc += dt; }
   last = { i: lo, p: f[lo] }; if (tAcc > 1) { console.log('GAIT speed=' + G.avatar.speed.toFixed(2) + ' footSlide m/s=' + (slide / tAcc).toFixed(3) + ' amp=' + (G.avatar.amp || 0).toFixed(3)); slide = 0; tAcc = 0; } }, { order: 99 }); }
+// ?sit=hammock|bench (with walk=1): start seated, for screenshots
+if (params.has('sit') && G.avatar) setTimeout(() => { const st = (G.seats || []).find(q => q.kind === params.get('sit')); if (!st) return; const A = G.avatar; A.x = st.x + Math.sin(st.yaw) * .8; A.z = st.z + Math.cos(st.yaw) * .8; A.yaw = st.yaw; A.seat = st; A.sitFrom = { x: A.x, z: A.z }; st.leaving = false; }, 500);
 })();
 

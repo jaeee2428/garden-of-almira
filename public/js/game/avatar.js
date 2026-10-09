@@ -28,8 +28,7 @@ const meshes = [];
 const part = (name, parent, draw) => { G.LODV = 0; const mb = new MB(); draw(mb); const m = mb.build('av_' + name, G.vc); m.parent = parent; m.isPickable = false; G.cast(m); meshes.push(m); return m; };
 const tube = (mb, a, b, r, col, sides = 14) => mb.tube([new V3(...a), V3.Lerp(new V3(...a), new V3(...b), .5), new V3(...b)], r, sides, (t, s) => shade(col, .95 + .06 * Math.sin(s * 6.283)), null, true);
 const skinC = (k = 1) => (u, v) => shade(SKIN, k * (.93 + .08 * v));
-const print = (u, v) => { const cu = Math.floor(u * 44), cv = Math.floor(v * 24), hsh = Math.sin(cu * 12.9898 + cv * 78.233) * 43758.5; const f = hsh - Math.floor(hsh), du = u * 44 % 1 - .5, dv = v * 24 % 1 - .5;   // tiny white florets on coral
-  return f > .6 && du * du + dv * dv < .035 ? mixA(TRIM, rgb('#ffd9e0'), .3) : shade(DRESS, .95 + .07 * Math.sin(u * 50 + v * 20)); };
+const print = (u, v) => shade(DRESS, .94 + .06 * Math.sin(u * 6.283 * 9) * (.4 + .6 * v) + .03 * (1 - v));   // plain cotton: soft vertical folds that deepen toward the hem (the dotted print blurred into random blotches)
 // a limb shaped like a real one: a turned surface whose radius (rx side-to-side, rz front-to-back) and centre offset follow
 // an anatomical profile along its length (deltoid, biceps, forearm taper to a slim wrist; thigh, calf bulge behind, ankle)
 const limb = (mb, y0, y1, prof, cf, nu = 22, nv = 18) => mb.grid(nu, nv, (u, v) => { const a = u * 6.283, [rx, rz, zo, xo] = prof(v); return [Math.cos(a) * rx + (xo || 0), y0 + (y1 - y0) * v, Math.sin(a) * rz + (zo || 0)]; }, typeof cf === 'function' ? cf : () => cf);
@@ -175,9 +174,11 @@ function stepSkirt(dt, t, ax, az, speed) {
   const knees = [L.leg, Rt.leg].map((lg, k) => { const th = lg.hip.rotation.x, sh = lg.knee.rotation.x; return { x: (k ? 1 : -1) * .08, kz: -.41 * Math.sin(th), ky: -.03 - .41 * Math.cos(th), az: -.41 * Math.sin(th) - .395 * Math.sin(th + sh), ay: -.03 - .41 * Math.cos(th) - .395 * Math.cos(th + sh) }; });
   const p = skirt.pos, n1 = SK.seg + 1;
   for (let j = 0; j <= SK.rings; j++) { const v = j / SK.rings, y = SK.top + (SK.hem - SK.top) * v, rb = SK.r0 + (SK.r1 - SK.r0) * Math.pow(v, .9), vv = Math.pow(v, 1.6);
-    const legAt = knees.map(k => { const tt = (y - (-.03)) / (k.ky + .03); if (tt <= 1) { const q = clamp(tt, 0, 1); return [k.x, k.kz * q]; } const q = clamp((y - k.ky) / (k.ay - k.ky), 0, 1); return [k.x, k.kz + (k.az - k.kz) * q]; });
+    // how far forward the leg reaches at this height: cloth rests on any part of the leg at or above this ring and falls straight down from it
+    // (walking: follows the knee; crouching or sitting: covers the thighs like a lap and hangs from the knees - no bare knees poking through)
+    const legAt = knees.map(k => { let reach = 0; for (let q = 0; q <= 1.001; q += .2) { const pz = k.kz * q, py = -.03 + (k.ky + .03) * q; if (py >= y - .085 && Math.abs(pz) > Math.abs(reach)) reach = pz; const sz = k.kz + (k.az - k.kz) * q, sy = k.ky + (k.ay - k.ky) * q; if (sy >= y - .085 && Math.abs(sz) > Math.abs(reach)) reach = sz; } return [k.x, reach]; });
     for (let i = 0; i <= SK.seg; i++) { const a = i / SK.seg * 6.283, dx = Math.sin(a), dz = Math.cos(a) * .88; let r = rb;
-      for (const [lx, lz] of legAt) { const along = lx * dx + lz * Math.cos(a), dl = Math.hypot(lx, lz) || 1, cosA = along / dl; if (cosA > .5) r = Math.max(r, (along + .075) * ((cosA - .5) / .5) + rb * (1 - (cosA - .5) / .5)); }   // knees push the cloth out
+      for (const [lx, lz] of legAt) { const along = lx * dx + lz * Math.cos(a), dl = Math.hypot(lx, lz) || 1, cosA = along / dl; if (cosA > .5) r = Math.max(r, (along + .09) * ((cosA - .5) / .5) + rb * (1 - (cosA - .5) / .5)); }   // knees push the cloth out
       const pleat = Math.sin(a * 11 + v * 1.5) * .006 * vv * (1 + .35 * speed) + Math.sin(a * 4 - A.phase * 2) * .007 * vv * vv * Math.min(1, speed), flut = Math.sin(t * 5.3 + a * 3 + v * 2) * .008 * W.gain * vv + Math.sin(t * 3.1 - a * 5) * .004 * speed * vv + pleat;
       const o = (j * n1 + i) * 3; const lx = cloth.lx + (cloth.hx - cloth.lx) * v, lz = cloth.lz + (cloth.hz - cloth.lz) * v; p[o] = dx * (r + flut) + (lx + wlx * .025) * vv; p[o + 1] = y + (Math.abs(lz) + Math.abs(lx)) * .25 * vv; p[o + 2] = dz * (r + flut) + (lz + wlz * .025) * vv; } }
   skirt.m.updateVerticesData(B.VertexBuffer.PositionKind, p); B.VertexData.ComputeNormals(p, skirt.idx, skirt.nrm); skirt.m.updateVerticesData(B.VertexBuffer.NormalKind, skirt.nrm);
@@ -230,7 +231,14 @@ const hairTip = sp(), hairTipZ = sp(), knee = sp(), leanF = sp(), leanS = sp(), 
 const idle = { t: 0, side: 1, shift: 0, from: 0, to: 0, k: 1, glance: 0, gFrom: 0, gTo: 0, gk: 1 };          // eased idle weight shift and glances
 let windup = 0, wave = 0, prevYaw = null; const yawS = sp();                                                                  // wave: seconds left of a greeting wave (G)                                                                                            // jump anticipation timer
 A.step = (dt, inp, t) => {
-  frame++; const yawC = inp.yaw, pvx = A.vx, pvz = A.vz;
+  frame++;
+  // ---- sitting (L near a seat): walk keys or L again stand you up; while seated you don't move, you sit
+  const standUp = st => { st.leaving = true; const out = st.kind === 'hammock' ? .9 : 1.25; A.sitFrom = { x: st.x + Math.sin(st.yaw) * out, z: st.z + Math.cos(st.yaw) * out }; };   // step off clear of the seat
+  if (inp.sit) { if (A.seat) { if (!A.seat.leaving) standUp(A.seat); } else { let best = null, bd = 1e9; for (const st of G.seats || []) { const d = Math.hypot(st.x - A.x, st.z - A.z); if (d < st.r && d < bd) { bd = d; best = st; } }
+      if (best) { A.seat = best; A.sitFrom = { x: A.x, z: A.z }; best.leaving = false; } } }
+  if (A.seat && !A.seat.leaving && (inp.fwd || inp.strafe || inp.jump) && A.sitK > .95) standUp(A.seat);
+  if (A.seat) { inp = Object.assign({}, inp, { fwd: 0, strafe: 0, run: false, jump: false, crouch: false }); A.vx = A.vz = 0; }
+  const yawC = inp.yaw, pvx = A.vx, pvz = A.vz;
   // ---- where you want to go (relative to the camera), how fast the ground lets you
   let fx = Math.sin(yawC) * inp.fwd + Math.cos(yawC) * inp.strafe, fz = Math.cos(yawC) * inp.fwd - Math.sin(yawC) * inp.strafe; const il = Math.hypot(fx, fz); if (il > 1) { fx /= il; fz /= il; }
   const gy0 = hFn(A.x, A.z), e = .5, gx = (hFn(A.x + e, A.z) - hFn(A.x - e, A.z)) / (2 * e), gz = (hFn(A.x, A.z + e) - hFn(A.x, A.z - e)) / (2 * e);
@@ -244,7 +252,7 @@ A.step = (dt, inp, t) => {
   // ---- move, then resolve contacts: solid things stop you (inelastic), deep water turns you back
   let nx = A.x + A.vx * dt, nz = A.z + A.vz * dt;
   const wNext = waterAt(nx, nz, t); if (wNext - hFn(nx, nz) > C.maxWade * 1.25) { nx = A.x; nz = A.z; A.vx *= .3; A.vz *= .3; }      // too deep to wade
-  const c = collide(nx, nz, C.radius);
+  const c = A.seat ? { x: nx, z: nz, n: null } : collide(nx, nz, C.radius);          // seated: you are on the seat, not pushed off it
   if (c.n) { const vn = A.vx * c.n[0] + A.vz * c.n[1]; if (vn < 0) { A.vx -= vn * c.n[0]; A.vz -= vn * c.n[1]; if (-vn > 1.1 && A.bump <= 0) { sfx().thud(clamp(-vn / 4, .3, 1)); A.bump = .45; } } }
   A.x = c.x; A.z = c.z; A.bump = Math.max(0, A.bump - dt);
   // ---- gravity, jumping, landing
@@ -280,9 +288,9 @@ A.step = (dt, inp, t) => {
     lg.hip.rotation.x = thigh; lg.knee.rotation.x = shin; lg.ankle.rotation.x = -(thigh + shin) * .85 + .25 * Math.max(0, -cph) * Math.max(0, -s) * m;   // sole level, heel lifts at push-off
     lg.hip.rotation.z = sd * .03;
     const ai = sd < 0 ? 0 : 1;                                                         // arms follow the gait through springs: they swing on and settle when you stop
-    am.sh.rotation.x = PH.stepSpring(armS[ai], (.2 + .3 * runK) * s * m * (1 - air) - .35 * air + .02 * Math.sin(t * 1.6) - .3 * Math.max(0, A.land) * (1 - air), 13, .42, dt);
+    am.sh.rotation.x = PH.stepSpring(armS[ai], (.75 * A.amp + .25 * runK) * sw * m * (1 - air) - .35 * air + .015 * Math.sin(t * 1.6) * (1 - m) - .3 * Math.max(0, A.land) * (1 - air), 11, .75, dt);   // in step with the legs; damped so it never wobbles
     am.sh.rotation.z = sd * (.07 + .35 * air + .05 * runK + .08 * Math.max(0, A.land) + .06 * A.crouch);   // + = away from the body (clears the hips and skirt)
-    am.el.rotation.x = Math.min(0, PH.stepSpring(elbS[ai], -(.28 + .9 * runK) * (.6 + .4 * m) - .25 * air, 11, .5, dt) + .015 * armS[ai].v);   // forearm lags the upper arm
+    am.el.rotation.x = Math.min(0, PH.stepSpring(elbS[ai], -(.28 + .9 * runK) * (.6 + .4 * m) - .25 * air, 10, .8, dt) + .006 * armS[ai].v);   // forearm lags the upper arm
   };
   pose(L.leg, Rt.arm, A.phase, -1); pose(Rt.leg, L.arm, A.phase + Math.PI, 1);          // left leg swings with the right arm
   const s1 = Math.sin(A.phase), breathe = Math.sin(t * 1.7) * (1 - m);
@@ -299,6 +307,20 @@ A.step = (dt, inp, t) => {
   pelvis.rotation.z += .045 * ws; spine.rotation.z -= .05 * ws;
   [L.leg, Rt.leg].forEach((lg, k) => { const soft = Math.max(0, (k ? -1 : 1) * ws); lg.hip.rotation.x -= .07 * soft; lg.knee.rotation.x += .15 * soft; lg.ankle.rotation.x -= .08 * soft; });
   // ---- crouch (hold C): hips sink ~25 cm, thighs fold forward, knees bend, ankles keep the soles flat, the back leans in
+  // ---- sit pose: glide to the seat, turn to face out, lower the hips onto it; thighs level, shins hanging, hands in the lap
+  { const st = A.seat; A.sitK = st ? Math.min(1, (A.sitK || 0) + dt / (st.leaving ? -.6 : .7)) : 0;
+    if (st && st.leaving && A.sitK <= 0) { A.seat = null; A.sitK = 0; if (st.mesh) st.mesh.rotation.z = 0; }
+    else if (st) { const k = EZ.inOutSine(clamp(A.sitK, 0, 1)), kp = EZ.inOutSine(clamp(A.sitK * 1.6, 0, 1));
+      const fx = st.x - Math.sin(st.yaw) * .02, fz = st.z - Math.cos(st.yaw) * .02;
+      A.x = A.sitFrom.x + (fx - A.sitFrom.x) * kp; A.z = A.sitFrom.z + (fz - A.sitFrom.z) * kp;
+      let dyw = Math.atan2(Math.sin(st.yaw - A.yaw), Math.cos(st.yaw - A.yaw)); A.yaw += dyw * (1 - Math.exp(-dt * 8));
+      let sway = 0; if (st.kind === 'hammock') { st.ph = (st.ph || 0) + dt * 1.9; st.amp = PH.damp(st.amp ?? .14, .07, .25, dt); sway = Math.sin(st.ph) * st.amp * k; if (st.mesh) st.mesh.rotation.z = sway; }
+      const gy = hFn(A.x, A.z), seatLocal = (st.y - gy) / SCALE + .09;                            // hips rest on the seat (pelvis local units)
+      pelvis.position.y = pelvis.position.y * (1 - k) + seatLocal * k; pelvis.position.x = pelvis.position.x * (1 - k) + sway * (st.y - (st.axisY || st.y)) / SCALE * k; pelvis.rotation.y *= 1 - k; pelvis.rotation.z = pelvis.rotation.z * (1 - k) + sway * .6 * k;
+      const lift = st.kind === 'hammock' ? .25 : 0;                                              // in a hammock the knees ride a little higher
+      [L.leg, Rt.leg].forEach((lg, i) => { lg.hip.rotation.x = lg.hip.rotation.x * (1 - k) + (-1.5 - lift) * k; lg.knee.rotation.x = lg.knee.rotation.x * (1 - k) + (1.45 + lift * .6) * k; lg.ankle.rotation.x = lg.ankle.rotation.x * (1 - k) + (.05 - lift * .3) * k; lg.hip.rotation.z = (i ? 1 : -1) * .05 * k; });
+      [L.arm, Rt.arm].forEach((am, i) => { am.sh.rotation.x = am.sh.rotation.x * (1 - k) - .45 * k; am.sh.rotation.z = am.sh.rotation.z * (1 - k) + (i ? 1 : -1) * .1 * k; am.el.rotation.x = am.el.rotation.x * (1 - k) - .95 * k; });
+      spine.rotation.x = spine.rotation.x * (1 - k) + (-.06 + .02 * Math.sin(t * 1.7)) * k; spine.rotation.y *= 1 - k; spine.rotation.z *= 1 - k; } }
   const ck = EZ.inOutSine(A.crouch);
   if (ck > .001) { pelvis.position.y -= .25 * ck; spine.rotation.x += .32 * ck; [L.leg, Rt.leg].forEach(lg => { lg.hip.rotation.x -= .9 * ck; lg.knee.rotation.x += 1.6 * ck; lg.ankle.rotation.x -= .6 * ck; });
     [L.arm, Rt.arm].forEach(am => { am.sh.rotation.x -= .35 * ck; am.el.rotation.x -= .45 * ck; }); }
