@@ -29,12 +29,22 @@ const birds = []; G.birds = birds;
   const eg = new MB(), egn = new MB(), ca = '#fbfbf8';
   eg.ellipsoid(0, .52, 0, .095, .115, .24, 16, 10, (u, v) => shade(rgb(ca), .92 + .1 * v)); eg.ellipsoid(0, .5, -.22, .05, .06, .12, 10, 7, () => rgb(ca));
   for (let i = 0; i < 9; i++) geo.leaf(eg, .2, .03, basis(new V3(Rr(-.25, .25, rand), -.35, -1).normalize(), UP, new V3(Rr(-.04, .04, rand), .6, -.1), 0), rgb(ca), shade(rgb(ca), .85), { nu: 4, nv: 2, fold: .1, curl: -.2, base: .5, sharp: .5 });
-  for (const sd of [-1, 1]) { eg.tube([new V3(sd * .04, .42, .01), new V3(sd * .04, .24, .015), new V3(sd * .04, .012, .02)], [.012, .008], 6, () => rgb('#2a2622')); for (const ang of [-.35, 0, .35]) eg.tube([new V3(sd * .04, .012, .02), new V3(sd * .04 + Math.sin(ang) * .05, .01, .02 + Math.cos(ang) * .08)], [.006, .003], 4, () => rgb('#2a2622')); }
-  const neck = []; for (let i = 0; i <= 9; i++) { const t = i / 9; neck.push(new V3(0, .06 + t * .34 + Math.sin(t * 5) * .02, Math.sin(t * 3.4) * .1 - .02)); }
+  // a real rig: legs are separate two-joint limbs hanging from the hips, the neck is jointed at its base on the body,
+  // so stepping, stretching and striking bend joints and nothing comes apart
+  const legUp = new MB(), legLo = new MB(), LEGC = () => rgb('#2a2622');
+  legUp.tube([new V3(0, .02, 0), new V3(0, -.1, .003), new V3(0, -.21, .005)], [.012, .009], 6, LEGC); legUp.ellipsoid(0, -.21, .005, .011, .013, .011, 6, 5, LEGC);   // shank + the backward-bending "knee" (ankle)
+  legLo.tube([new V3(0, 0, 0), new V3(0, -.1, .003), new V3(0, -.198, .006)], [.009, .007], 6, LEGC); for (const ang of [-.35, 0, .35]) legLo.tube([new V3(0, -.198, .006), new V3(Math.sin(ang) * .05, -.2, .006 + Math.cos(ang) * .08)], [.006, .003], 4, LEGC);
+  legLo.tube([new V3(0, -.198, .006), new V3(0, -.2, -.04)], [.005, .003], 4, LEGC);
+  const neck = []; for (let i = 0; i <= 9; i++) { const t = i / 9; neck.push(new V3(0, t * .34 + Math.sin(t * 5) * .02, Math.sin(t * 3.4) * .1)); }   // starts at its own origin = the neck joint
   egn.tube(neck, [.034, .016], 8, () => rgb(ca)); const hd = neck[9]; egn.ellipsoid(hd.x, hd.y + .01, hd.z + .02, .026, .024, .04, 10, 7, () => rgb(ca)); egn.tube([new V3(0, hd.y + .004, hd.z + .055), new V3(0, hd.y - .012, hd.z + .21)], [.013, .0025], 6, () => rgb('#e8c23a'));
   for (const sd of [-1, 1]) egn.ellipsoid(sd * .02, hd.y + .02, hd.z + .035, .004, .004, .004, 4, 3, () => [.02, .02, .02]);
-  const egBody = part(eg), egNeck = part(egn); const root = new B.TransformNode('egret', scene), a = { root, body: egBody.createInstance('e1'), neck: egNeck.createInstance('e2'), ph: rand() * 6.28, timer: 5, state: 'stand', ang: .35, lunge: 0 };
-  a.body.parent = root; a.neck.parent = root; a.neck.position.set(0, .54, .18); a.neck.position.y = .54 - .06; a.neck.position.z = .18; [a.body, a.neck].forEach(m => m.isPickable = false); root.scaling.setAll(1.15); a.hot = { pos: new V3(), r: .6, kind: 'tagak' }; G.hot.push(a.hot); G.egret = a; G.cast(a.body);
+  const egBody = part(eg), egNeck = part(egn), egUp = part(legUp), egLo = part(legLo); const root = new B.TransformNode('egret', scene), torso = new B.TransformNode('egretTorso', scene);
+  torso.parent = root; torso.position.set(0, .42, .01);                                             // the body pitches over the hips
+  const a = { root, torso, body: egBody.createInstance('e1'), neck: egNeck.createInstance('e2'), ph: rand() * 6.28, timer: 5, state: 'stand', ang: .35, lunge: 0, gait: 0, yaw: 0, nk: G.physics.spring(), tp: G.physics.spring(), legs: [] };
+  a.body.parent = torso; a.body.position.set(0, -.42, -.01); a.neck.parent = torso; a.neck.position.set(0, .12, .15);   // neck joint sits inside the front of the body
+  for (const sd of [-1, 1]) { const hip = new B.TransformNode('egHip', scene); hip.parent = root; hip.position.set(sd * .04, .42, .01); const up = egUp.createInstance('eu'); up.parent = hip;
+    const kn = new B.TransformNode('egKnee', scene); kn.parent = hip; kn.position.set(0, -.21, .005); const lo = egLo.createInstance('el'); lo.parent = kn; up.isPickable = lo.isPickable = false; a.legs.push({ hip, kn }); }
+  [a.body, a.neck].forEach(m => m.isPickable = false); root.scaling.setAll(1.15); a.hot = { pos: new V3(), r: .6, kind: 'tagak' }; G.hot.push(a.hot); G.egret = a; G.cast(a.body);
 })();
 function updateBirds(t, dt, cam, day) {
   for (const b of birds) {
@@ -49,9 +59,24 @@ function updateBirds(t, dt, cam, day) {
     }
     b.hot.pos.copyFrom(b.root.position);
   }
-  const e = G.egret; if (e) { e.root.setEnabled(true); const px = P.x + Math.cos(e.ang) * (P.r + .15), pz = P.z + Math.sin(e.ang) * (P.r + .15); e.timer -= dt; if (e.timer <= 0) { e.state = e.state === 'stand' ? 'step' : 'stand'; e.timer = e.state === 'step' ? R(2, 4) : R(5, 11); if (e.state === 'stand' && rand() < .6) e.lunge = 1; } if (e.state === 'step') e.ang += dt * .05;
-    const gy = hFn(px, pz); e.root.position.set(px, Math.max(gy, -.4), pz); e.root.rotation.y = e.ang + Math.PI / 2 + .6; e.lunge = Math.max(0, e.lunge - dt * .8); const lg = Math.sin(clamp(1 - e.lunge, 0, 1) * Math.PI) * (e.lunge > 0 ? 1 : 0);
-    e.neck.rotation.x = Math.sin(t * .8 + e.ph) * .06 + lg * 1.15; e.neck.position.z = .18 + lg * .06; e.hot.pos.set(px, gy + .6, pz); }
+  const e = G.egret; if (e) { e.root.setEnabled(true); e.timer -= dt;
+    if (e.timer <= 0) { e.state = e.state === 'stand' ? 'step' : 'stand'; e.timer = e.state === 'step' ? R(2, 4) : R(5, 11); if (e.state === 'stand' && rand() < .6) { e.lunge = 1.7; } }
+    const walking = e.state === 'step', v = walking ? .05 : 0; e.ang += dt * v;                    // slow, deliberate wading round the pond edge
+    const ER = P.r - .45, px = P.x + Math.cos(e.ang) * ER, pz = P.z + Math.sin(e.ang) * ER, gy = hFn(px, pz);   // wading the shallows inside the rim stones (not on them), ankle-deep
+    e.gait += dt * v * ER / .26 * Math.PI;                                                  // the stride advances with distance: feet never skate
+    const want = walking ? -e.ang : e.ang + Math.PI / 2 + .6; let dy = Math.atan2(Math.sin(want - e.yaw), Math.cos(want - e.yaw)); e.yaw += dy * (1 - Math.exp(-dt * 2.5));
+    e.root.position.set(px, gy, pz); e.root.rotation.y = e.yaw;
+    const wk = e.wk = G.physics.damp(e.wk || 0, walking ? 1 : 0, 4, dt);
+    e.legs.forEach((L, k) => { const ph = e.gait + k * Math.PI, sw = Math.sin(ph), lift = Math.pow(Math.max(0, Math.cos(ph)), 2);   // lift the foot high while it swings forward, like a heron
+      L.hip.rotation.x = -.32 * sw * wk; L.kn.rotation.x = .95 * lift * wk; });
+    // the strike: anticipation (neck draws back into an S), a fast stab forward-down, a hold, then an eased recovery
+    let strike = 0, pitch = 0; if (e.lunge > 0) { e.lunge = Math.max(0, e.lunge - dt); const u = 1 - e.lunge / 1.7, EZ = G.ease;
+      strike = u < .3 ? -.3 * EZ.inOutSine(u / .3) : u < .4 ? -.3 + 1.55 * EZ.outCubic((u - .3) / .1) : u < .58 ? 1.25 + .04 * Math.sin(t * 40) : 1.25 * (1 - EZ.inOutSine((u - .58) / .42));
+      pitch = Math.max(0, strike) * .22; }
+    const bob = walking ? Math.sin(e.gait * 2) : 0;
+    e.neck.rotation.x = G.physics.stepSpring(e.nk, strike + Math.sin(t * .8 + e.ph) * .05 + bob * .05 * wk, e.lunge > 0 ? 40 : 8, .75, dt);   // stiff during the stab, soft otherwise
+    e.torso.rotation.x = G.physics.stepSpring(e.tp, pitch + .04 * wk, 9, .8, dt); e.torso.position.y = .42 + .008 * Math.abs(bob) * wk;
+    e.hot.pos.set(px, gy + .6, pz); }
 }
 function flapBird(b, t, dt, glide) { b.flapT += dt; const cyc = b.flapT % 2.4, flap = cyc < 1.4 || glide ? 1 : .08; const ang = Math.sin(t * 22 + b.ph) * .85 * flap + .05; b.wingR.rotation.z = -ang; b.wingL.rotation.z = ang; b.wingR.scaling.x = 1; b.wingL.scaling.x = -1; }
 G.systems.add('birds', (t, dt) => updateBirds(t, G.faunaKit.dt(dt), G.camera.position, G.faunaKit.isDay()), { order: 61 });
