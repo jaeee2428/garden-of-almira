@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardin ni Almira Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ea; --paper:#fffdf7; --ink:#2b2a26; --muted:#6c675c; --line:#e3dccb;
+  --leaf:#3f6b45; --leaf-soft:#e3eee0; --petal:#c4506a; --petal-soft:#f8e3e8;
+  --sun:#d39a2b; --sun-soft:#f8ecd2; --night:#3b4a7a; --night-soft:#e2e6f3; --sea:#2f7b8c; --sea-soft:#dcedf0;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171a; --paper:#1f2024; --ink:#ebe7dd; --muted:#a39e92; --line:#34353a;
+    --leaf:#8fc596; --leaf-soft:#22302a; --petal:#ec8ea3; --petal-soft:#3a2229;
+    --sun:#e9b860; --sun-soft:#3a2f1a; --night:#9fb0e6; --night-soft:#252a3d; --sea:#7cc4d2; --sea-soft:#1c3036;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171a; --paper:#1f2024; --ink:#ebe7dd; --muted:#a39e92; --line:#34353a;
+  --leaf:#8fc596; --leaf-soft:#22302a; --petal:#ec8ea3; --petal-soft:#3a2229;
+  --sun:#e9b860; --sun-soft:#3a2f1a; --night:#9fb0e6; --night-soft:#252a3d; --sea:#7cc4d2; --sea-soft:#1c3036;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif}
+main{max-width:920px;margin:0 auto;padding:48px 16px 96px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;line-height:1.2}
+h1{font-size:clamp(2rem,5vw,3rem);margin:.2em 0 .1em}
+h2{font-size:1.6rem;margin:2.6em 0 .6em;padding-top:.6em;border-top:1px solid var(--line)}
+h3{font-size:1.15rem;margin:1.6em 0 .4em}
+p{margin:.6em 0}
+.kicker{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.15rem;color:var(--muted);max-width:44em}
+.note{font-size:.85rem;color:var(--muted)}
+.cb{font-style:italic}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.pill{display:inline-block;font-size:.75rem;padding:2px 9px;border-radius:99px;background:var(--leaf-soft);color:var(--leaf);font-weight:600;margin-right:4px}
+.pill.p{background:var(--petal-soft);color:var(--petal)} .pill.s{background:var(--sun-soft);color:var(--sun)}
+.pill.n{background:var(--night-soft);color:var(--night)} .pill.w{background:var(--sea-soft);color:var(--sea)}
+.pillar h3{margin-top:.2em}
+.pillar .ic{font-size:1.6rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.tablewrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:4px 8px}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:Inter,system-ui,sans-serif;fill:var(--ink)}
+.flowwrap{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+
+/* journal mock */
+.journal{display:grid;grid-template-columns:1fr 1fr;background:#efe5cc;border-radius:10px;padding:10px;gap:10px;box-shadow:var(--shadow);color:#3a3326}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .journal{background:#4a412f}}
+:root[data-theme="dark"] .journal{background:#4a412f}
+.page{background:#fbf6e8;border-radius:6px;padding:16px 18px;min-height:360px;position:relative;background-image:repeating-linear-gradient(transparent 0 27px,#e8dfc8 27px 28px)}
+.page h4{font-family:Fraunces,serif;margin:0 0 6px;font-size:1.1rem}
+.hand{font-family:Caveat,cursive;font-size:1.25rem;line-height:28px;color:#4d3f2a}
+.blank{display:inline-block;min-width:90px;border-bottom:2px dashed #b8a982;color:#b8a982;font-family:Inter;font-size:.78rem;padding:0 4px;text-align:center}
+.filled{border-bottom:2px solid #6b8f5a;color:#3f6b45;font-family:Caveat,cursive;font-size:1.3rem}
+.stamp{position:absolute;right:16px;bottom:14px;transform:rotate(-8deg);border:2px solid #c4506a;color:#c4506a;border-radius:6px;padding:2px 8px;font:600 .75rem Inter;letter-spacing:.08em;opacity:.85}
+.sketch{width:100%;max-width:200px;margin:4px auto 6px}
+.clue{font-size:.82rem;background:#fff;border:1px solid #e3d8bb;border-radius:6px;padding:6px 9px;margin:6px 0;line-height:1.4;color:#3a3326}
+.clue b{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:#8a7a55;display:block}
+@media (max-width:640px){.journal{grid-template-columns:1fr}}
+
+.chapter{border-left:4px solid var(--c);padding-left:14px;margin:18px 0}
+.chapter h3{margin:.2em 0}
+.chapter ul{margin:.3em 0;padding-left:1.1em}
+.warn{border-left:4px solid var(--sun);background:var(--sun-soft);padding:12px 16px;border-radius:0 10px 10px 0;font-size:.92rem}
+ol.steps li{margin:.35em 0}
+</style>
+</head>
+<body>
+<main>
+
+<div class="kicker">Concept note · draft v0.1 · October 2026</div>
+<h1>Hardin ni Almira</h1>
+<p class="lede">A cozy deduction game set in a Cebuano seaside garden. You learn its flowers the way a botanist would, through clues, notes and a herbarium journal. Along the way you uncover the folk stories and healing knowledge that grew with them.</p>
+<p class="note">Princess Jaena Marie O. De La Peña · BS Computer Science, UP Cebu · Special Problem<br>Working title, inspired by the title of Erlinda K. Alburo's <span class="cb">Sinug-ang Hardin ni Almira</span>. Content from the poems will only be used with her permission.</p>
+
+<h2>1. Vision</h2>
+<div class="grid g2">
+  <div class="card"><h3 style="margin-top:0">The problem</h3>
+  <p>Knowledge about Cebuano plants, like their names, their folk uses and the stories told about them, mostly lives with elders and gets passed on by word of mouth. Younger Cebuanos often know these flowers by sight but not by name, and seldom know what they were used for.</p></div>
+  <div class="card"><h3 style="margin-top:0">The idea</h3>
+  <p>A browser-based 3D garden where you learn by <b>noticing and working things out</b>, not by reading a list. Each flower is a small mystery. Solving it fills a page of your herbarium journal and brings back a memory, a word and a story.</p></div>
+</div>
+
+<h3>Design pillars</h3>
+<div class="grid g3">
+  <div class="card pillar"><div class="ic">🔍</div><h3>Observe, then deduce</h3><p>Every answer can be found in the world: scent at night, leaf shape, where it grows, who uses it. No quest markers.</p></div>
+  <div class="card pillar"><div class="ic">📖</div><h3>The journal is the game</h3><p>Progress lives in a hand-drawn herbarium that you fill in yourself. It is also what you take away from the game.</p></div>
+  <div class="card pillar"><div class="ic">🗣️</div><h3>Cebuano first</h3><p>Names, riddles and sayings are in Cebuano, with English help underneath. Saying the right name is what solves the puzzle.</p></div>
+  <div class="card pillar"><div class="ic">🌙</div><h3>Stories of the place</h3><p>Folklore is treated with respect, as stories told by people, not as monsters to fight. Gentle wonder, never horror.</p></div>
+  <div class="card pillar"><div class="ic">🍃</div><h3>Calm and kind</h3><p>No timers, no game over. Wrong guesses get gentle hints, so the player can't get stuck.</p></div>
+</div>
+
+<h2>2. Story frame</h2>
+<p>Ikaw comes home to the seaside garden that was cared for by <b>Almira</b>. Who Almira is (a lola, a lost aunt, or the garden itself) stays open until after the conversation with Ma'am Alburo.</p>
+<p>The garden has grown quiet. Almira left behind a <b>herbarium journal</b> that is only half finished: pressed flowers with missing names, notes in her handwriting, riddles in the margins and stories told to her by neighbours. Ikaw's task is to finish the journal. Each completed page brings part of the garden back: colour, birdsong, the smell of dama de noche at night.</p>
+<p>When all 18 pages are complete, the garden <b>awakens</b> (the existing finale). The last page is Almira's message, or, with permission, lines from the poems.</p>
+
+<h2>3. Core loop: the Botany Manor style deduction</h2>
+<p>In <span class="cb">Botany Manor</span>, you are given a plant you can't identify yet. You collect clues from letters, books and the house, then confirm what the plant needs before it blooms. We adapt that loop to Cebuano plants and folk knowledge:</p>
+<div class="flowwrap">
+<svg viewBox="0 0 880 250" role="img" aria-label="Core loop: find a pressed page, collect clues, deduce in journal, confirm in the garden, unlock memory and story">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker>
+  </defs>
+  <g font-size="13">
+    <rect x="10" y="40" width="150" height="86" rx="12" fill="var(--petal-soft)" stroke="var(--petal)"/>
+    <text x="85" y="72" text-anchor="middle" font-weight="600">1 · Mystery page</text>
+    <text x="85" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">a pressed flower,</text>
+    <text x="85" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">name missing</text>
+
+    <rect x="190" y="40" width="150" height="86" rx="12" fill="var(--sun-soft)" stroke="var(--sun)"/>
+    <text x="265" y="72" text-anchor="middle" font-weight="600">2 · Gather clues</text>
+    <text x="265" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">notes, tigmo, people,</text>
+    <text x="265" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">scent, time, place</text>
+
+    <rect x="370" y="40" width="150" height="86" rx="12" fill="var(--leaf-soft)" stroke="var(--leaf)"/>
+    <text x="445" y="72" text-anchor="middle" font-weight="600">3 · Deduce</text>
+    <text x="445" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">fill the blanks in</text>
+    <text x="445" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">the journal</text>
+
+    <rect x="550" y="40" width="150" height="86" rx="12" fill="var(--sea-soft)" stroke="var(--sea)"/>
+    <text x="625" y="72" text-anchor="middle" font-weight="600">4 · Confirm</text>
+    <text x="625" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">find the living plant,</text>
+    <text x="625" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">say "tabi", collect it</text>
+
+    <rect x="730" y="40" width="140" height="86" rx="12" fill="var(--night-soft)" stroke="var(--night)"/>
+    <text x="800" y="72" text-anchor="middle" font-weight="600">5 · Remember</text>
+    <text x="800" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">page stamped, memory</text>
+    <text x="800" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">and story unlocked</text>
+
+    <path d="M160 83H186" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+    <path d="M340 83H366" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+    <path d="M520 83H546" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+    <path d="M700 83H726" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+    <path d="M800 126V200H85V130" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="5 5" marker-end="url(#ar)"/>
+    <text x="442" y="222" text-anchor="middle" font-size="12" fill="var(--muted)">the story unlocks the next mystery page (and new places or times of day)</text>
+    <path d="M445 126V160" stroke="var(--petal)" stroke-width="1.4" stroke-dasharray="3 4"/>
+    <text x="445" y="176" text-anchor="middle" font-size="11.5" fill="var(--petal)">wrong guess → gentle hint, no penalty</text>
+  </g>
+</svg>
+</div>
+
+<h3>Clue types (each flower has 3–4)</h3>
+<div class="tablewrap"><table>
+<tr><th>Clue</th><th>Where it comes from</th><th>What it teaches</th></tr>
+<tr><td><span class="pill p">Almira's note</span></td><td>Handwritten lines in the journal, letters in the kubo</td><td>Memory, emotion, how the plant was used at home</td></tr>
+<tr><td><span class="pill s">Tigmo</span></td><td>A Cebuano riddle in the margin, with English help</td><td>Language: the Cebuano name and descriptive words</td></tr>
+<tr><td><span class="pill">Sensory</span></td><td>The world: scent only at night, colour, leaf shape, bees, place</td><td>Observation, botany (what the flower looks like)</td></tr>
+<tr><td><span class="pill w">Neighbour</span></td><td>A villager's story or request (a cough, a fever, a fiesta)</td><td>Folk use and the community around the plant</td></tr>
+<tr><td><span class="pill n">Sugilanon</span></td><td>A folk story told at dusk or night</td><td>Folklore and beliefs attached to the plant or place</td></tr>
+</table></div>
+
+<h3>The deduction itself</h3>
+<p>Each journal page has three blanks. The player fills them by picking from words they have already collected (a word bank that grows as clues are found):</p>
+<ol class="steps">
+  <li><b>Ngalan (name):</b> the Cebuano name, e.g. <span class="cb">manul</span>, <span class="cb">antulunga</span>, <span class="cb">balunsaying</span>.</li>
+  <li><b>Kanus-a / asa (when or where):</b> blooms at night, near water, climbs the fence, grows by the churchyard.</li>
+  <li><b>Gamit (use):</b> fever tea, poultice for boils, garland for the altar, dye, "do not eat, poison".</li>
+</ol>
+<p>Three correct blanks confirm the page. The player then goes to the living plant in the garden and collects it into the bayong. That reuses the existing click, card and bayong flow, now as the reward instead of the start.</p>
+
+<h2>4. The herbarium journal (mockup)</h2>
+<p class="note">Opened with a key (for example <b>J</b>), not a new button. It is filled in by the player, so it isn't the removed flower-guide pop-up. The Cebuano lines below are placeholders to be checked by a native speaker.</p>
+<div class="journal">
+  <div class="page">
+    <h4>Pahina 5 · ???</h4>
+    <svg class="sketch" viewBox="0 0 200 150" aria-label="Pencil sketch of a pressed night flower">
+      <g fill="none" stroke="#6d5d3f" stroke-width="1.4" stroke-linecap="round">
+        <path d="M100 145C98 110 102 80 100 40"/>
+        <path d="M100 110C80 104 62 108 46 118C64 120 84 118 100 110z" fill="#e7dfc4"/>
+        <path d="M100 90C120 82 140 86 156 96C138 100 116 98 100 90z" fill="#e7dfc4"/>
+        <g fill="#f3efdc">
+          <path d="M100 40l-8-22 8 4 8-4z"/><path d="M100 40l-20-14 9-1 4-8z"/><path d="M100 40l20-14-9-1-4-8z"/>
+          <path d="M100 40l-26 2 7 5-3 8z"/><path d="M100 40l26 2-7 5 3 8z"/>
+        </g>
+      </g>
+      <text x="196" y="140" text-anchor="end" font-family="Caveat" font-size="15" fill="#8a7a55">pressed 19__</text>
+    </svg>
+    <div class="hand">Ngalan: <span class="blank">? name</span></div>
+    <div class="hand">Kanus-a: <span class="filled">mobukad inig gabii</span></div>
+    <div class="hand">Gamit: <span class="blank">? use</span></div>
+    <div class="hand" style="margin-top:6px">"Smells of the whole street after dark..."</div>
+  </div>
+  <div class="page">
+    <h4>Mga timailhan · clues</h4>
+    <div class="clue"><b>Almira's note</b>"Lola never let us pick it. She said its perfume was for the ones who walk at night."</div>
+    <div class="clue"><b>Tigmo (placeholder)</b>A lady who only dresses up when the sun goes down. Who is she?</div>
+    <div class="clue"><b>Sensory</b>Near the gate the air turns sweet after 7 pm, but the plant looks plain by day.</div>
+    <div class="clue"><b>Neighbour</b>Nang Iday: "Don't make tea out of that one, day. Smell it, don't drink it."</div>
+    <div class="stamp">KULANG PA · INCOMPLETE</div>
+  </div>
+</div>
+<p class="note">Answer: dama de noche. It opens only at night and is grown for its scent, but all parts are toxic, which the neighbour's warning hints at. This matches the facts already on the card.</p>
+
+<h2>5. Folklore layer: Sugilanon sa Sugbo</h2>
+<p>Short stories told by a neighbour, a fisherman or Almira's notes, each tied to a place or plant in the garden. They give the garden a soul and teach the beliefs behind everyday habits. <b>All of these need checking</b> with Ma'am Gabales, Ma'am Alburo or local elders before writing the final text, and should name the town or source.</p>
+<div class="tablewrap"><table>
+<tr><th>Story / belief</th><th>What it is (to verify)</th><th>How it shows up in the game</th></tr>
+<tr><td><b>Maria Cacao</b></td><td>The diwata of Mt. Lantoy in Argao, Cebu, said to sail a golden ship down the river. When bridges wash away, people say her ship passed.</td><td>Told by the fisherman at the bangka at dusk. Opens the shore area. A glint of gold on the sea at night (no new UI).</td></tr>
+<tr><td><b>Tamawo / engkanto and the dalakit</b></td><td>Fair, unseen beings said to live in big trees like the balete (dalakit). People ask permission when passing.</td><td>The <b>"Tabi" mechanic</b>: hold a key before collecting near the old tree or at night. If you forget, nothing bad happens, but a leaf falls and Almira's note reminds you.</td></tr>
+<tr><td><b>Buyag</b></td><td>A stranger's praise or greeting can make a child sick, unless they say "puwera buyag".</td><td>A neighbour's child is unwell after visitors. Part of the remedy puzzle (with a disclaimer that this is folk belief).</td></tr>
+<tr><td><b>Mananambal, tuob, palina</b></td><td>Folk healers. Tuob is steam inhalation with boiled leaves, palina is smoke cleansing with dried herbs.</td><td>Almira's remedy pages: combine the right plants for tuob. Teaches folk use and the "no medical advice" boundary.</td></tr>
+<tr><td><b>Holy Week herb gathering (Siquijor)</b></td><td>Healers gather herbs on Good Friday for the year's remedies, a famous Visayan tradition.</td><td>A late-game sugilanon explaining why Almira's journal has dates on Fridays.</td></tr>
+<tr><td><b>Kalag-kalag</b></td><td>All Souls' Day. Graves get flowers, candles and food; kalachuchi and rosal grow in churchyards.</td><td>Night chapter: the kalachuchi and rosal pages, with candles at the small shrine (candles flicker only at night, as now).</td></tr>
+<tr><td><b>Sumpa kita</b></td><td>The sampaguita legend ("I promise you"), told across the Philippines, likely Tagalog in origin.</td><td>The prologue flower. Almira's promise to the garden is the hook of the story.</td></tr>
+<tr><td><b>Flores de Mayo</b></td><td>Girls offer flowers to the Virgin Mary in May; roses lead the Santacruzan.</td><td>The rosas page: gather flowers for the arch, with a short memory of Almira as a sagala.</td></tr>
+</table></div>
+
+<h2>6. Game flow</h2>
+<p>One day in the garden, split by the time of day the game already has (Buntag → Udto → Hapon → Gabii). Each chapter opens part of the garden and adds a new type of clue.</p>
+
+<div class="flowwrap">
+<svg viewBox="0 0 880 170" role="img" aria-label="Timeline of chapters from Prologue through Buntag, Udto, Hapon and Gabii to the Awakening">
+  <g font-size="12.5">
+    <path d="M30 70H850" stroke="var(--line)" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="40" cy="70" r="14" fill="var(--petal-soft)" stroke="var(--petal)" stroke-width="2"/>
+    <text x="40" y="38" text-anchor="middle" font-weight="600">Prologue</text><text x="40" y="106" text-anchor="middle" fill="var(--muted)">1 page</text>
+    <circle cx="210" cy="70" r="14" fill="var(--sun-soft)" stroke="var(--sun)" stroke-width="2"/>
+    <text x="210" y="38" text-anchor="middle" font-weight="600">I · Buntag</text><text x="210" y="106" text-anchor="middle" fill="var(--muted)">5 pages</text>
+    <text x="210" y="124" text-anchor="middle" fill="var(--muted)" font-size="11">yard and house</text>
+    <circle cx="380" cy="70" r="14" fill="var(--sea-soft)" stroke="var(--sea)" stroke-width="2"/>
+    <text x="380" y="38" text-anchor="middle" font-weight="600">II · Udto</text><text x="380" y="106" text-anchor="middle" fill="var(--muted)">5 pages</text>
+    <text x="380" y="124" text-anchor="middle" fill="var(--muted)" font-size="11">pond and shore</text>
+    <circle cx="550" cy="70" r="14" fill="var(--leaf-soft)" stroke="var(--leaf)" stroke-width="2"/>
+    <text x="550" y="38" text-anchor="middle" font-weight="600">III · Hapon</text><text x="550" y="106" text-anchor="middle" fill="var(--muted)">4 pages</text>
+    <text x="550" y="124" text-anchor="middle" fill="var(--muted)" font-size="11">remedies, visitors</text>
+    <circle cx="720" cy="70" r="14" fill="var(--night-soft)" stroke="var(--night)" stroke-width="2"/>
+    <text x="720" y="38" text-anchor="middle" font-weight="600">IV · Gabii</text><text x="720" y="106" text-anchor="middle" fill="var(--muted)">3 pages</text>
+    <text x="720" y="124" text-anchor="middle" fill="var(--muted)" font-size="11">stories, spirits</text>
+    <circle cx="850" cy="70" r="16" fill="var(--petal)" />
+    <text x="850" y="75" text-anchor="middle" fill="#fff" font-size="14">✿</text>
+    <text x="850" y="38" text-anchor="end" font-weight="600">Awakening</text><text x="850" y="106" text-anchor="end" fill="var(--muted)">18 / 18</text>
+    <text x="440" y="158" text-anchor="middle" fill="var(--muted)" font-size="11.5">Estimated play time 45–60 min · Free Walk and the Tour stay available as they are now</text>
+  </g>
+</svg>
+</div>
+
+<div class="chapter" style="--c:var(--petal)">
+  <span class="pill p">Prologue · tutorial</span>
+  <h3>Sumpa kita</h3>
+  <ul>
+    <li>Ikaw arrives at the gate, finds the journal on the papag and reads Almira's first note.</li>
+    <li>Flower: <b>sampaguita (manul)</b>. Teaches the whole loop with only two blanks: clue → deduce → collect → page stamped.</li>
+    <li>Payoff: the first memory (Almira threading a garland for the altar) and the promise that frames the game.</li>
+  </ul>
+</div>
+<div class="chapter" style="--c:var(--sun)">
+  <span class="pill s">Chapter I · Buntag</span>
+  <h3>Ang nataran (the yard)</h3>
+  <ul>
+    <li>Flowers: <b>gumamela, santan, rosas, bogambilya, pukingan</b>.</li>
+    <li>New clue type: <b>tigmo</b> riddles. Morning chores (well, hens) reveal sensory clues.</li>
+    <li>Example: gumamela. Children blow bubbles from its crushed petals; Nang Iday asks for it for a boil. Gamit = poultice.</li>
+    <li>Folklore: <b>Flores de Mayo</b> memory on the rosas page.</li>
+  </ul>
+</div>
+<div class="chapter" style="--c:var(--sea)">
+  <span class="pill w">Chapter II · Udto</span>
+  <h3>Ang lim-aw ug baybayon (pond and shore)</h3>
+  <ul>
+    <li>Flowers: <b>liryo, canna (balunsaying), heliconia, orkidyas, kadena</b>.</li>
+    <li>New clue type: <b>neighbour</b> stories. The fisherman at the bangka, a child by the pond.</li>
+    <li>Example: canna. "A drink to cool the body after working in the sun" plus "seeds hard as shot", which children use as beads (kolintasan).</li>
+    <li>Folklore: <b>Maria Cacao</b>, told at the shore as the afternoon turns.</li>
+  </ul>
+</div>
+<div class="chapter" style="--c:var(--leaf)">
+  <span class="pill">Chapter III · Hapon</span>
+  <h3>Tambal (remedies)</h3>
+  <ul>
+    <li>Flowers: <b>kamia, ilang-ilang, tsampaka, adelfa</b>.</li>
+    <li>New mechanic: <b>remedy pages</b>. A visitor describes a problem; the player picks plants from the journal (for example kamia for a sore-throat gargle, or tuob steam).</li>
+    <li><b>Adelfa is the lesson on caution:</b> beautiful but poisonous, used only on the skin in folk practice. Choosing it for a tea gives a gentle warning and the "never eat" fact.</li>
+    <li>Folklore: <b>mananambal, tuob, buyag</b>.</li>
+  </ul>
+</div>
+<div class="chapter" style="--c:var(--night)">
+  <span class="pill n">Chapter IV · Gabii</span>
+  <h3>Mga sugilanon (night stories)</h3>
+  <ul>
+    <li>Flowers: <b>dama de noche, kalachuchi, rosal</b>. Two of them are found by scent, only after dark.</li>
+    <li>New clue type: <b>sugilanon</b> at the shrine. The <b>"tabi"</b> moment at the old tree. Fireflies only at night (as now).</li>
+    <li>Folklore: <b>tamawo and the dalakit</b>, <b>kalag-kalag</b>, Holy Week herb gathering.</li>
+  </ul>
+</div>
+<div class="chapter" style="--c:var(--petal)">
+  <span class="pill p">Epilogue</span>
+  <h3>Awakening</h3>
+  <ul>
+    <li>18/18 pages: the existing awaken magic plays. Almira's last page is revealed (or, with permission, lines from the poems).</li>
+    <li>The completed journal can be saved or printed as a herbarium, which is the player's takeaway and a good thesis artifact.</li>
+  </ul>
+</div>
+
+<h2>7. How it fits what's already built</h2>
+<div class="tablewrap"><table>
+<tr><th>Already in the game</th><th>Role in the new flow</th></tr>
+<tr><td>Walk mode, Ikaw, Tab view</td><td>How you explore and look for clues (unchanged)</td></tr>
+<tr><td>Time of day (Buntag … Gabii)</td><td>Chapter structure; some clues only appear at certain hours</td></tr>
+<tr><td>Hover label (Cebuano name)</td><td>Hidden for unsolved hero flowers ("???"), revealed once the page is solved</td></tr>
+<tr><td>Flower card</td><td>Becomes the reward screen after a correct deduction</td></tr>
+<tr><td>Bayong (18 flowers)</td><td>Progress tracker, and where the journal lives</td></tr>
+<tr><td>Awaken magic</td><td>The finale</td></tr>
+<tr><td>Tour (190 s)</td><td>Stays as is, as a calm "postcard" mode</td></tr>
+<tr><td>Soundscape, hens, egret, sea</td><td>Sources of sensory clues</td></tr>
+</table></div>
+<div class="warn" style="margin-top:14px"><b>Not coming back:</b> wish lanterns, the Kuwento panel, the Hangin button, fairies and the flower-guide pop-up stay removed. Stories are delivered through the journal, NPC lines and Almira's notes.</div>
+
+<h2>8. Scope for the SP</h2>
+<div class="grid g3">
+  <div class="card"><span class="pill">Must have</span><ul><li>Journal with 18 pages and blanks</li><li>Clue collection and word bank</li><li>Deduce → collect → stamp loop</li><li>Prologue + 4 chapters</li><li>Ending</li></ul></div>
+  <div class="card"><span class="pill s">Nice to have</span><ul><li>Tigmo for every flower</li><li>3–4 neighbour NPCs</li><li>Remedy pages</li><li>"Tabi" mechanic</li><li>Recorded Cebuano voice lines</li></ul></div>
+  <div class="card"><span class="pill n">Stretch</span><ul><li>Lines from Alburo's poems (with permission)</li><li>Printable herbarium</li><li>Small hands-on mini-games (garland threading)</li></ul></div>
+</div>
+
+<h3>Evaluation ideas</h3>
+<ul>
+  <li><b>Learning:</b> a short quiz before and after playing (name, use and caution for 6–8 flowers).</li>
+  <li><b>Experience:</b> a game experience questionnaire or the System Usability Scale (SUS), plus a few open questions about what they remember.</li>
+  <li><b>Cultural accuracy:</b> a review of the content by Ma'am Gabales, Ma'am Alburo (if willing) or a local elder or mananambal.</li>
+  <li><b>Performance:</b> frame rate on a regular school laptop (the existing <code>?perf=1</code> tool).</li>
+</ul>
+
+<h2>9. Open questions</h2>
+<ol>
+  <li>Who is Almira? Decide after talking with Ma'am Alburo.</li>
+  <li>Target players: high school students, college students or general?</li>
+  <li>How much English help: always shown, or a toggle key?</li>
+  <li>Which folklore stories can we confirm with a source or a person, and from which town?</li>
+  <li>Who checks the Cebuano lines (riddles, notes)? Ma'am Gabales' theater students could also record the voices.</li>
+</ol>
+
+<p class="note" style="margin-top:40px">Folk uses are from public Philippine ethnobotany sources (StuartXchange, PTKDL) and are not medical advice. Flowers are typical Cebuano garden plants, not taken from Alburo's text.</p>
+</main>
+</body>
+</html>
