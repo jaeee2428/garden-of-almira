@@ -81,9 +81,9 @@ ol.steps li{margin:.35em 0}
 <body>
 <main>
 
-<div class="kicker">Concept note · draft v0.1 · October 2026</div>
+<div class="kicker">Concept note · draft v0.2 · October 2026</div>
 <h1>Hardin ni Almira</h1>
-<p class="lede">A cozy deduction game set in a Cebuano seaside garden. You learn its flowers the way a botanist would, through clues, notes and a herbarium journal. Along the way you uncover the folk stories and healing knowledge that grew with them.</p>
+<p class="lede">A cozy deduction game set in a Cebuano seaside garden. Lola Almira, a botanist who is going blind, has kept a journal with a poem and her knowledge for each of her flowers. As her sight fades, the pages are left unfinished. You become her eyes: find each flower, describe it to her, and finish the journal before her knowledge is lost.</p>
 <p class="note">Princess Jaena Marie O. De La Peña · BS Computer Science, UP Cebu · Special Problem<br>Working title, inspired by the title of Erlinda K. Alburo's <span class="cb">Sinug-ang Hardin ni Almira</span>. Content from the poems will only be used with her permission.</p>
 
 <h2>1. Vision</h2>
@@ -103,13 +103,70 @@ ol.steps li{margin:.35em 0}
   <div class="card pillar"><div class="ic">🍃</div><h3>Calm and kind</h3><p>No timers, no game over. Wrong guesses get gentle hints, so the player can't get stuck.</p></div>
 </div>
 
-<h2>2. Story frame</h2>
-<p>Ikaw comes home to the seaside garden that was cared for by <b>Almira</b>. Who Almira is (a lola, a lost aunt, or the garden itself) stays open until after the conversation with Ma'am Alburo.</p>
-<p>The garden has grown quiet. Almira left behind a <b>herbarium journal</b> that is only half finished: pressed flowers with missing names, notes in her handwriting, riddles in the margins and stories told to her by neighbours. Ikaw's task is to finish the journal. Each completed page brings part of the garden back: colour, birdsong, the smell of dama de noche at night.</p>
-<p>When all 18 pages are complete, the garden <b>awakens</b> (the existing finale). The last page is Almira's message, or, with permission, lines from the poems.</p>
+<h2>2. Story frame: Lola Almira</h2>
+<div class="grid g2">
+<div class="card">
+<p style="margin-top:0"><b>Lola Almira</b> is a botanist who has spent her life in her seaside garden. For every flower she grows, she writes a page in her journal: <b>a poem</b> and <b>everything she knows about it</b>, its name, when it blooms, how the old folk used it, and the stories told about it.</p>
+<p>Now Lola is <b>going blind</b>. The handwriting in the journal gets shakier, the drawings stop, and the last pages are only half written. She can still smell the dama de noche opening at night and knows each leaf by touch, but she can no longer find her flowers or write them down.</p>
+</div>
+<div class="card">
+<p style="margin-top:0"><b>Ikaw</b>, her apo, comes home to stay with her. Lola gives Ikaw the journal and asks for help finishing it: "Ikaw na ang akong mata." (You will be my eyes.)</p>
+<p>For each flower, Ikaw follows the clues, finds the plant and <b>describes it to Lola</b>. When Lola recognises it, she recites its poem and tells what she knows, and Ikaw writes it down. Ikaw's handwriting appears next to Lola's on the page.</p>
+<p>When all 18 pages are complete, the garden <b>awakens</b> (the existing finale). Lola's knowledge has been passed on and is no longer only in her memory.</p>
+</div>
+</div>
+<p class="note">Based on the premise of Erlinda K. Alburo's <span class="cb">Sinug-ang Hardin ni Almira</span> as described to us (Almira, a botanist going blind, with a poem and knowledge for each flower). Her actual poems will only be used with her permission. Until then, the pages carry Lola's plain spoken knowledge, and we will <b>not</b> write new poems in her name.</p>
+
+<h3>Why this fits the SP so well</h3>
+<p>Lola's fading sight is the same problem the SP is about: folk knowledge that lives in one elder's memory and is lost when no one learns it. The player doesn't just read the knowledge. They take part in passing it on from one generation to the next.</p>
+
+<h3>The fading journal: clues change as Lola's sight fades</h3>
+<p>The journal itself tells the story. The order of the chapters follows how Lola's pages were written, from when she could still see to after she couldn't. That changes how the player has to find each flower.</p>
+<div class="flowwrap">
+<svg viewBox="0 0 880 250" role="img" aria-label="Three journal pages from clear to faded, with clues shifting from sight to scent, touch and sound">
+  <g font-size="12.5">
+    <g transform="translate(20,20)">
+      <rect width="250" height="170" rx="8" fill="#fbf6e8" stroke="#d9cba6"/>
+      <text x="14" y="26" font-family="Fraunces,serif" font-size="15" style="fill:#3a3326" font-weight="600">Early pages</text>
+      <g stroke="#6d5d3f" stroke-width="1.3" fill="none"><path d="M60 140V80"/><circle cx="60" cy="70" r="12" fill="#f3c9d2"/><path d="M60 110c-14-6-24-2-30 6c12 2 22 0 30-6z" fill="#dfe8cf"/></g>
+      <g font-family="Caveat,cursive" font-size="17" style="fill:#4d3f2a"><text x="100" y="62">Colour: red,</text><text x="100" y="84">five petals,</text><text x="100" y="106">opens at dawn...</text></g>
+      <text x="14" y="160" font-size="11" style="fill:#8a7a55">neat hand · drawings · colour notes</text>
+    </g>
+    <g transform="translate(315,20)">
+      <rect width="250" height="170" rx="8" fill="#f8f1de" stroke="#d9cba6"/>
+      <text x="14" y="26" font-family="Fraunces,serif" font-size="15" style="fill:#3a3326" font-weight="600">Middle pages</text>
+      <g font-family="Caveat,cursive" font-size="21" style="fill:#5d4f38" transform="rotate(-2 120 90)"><text x="20" y="66">Leaves smell</text><text x="28" y="94">like ginger.</text><text x="20" y="122">White, I think</text></g>
+      <text x="14" y="160" font-size="11" style="fill:#8a7a55">bigger, shakier letters · no drawings</text>
+    </g>
+    <g transform="translate(610,20)">
+      <rect width="250" height="170" rx="8" fill="#f2ead2" stroke="#d9cba6"/>
+      <text x="14" y="26" font-family="Fraunces,serif" font-size="15" style="fill:#3a3326" font-weight="600">Last pages</text>
+      <g font-family="Caveat,cursive" font-size="26" style="fill:#6d5d3f" opacity=".75" transform="rotate(4 120 90)"><text x="24" y="74">sweet... at</text><text x="40" y="108">night</text></g>
+      <ellipse cx="190" cy="110" rx="18" ry="10" fill="#e8dfc0" opacity=".9"/>
+      <text x="14" y="160" font-size="11" style="fill:#8a7a55">a few words · a pressed petal · gaps</text>
+    </g>
+    <path d="M30 222H850" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#ar2)"/>
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+    <text x="145" y="242" text-anchor="middle" fill="var(--muted)">clues by SIGHT</text>
+    <text x="440" y="242" text-anchor="middle" fill="var(--muted)">by SCENT and TOUCH</text>
+    <text x="735" y="242" text-anchor="middle" fill="var(--muted)">by SCENT, SOUND, MEMORY</text>
+  </g>
+</svg>
+</div>
+<p>By the night chapter, even Ikaw can barely see, so the player finds flowers the way Lola does: by scent, sound and memory. The game teaches empathy without needing to explain it.</p>
+
+<h3>Key mechanic: Ihulagway kay Lola (describe it to Lola)</h3>
+<p>This replaces simply clicking to collect, and it's what makes the game its own. After finding a flower, Ikaw goes back to Lola (on the papag, the duyan or by the window) and describes it:</p>
+<ol class="steps">
+  <li>The player picks 3 details they observed from their notes: <b>colour</b>, <b>shape or petal count</b>, <b>scent</b>, <b>when it opens</b>, <b>where it grows</b>, <b>how the leaf feels</b>.</li>
+  <li>Right details: Lola smiles, says its Cebuano name and recites its poem and knowledge. The card appears and the page is stamped.</li>
+  <li>Unclear details: Lola asks a question back ("Does it smell at night, day?"). That is a gentle hint, never a failure.</li>
+  <li>Some flowers Ikaw brings to Lola to touch or smell, like the waxy rosal or the sampaguita garland.</li>
+</ol>
+<p class="note">Possible extra: hold a key (e.g. <b>O</b>, which is free; H already hides the UI) for <b>"Mata ni Lola"</b>, a short moment where the view goes soft and dim and the scents and sounds of the garden get stronger, so the player can feel how Lola finds her flowers. This should be done gently and checked with people who have low vision, so it's respectful and not a gimmick.</p>
 
 <h2>3. Core loop: the Botany Manor style deduction</h2>
-<p>In <span class="cb">Botany Manor</span>, you are given a plant you can't identify yet. You collect clues from letters, books and the house, then confirm what the plant needs before it blooms. We adapt that loop to Cebuano plants and folk knowledge:</p>
+<p>In <span class="cb">Botany Manor</span>, you are given a plant you can't identify yet. You collect clues from letters, books and the house, then confirm what the plant needs before it blooms. We adapt that loop to Cebuano plants, folk knowledge and Lola's unfinished pages:</p>
 <div class="flowwrap">
 <svg viewBox="0 0 880 250" role="img" aria-label="Core loop: find a pressed page, collect clues, deduce in journal, confirm in the garden, unlock memory and story">
   <defs>
@@ -132,14 +189,14 @@ ol.steps li{margin:.35em 0}
     <text x="445" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">the journal</text>
 
     <rect x="550" y="40" width="150" height="86" rx="12" fill="var(--sea-soft)" stroke="var(--sea)"/>
-    <text x="625" y="72" text-anchor="middle" font-weight="600">4 · Confirm</text>
-    <text x="625" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">find the living plant,</text>
-    <text x="625" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">say "tabi", collect it</text>
+    <text x="625" y="72" text-anchor="middle" font-weight="600">4 · Describe</text>
+    <text x="625" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">find it, say "tabi", then</text>
+    <text x="625" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">describe it to Lola</text>
 
     <rect x="730" y="40" width="140" height="86" rx="12" fill="var(--night-soft)" stroke="var(--night)"/>
-    <text x="800" y="72" text-anchor="middle" font-weight="600">5 · Remember</text>
-    <text x="800" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">page stamped, memory</text>
-    <text x="800" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">and story unlocked</text>
+    <text x="800" y="72" text-anchor="middle" font-weight="600">5 · Lola remembers</text>
+    <text x="800" y="92" text-anchor="middle" font-size="11.5" fill="var(--muted)">poem and knowledge,</text>
+    <text x="800" y="108" text-anchor="middle" font-size="11.5" fill="var(--muted)">Ikaw writes it down</text>
 
     <path d="M160 83H186" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
     <path d="M340 83H366" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
@@ -156,7 +213,7 @@ ol.steps li{margin:.35em 0}
 <h3>Clue types (each flower has 3–4)</h3>
 <div class="tablewrap"><table>
 <tr><th>Clue</th><th>Where it comes from</th><th>What it teaches</th></tr>
-<tr><td><span class="pill p">Almira's note</span></td><td>Handwritten lines in the journal, letters in the kubo</td><td>Memory, emotion, how the plant was used at home</td></tr>
+<tr><td><span class="pill p">Lola's page</span></td><td>What Lola managed to write: a few lines, a drawing or a pressed petal. Plus things she says while you sit with her.</td><td>Memory, emotion, how the plant was used at home</td></tr>
 <tr><td><span class="pill s">Tigmo</span></td><td>A Cebuano riddle in the margin, with English help</td><td>Language: the Cebuano name and descriptive words</td></tr>
 <tr><td><span class="pill">Sensory</span></td><td>The world: scent only at night, colour, leaf shape, bees, place</td><td>Observation, botany (what the flower looks like)</td></tr>
 <tr><td><span class="pill w">Neighbour</span></td><td>A villager's story or request (a cough, a fever, a fiesta)</td><td>Folk use and the community around the plant</td></tr>
@@ -170,7 +227,7 @@ ol.steps li{margin:.35em 0}
   <li><b>Kanus-a / asa (when or where):</b> blooms at night, near water, climbs the fence, grows by the churchyard.</li>
   <li><b>Gamit (use):</b> fever tea, poultice for boils, garland for the altar, dye, "do not eat, poison".</li>
 </ol>
-<p>Three correct blanks confirm the page. The player then goes to the living plant in the garden and collects it into the bayong. That reuses the existing click, card and bayong flow, now as the reward instead of the start.</p>
+<p>The blanks are the parts Lola could no longer see to write. With the blanks filled in, the player finds the living plant, collects it into the bayong (the existing click and bayong flow) and describes it to Lola. Her answer, the poem and the card, is the reward.</p>
 
 <h2>4. The herbarium journal (mockup)</h2>
 <p class="note">Opened with a key (for example <b>J</b>), not a new button. It is filled in by the player, so it isn't the removed flower-guide pop-up. The Cebuano lines below are placeholders to be checked by a native speaker.</p>
@@ -196,7 +253,7 @@ ol.steps li{margin:.35em 0}
   </div>
   <div class="page">
     <h4>Mga timailhan · clues</h4>
-    <div class="clue"><b>Almira's note</b>"Lola never let us pick it. She said its perfume was for the ones who walk at night."</div>
+    <div class="clue"><b>Lola's page</b>"I can't see it anymore, but I always know when it opens. Its perfume is for the ones who walk at night."</div>
     <div class="clue"><b>Tigmo (placeholder)</b>A lady who only dresses up when the sun goes down. Who is she?</div>
     <div class="clue"><b>Sensory</b>Near the gate the air turns sweet after 7 pm, but the plant looks plain by day.</div>
     <div class="clue"><b>Neighbour</b>Nang Iday: "Don't make tea out of that one, day. Smell it, don't drink it."</div>
@@ -206,17 +263,17 @@ ol.steps li{margin:.35em 0}
 <p class="note">Answer: dama de noche. It opens only at night and is grown for its scent, but all parts are toxic, which the neighbour's warning hints at. This matches the facts already on the card.</p>
 
 <h2>5. Folklore layer: Sugilanon sa Sugbo</h2>
-<p>Short stories told by a neighbour, a fisherman or Almira's notes, each tied to a place or plant in the garden. They give the garden a soul and teach the beliefs behind everyday habits. <b>All of these need checking</b> with Ma'am Gabales, Ma'am Alburo or local elders before writing the final text, and should name the town or source.</p>
+<p>Short stories told by Lola, a neighbour or a fisherman, each tied to a place or plant in the garden. They give the garden a soul and teach the beliefs behind everyday habits. <b>All of these need checking</b> with Ma'am Gabales, Ma'am Alburo or local elders before writing the final text, and should name the town or source.</p>
 <div class="tablewrap"><table>
 <tr><th>Story / belief</th><th>What it is (to verify)</th><th>How it shows up in the game</th></tr>
 <tr><td><b>Maria Cacao</b></td><td>The diwata of Mt. Lantoy in Argao, Cebu, said to sail a golden ship down the river. When bridges wash away, people say her ship passed.</td><td>Told by the fisherman at the bangka at dusk. Opens the shore area. A glint of gold on the sea at night (no new UI).</td></tr>
 <tr><td><b>Tamawo / engkanto and the dalakit</b></td><td>Fair, unseen beings said to live in big trees like the balete (dalakit). People ask permission when passing.</td><td>The <b>"Tabi" mechanic</b>: hold a key before collecting near the old tree or at night. If you forget, nothing bad happens, but a leaf falls and Almira's note reminds you.</td></tr>
 <tr><td><b>Buyag</b></td><td>A stranger's praise or greeting can make a child sick, unless they say "puwera buyag".</td><td>A neighbour's child is unwell after visitors. Part of the remedy puzzle (with a disclaimer that this is folk belief).</td></tr>
 <tr><td><b>Mananambal, tuob, palina</b></td><td>Folk healers. Tuob is steam inhalation with boiled leaves, palina is smoke cleansing with dried herbs.</td><td>Almira's remedy pages: combine the right plants for tuob. Teaches folk use and the "no medical advice" boundary.</td></tr>
-<tr><td><b>Holy Week herb gathering (Siquijor)</b></td><td>Healers gather herbs on Good Friday for the year's remedies, a famous Visayan tradition.</td><td>A late-game sugilanon explaining why Almira's journal has dates on Fridays.</td></tr>
-<tr><td><b>Kalag-kalag</b></td><td>All Souls' Day. Graves get flowers, candles and food; kalachuchi and rosal grow in churchyards.</td><td>Night chapter: the kalachuchi and rosal pages, with candles at the small shrine (candles flicker only at night, as now).</td></tr>
-<tr><td><b>Sumpa kita</b></td><td>The sampaguita legend ("I promise you"), told across the Philippines, likely Tagalog in origin.</td><td>The prologue flower. Almira's promise to the garden is the hook of the story.</td></tr>
-<tr><td><b>Flores de Mayo</b></td><td>Girls offer flowers to the Virgin Mary in May; roses lead the Santacruzan.</td><td>The rosas page: gather flowers for the arch, with a short memory of Almira as a sagala.</td></tr>
+<tr><td><b>Holy Week herb gathering (Siquijor)</b></td><td>Healers gather herbs on Good Friday for the year's remedies, a famous Visayan tradition.</td><td>A late-game sugilanon from Lola, explaining why some of her pages are dated on Good Fridays.</td></tr>
+<tr><td><b>Kalag-kalag</b></td><td>All Souls' Day. Graves get flowers, candles and food; kalachuchi and rosal grow in churchyards.</td><td>Night chapter: the kalachuchi and rosal pages, with candles at the small shrine (candles flicker only at night, as now). Lola remembers the people she lit candles for.</td></tr>
+<tr><td><b>Sumpa kita</b></td><td>The sampaguita legend ("I promise you"), told across the Philippines, likely Tagalog in origin.</td><td>The prologue flower. Ikaw's promise to Lola to finish the journal is the hook of the story.</td></tr>
+<tr><td><b>Flores de Mayo</b></td><td>Girls offer flowers to the Virgin Mary in May; roses lead the Santacruzan.</td><td>The rosas page: gather flowers for the arch, with a short memory of Lola as a young sagala.</td></tr>
 </table></div>
 
 <h2>6. Game flow</h2>
@@ -252,9 +309,9 @@ ol.steps li{margin:.35em 0}
   <span class="pill p">Prologue · tutorial</span>
   <h3>Sumpa kita</h3>
   <ul>
-    <li>Ikaw arrives at the gate, finds the journal on the papag and reads Almira's first note.</li>
-    <li>Flower: <b>sampaguita (manul)</b>. Teaches the whole loop with only two blanks: clue → deduce → collect → page stamped.</li>
-    <li>Payoff: the first memory (Almira threading a garland for the altar) and the promise that frames the game.</li>
+    <li>Ikaw arrives at the gate. Lola is on the papag and can't quite see Ikaw's face. She hands over the journal: "Ikaw na ang akong mata."</li>
+    <li>Flower: <b>sampaguita (manul)</b>. Teaches the whole loop with only two blanks: clue → deduce → collect → describe to Lola → page stamped.</li>
+    <li>Payoff: Lola threads a sampaguita garland by touch, and Ikaw promises to finish the journal (sumpa kita, "I promise you").</li>
   </ul>
 </div>
 <div class="chapter" style="--c:var(--sun)">
@@ -262,7 +319,7 @@ ol.steps li{margin:.35em 0}
   <h3>Ang nataran (the yard)</h3>
   <ul>
     <li>Flowers: <b>gumamela, santan, rosas, bogambilya, pukingan</b>.</li>
-    <li>New clue type: <b>tigmo</b> riddles. Morning chores (well, hens) reveal sensory clues.</li>
+    <li>Early, clear pages: Lola's drawings and colour notes. New clue type: <b>tigmo</b> riddles. Morning chores (well, hens) reveal sensory clues.</li>
     <li>Example: gumamela. Children blow bubbles from its crushed petals; Nang Iday asks for it for a boil. Gamit = poultice.</li>
     <li>Folklore: <b>Flores de Mayo</b> memory on the rosas page.</li>
   </ul>
@@ -272,7 +329,7 @@ ol.steps li{margin:.35em 0}
   <h3>Ang lim-aw ug baybayon (pond and shore)</h3>
   <ul>
     <li>Flowers: <b>liryo, canna (balunsaying), heliconia, orkidyas, kadena</b>.</li>
-    <li>New clue type: <b>neighbour</b> stories. The fisherman at the bangka, a child by the pond.</li>
+    <li>Middle pages: the drawings stop, the handwriting grows. New clue type: <b>neighbour</b> stories. The fisherman at the bangka, a child by the pond.</li>
     <li>Example: canna. "A drink to cool the body after working in the sun" plus "seeds hard as shot", which children use as beads (kolintasan).</li>
     <li>Folklore: <b>Maria Cacao</b>, told at the shore as the afternoon turns.</li>
   </ul>
@@ -282,7 +339,7 @@ ol.steps li{margin:.35em 0}
   <h3>Tambal (remedies)</h3>
   <ul>
     <li>Flowers: <b>kamia, ilang-ilang, tsampaka, adelfa</b>.</li>
-    <li>New mechanic: <b>remedy pages</b>. A visitor describes a problem; the player picks plants from the journal (for example kamia for a sore-throat gargle, or tuob steam).</li>
+    <li>Pages written by touch and scent. New mechanic: <b>remedy pages</b>, where Lola teaches by smell and feel. A visitor describes a problem; the player picks plants from the journal (for example kamia for a sore-throat gargle, or tuob steam).</li>
     <li><b>Adelfa is the lesson on caution:</b> beautiful but poisonous, used only on the skin in folk practice. Choosing it for a tea gives a gentle warning and the "never eat" fact.</li>
     <li>Folklore: <b>mananambal, tuob, buyag</b>.</li>
   </ul>
@@ -291,7 +348,7 @@ ol.steps li{margin:.35em 0}
   <span class="pill n">Chapter IV · Gabii</span>
   <h3>Mga sugilanon (night stories)</h3>
   <ul>
-    <li>Flowers: <b>dama de noche, kalachuchi, rosal</b>. Two of them are found by scent, only after dark.</li>
+    <li>Flowers: <b>dama de noche, kalachuchi, rosal</b>. Lola's last pages are almost blank. Ikaw finds the flowers by scent, the way Lola does now.</li>
     <li>New clue type: <b>sugilanon</b> at the shrine. The <b>"tabi"</b> moment at the old tree. Fireflies only at night (as now).</li>
     <li>Folklore: <b>tamawo and the dalakit</b>, <b>kalag-kalag</b>, Holy Week herb gathering.</li>
   </ul>
@@ -300,7 +357,7 @@ ol.steps li{margin:.35em 0}
   <span class="pill p">Epilogue</span>
   <h3>Awakening</h3>
   <ul>
-    <li>18/18 pages: the existing awaken magic plays. Almira's last page is revealed (or, with permission, lines from the poems).</li>
+    <li>18/18 pages: Ikaw reads the whole journal aloud to Lola under the stars, and the existing awaken magic plays. Her final page, written together, is about passing the garden on.</li>
     <li>The completed journal can be saved or printed as a herbarium, which is the player's takeaway and a good thesis artifact.</li>
   </ul>
 </div>
@@ -309,6 +366,8 @@ ol.steps li{margin:.35em 0}
 <div class="tablewrap"><table>
 <tr><th>Already in the game</th><th>Role in the new flow</th></tr>
 <tr><td>Walk mode, Ikaw, Tab view</td><td>How you explore and look for clues (unchanged)</td></tr>
+<tr><td>Kubo, papag, duyan</td><td>Where Lola Almira sits; you come back to her to describe each flower (Lola is a new character model)</td></tr>
+<tr><td>Sit with L</td><td>Sit beside Lola to listen to her stories</td></tr>
 <tr><td>Time of day (Buntag … Gabii)</td><td>Chapter structure; some clues only appear at certain hours</td></tr>
 <tr><td>Hover label (Cebuano name)</td><td>Hidden for unsolved hero flowers ("???"), revealed once the page is solved</td></tr>
 <tr><td>Flower card</td><td>Becomes the reward screen after a correct deduction</td></tr>
@@ -321,7 +380,7 @@ ol.steps li{margin:.35em 0}
 
 <h2>8. Scope for the SP</h2>
 <div class="grid g3">
-  <div class="card"><span class="pill">Must have</span><ul><li>Journal with 18 pages and blanks</li><li>Clue collection and word bank</li><li>Deduce → collect → stamp loop</li><li>Prologue + 4 chapters</li><li>Ending</li></ul></div>
+  <div class="card"><span class="pill">Must have</span><ul><li>Lola Almira (character + voice lines)</li><li>"Describe to Lola" step</li><li>Journal with 18 pages and blanks</li><li>Clue collection and word bank</li><li>Deduce → collect → stamp loop</li><li>Prologue + 4 chapters</li><li>Ending</li></ul></div>
   <div class="card"><span class="pill s">Nice to have</span><ul><li>Tigmo for every flower</li><li>3–4 neighbour NPCs</li><li>Remedy pages</li><li>"Tabi" mechanic</li><li>Recorded Cebuano voice lines</li></ul></div>
   <div class="card"><span class="pill n">Stretch</span><ul><li>Lines from Alburo's poems (with permission)</li><li>Printable herbarium</li><li>Small hands-on mini-games (garland threading)</li></ul></div>
 </div>
@@ -336,7 +395,7 @@ ol.steps li{margin:.35em 0}
 
 <h2>9. Open questions</h2>
 <ol>
-  <li>Who is Almira? Decide after talking with Ma'am Alburo.</li>
+  <li>How closely should the game follow Ma'am Alburo's story of Almira, and may we use her poems on each page?</li>
   <li>Target players: high school students, college students or general?</li>
   <li>How much English help: always shown, or a toggle key?</li>
   <li>Which folklore stories can we confirm with a source or a person, and from which town?</li>

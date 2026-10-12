@@ -51,3 +51,6 @@ Wish/lantern release, "Kuwento" panel, "Hangin" button, Detail quality button, g
 - **Animals**: hens steer around obstacles/bushes/each other (faunaKit.steer, stuck -> new target); egret re-rigged (neck joint at its base, two-joint stepping legs, anticipation strike) and wades inside the pond rim.
 - Dev: `?specimen=id[&close=1]` studio, `?notitle=1`, `?at=egret&egret=step|strike`, `?shaderdefs=shrub`, `&face=1&facea=angle` avatar portrait.
 - **Git**: commit locally; push ONLY when the user says.
+
+## Story premise (user, 2026-10-12)
+- Per the user, in Alburo's *Sinug-ang Hardin ni Almira* Almira is a botanist going blind who keeps a journal with a poem + her knowledge for each flower. Game concept (docs/concept/concept-note.html): Lola Almira + apo Ikaw finish her fading herbarium journal (Botany Manor-style deduction, "describe it to Lola", Cebu folklore, chapters by time of day). Use her actual poems only with permission; never write poems in her name. Specific flowers are still NOT confirmed from her text.
