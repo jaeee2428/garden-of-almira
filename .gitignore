@@ -2,3 +2,14 @@
 *.swp
 .vscode/
 .idea/
+
+# Local AI-assistant notes and skills (never pushed)
+STATE.md
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.claude/
+.cursor/
+.agents/
+skills/
+*.skill.md

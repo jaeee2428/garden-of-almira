@@ -44,4 +44,3 @@ The code is split by responsibility; see **[docs/ARCHITECTURE.md](docs/ARCHITECT
 - Weeds are flower-like and unlabeled; the 14 named flowers are the ones you can click (card + bayong).
 - Cards describe Visayan folk and herbal practice (mostly medicinal, some cultural) from public Philippine ethnobotany sources (StuartXchange, Philippine Traditional Knowledge Digital Library). They are folk uses, not medical advice, and were not checked by a Cebuano healer.
 - The text of Erlinda Alburo's "Garden of Almira" could not be found online, so the plant list is typical of Cebuano gardens, not taken from the work.
-- `STATE.md` records the full current state of the app.
