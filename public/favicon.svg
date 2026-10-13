@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Sampaguita on a night-garden tile (colors from css/garden.css) -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0" stop-color="#2c2117"/>
+      <stop offset="1" stop-color="#17120d"/>
+    </radialGradient>
+    <linearGradient id="petal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f4e9d0"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#bg)" stroke="#e8b04a" stroke-opacity=".7" stroke-width="2"/>
+  <!-- leaves -->
+  <path d="M30 40 C 20 44, 12 52, 9 56 C 18 56, 27 50, 31 42 Z" fill="#3f7a3a"/>
+  <path d="M34 40 C 44 44, 52 52, 55 56 C 46 56, 37 50, 33 42 Z" fill="#4f8d45"/>
+  <path d="M30 41 L 13 54 M34 41 L 51 54" stroke="#2a5a28" stroke-width="1" fill="none"/>
+  <!-- outer petals -->
+  <g transform="translate(32 29)" fill="url(#petal)" stroke="#d9c9a3" stroke-width=".6">
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(0)"/>
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(45)"/>
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(90)"/>
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(135)"/>
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(180)"/>
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(225)"/>
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(270)"/>
+    <ellipse rx="5.6" ry="13" cy="-11" transform="rotate(315)"/>
+  </g>
+  <!-- inner petals -->
+  <g transform="translate(32 29) rotate(22.5)" fill="#ffffff" stroke="#e6d8b8" stroke-width=".5">
+    <ellipse rx="3.6" ry="7.5" cy="-6"/>
+    <ellipse rx="3.6" ry="7.5" cy="-6" transform="rotate(72)"/>
+    <ellipse rx="3.6" ry="7.5" cy="-6" transform="rotate(144)"/>
+    <ellipse rx="3.6" ry="7.5" cy="-6" transform="rotate(216)"/>
+    <ellipse rx="3.6" ry="7.5" cy="-6" transform="rotate(288)"/>
+  </g>
+  <circle cx="32" cy="29" r="3.4" fill="#e8b04a"/>
+  <circle cx="32" cy="29" r="1.5" fill="#b5532e"/>
+</svg>
