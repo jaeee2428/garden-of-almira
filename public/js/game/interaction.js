@@ -53,10 +53,14 @@ function refreshChips() { chips.querySelectorAll('.chip').forEach(c => c.classLi
 refreshChips();
 if (collected.size === ORDER.length) G.awaken();
 let cardTimer;
+const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 function showCard(info, extra) { $('cname').textContent = info.ceb;
   $('cnames').textContent = [info.english, ...(info.names || []).filter(n => n.toLowerCase() !== info.ceb.toLowerCase())].filter(Boolean).join(' · ');   // English + other local names (flower cards)
   $('cmeta').textContent = info.family ? info.family + (info.scent ? ' · scent: ' + info.scent : '') : '';
-  $('csci').textContent = info.sci; $('cfact').textContent = info.fact; $('cextra').textContent = extra || ''; $('cdot').style.background = info.color; card.classList.add('show'); clearTimeout(cardTimer); cardTimer = setTimeout(() => card.classList.remove('show'), 14000); }
+  $('csci').textContent = info.sci; $('cfact').textContent = info.fact; $('cextra').textContent = extra || '';
+  // the oral tradition behind the flower, and what we keep doing (hero flowers only)
+  $('ctrad').innerHTML = info.tradition ? '<b>Sa naandan · in tradition</b>' + esc(info.tradition) : '';
+  $('ckeep').innerHTML = info.keep ? '<b>Nakat-unan · what we learned</b>' + esc(info.keep) : ''; $('cdot').style.background = info.color; card.classList.add('show'); clearTimeout(cardTimer); cardTimer = setTimeout(() => card.classList.remove('show'), info.tradition ? 26000 : 14000); }   // longer cards stay longer
 $('cclose').onclick = () => card.classList.remove('show');
 function onClick(e) {
   if (e.target !== canvas && !P.locked) return;

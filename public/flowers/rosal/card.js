@@ -15,6 +15,8 @@ G.flowerCard({
   "scent": "strong, sweet",
   "look": "Shrub 1-1.5 m; glossy dark opposite leaves; heavily scented double white flowers in a spiral of waxy petals, ageing creamy yellow.",
   "fact": "The gardenia: glossy dark leaves and heavily scented double white flowers that turn creamy yellow as they age. In the Philippines it goes into wreaths and bouquets, and its ripe yellow fruit gives a dye for cloth and food. Folk uses listed in Philippine herbal references (many from Chinese practice): a flower decoction as an eyewash for sore eyes, a leaf poultice on swollen breasts, the pounded fruit on sprains and boils.",
+  "tradition": "Rosal goes into wreaths and altar flowers, especially for the dead, and its scent fills wakes in many Visayan homes. Families remember their loved ones by the flowers that were there.",
+  "keep": "Plant flowers you want to be remembered by. Gardens hold family memory.",
   "sources": [
     "stuartxchange.org/Rosal.html"
   ]

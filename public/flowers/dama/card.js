@@ -17,6 +17,8 @@ G.flowerCard({
   "scent": "very strong, only at night",
   "look": "Loose shrub with arching stems; narrow pointed leaves; clusters of slender greenish-cream tubular flowers with 5 tiny star lobes that open after dusk.",
   "fact": "“Lady of the night”: the greenish-yellow tubes open after dusk and the scent carries far. It is grown for its fragrance; I found no Philippine medicinal use recorded for it, and all parts are toxic, so it is not a plant for teas.",
+  "tradition": "Dama de noche belongs to the night: in the ghost stories told on Visayan porches, a sweet scent drifting in after dark means someone unseen is passing. Its place in the garden is for scent and story, not medicine.",
+  "keep": "Not every plant in the old garden was a cure. Some were kept for comfort, memory and stories.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

@@ -17,6 +17,8 @@ G.flowerCard({
   "scent": "none",
   "look": "Shrub 1-3 m; glossy toothed oval leaves; large 5-petalled flowers (red, pink, yellow, orange) with a long staminal column tipped by 5 red stigma pads; each flower lasts one day.",
   "fact": "Folk healers pound the flower buds and leaves into a poultice for boils, abscesses and mumps, and drink a decoction for cough. Children crush the petals to make soapy bubbles, and the flowers heated in coconut oil were used on the hair. Each bloom lasts one day.",
+  "tradition": "A first medicine many children learn: the mananambal's poultice of pounded buds for a boil. It is also a childhood game remembered across the islands, crushing the petals in water to blow bubbles.",
+  "keep": "Knowledge often travels through play. What we learned as children is still worth teaching.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

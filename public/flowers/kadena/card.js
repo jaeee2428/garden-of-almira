@@ -17,6 +17,8 @@ G.flowerCard({
   "scent": "faint",
   "look": "Climbing vine with tendrils; heart-shaped leaves; long trailing sprays of small pink heart-shaped flowers.",
   "fact": "The “chain of love”, a vine with heart-shaped leaves and sprays of small pink flowers. Philippine folk uses recorded for it: leaf tea for blood sugar, blossoms for high blood pressure, and leaves applied to reduce swelling and to close wounds.",
+  "tradition": "The kadena de amor covers fences and gates across the islands; its name, “chain of love”, comes up in courtship songs and in the way neighbours share cuttings over the fence.",
+  "keep": "Share cuttings with neighbours: that is how most of these flowers reached every barangay.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

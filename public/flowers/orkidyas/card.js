@@ -15,6 +15,8 @@ G.flowerCard({
   "scent": "mostly none",
   "look": "Epiphyte clinging to a trunk by grey roots; a few broad thick leaves; an arching spike of flat moth-shaped flowers with a small lipped centre.",
   "fact": "The Philippines has many orchids that grow on trees, among them the waling-waling of Mindanao. These moth orchids cling to the trunks and need no soil, only humid air and a tree to hold on to.",
+  "tradition": "Orchids were gathered from the forest trees and hung under the eaves of the kubo. Today we know that taking them from the wild hurts the forests that grew them, and the waling-waling is now protected.",
+  "keep": "Love a wild plant by growing it from a nursery, not by taking it from the forest.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

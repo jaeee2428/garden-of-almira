@@ -18,6 +18,8 @@ G.flowerCard({
   "scent": "heavy and sweet",
   "look": "Tree with long drooping branches; large glossy leaves; clusters of drooping flowers with 6 long, narrow, twisted petals that turn from green to yellow.",
   "fact": "The perfume tree, native to the Philippines, with long drooping branches and curled yellow-green flowers. The flower oil, mixed with coconut oil, made the old hair oil called Macassar; the bark decoction is a folk remedy for rheumatism and fever, and the oil is used as a calming scent and for scalp and skin.",
+  "tradition": "Native to these islands, the “flower of flowers” was tucked into hair, laid in clothes chests and mixed into coconut oil for hilot, the healing massage. Its scent is part of how many lolas are remembered.",
+  "keep": "Pick the flowers when they turn deep yellow, early in the morning, when the scent is strongest.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

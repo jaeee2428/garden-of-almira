@@ -17,6 +17,8 @@ G.flowerCard({
   "scent": "sweet, strongest at dusk and night",
   "look": "Shrub or loose climber ~1-1.5 m; glossy oval opposite leaves; small waxy white flowers, single or double, in little clusters with pointed buds.",
   "fact": "The national flower; its name comes from sumpa kita, “I promise you”. Called manul in Bisaya. Garlands go on holy images and altars. In folk medicine a decoction of the flowers is taken for fever and cough and used as an eyewash for red, swollen eyes, and bruised leaves are laid on the breasts to dry up milk.",
+  "tradition": "Garlands of manul are sold outside churches all over Cebu and hung on the Santo Niño and on home altars, an offering that is half prayer, half promise. Lolas teach the sumpa kita story by word of mouth: a flower that keeps a vow.",
+  "keep": "Pick the buds in the late afternoon, string them before dusk, and give the first garland to someone you love.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

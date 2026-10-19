@@ -18,6 +18,8 @@ G.flowerCard({
   "scent": "none",
   "look": "Thorny woody climber; heart-shaped leaves; papery coloured bracts in threes, each holding one tiny cream tubular flower.",
   "fact": "The bright “petals” are bracts around three tiny cream flowers; thorny stems climb arches and walls across the Visayas. Elsewhere (Mexico) the flowers are steeped as a tea for cough, but I did not find a documented Visayan medicinal use.",
+  "tradition": "A newer arrival in Visayan yards, climbing fences and church walls in bright bracts. It has no old place in the healers' lore, which shows that a garden, like a tradition, keeps taking in new things.",
+  "keep": "Honest knowledge says what we do not know as well as what we do.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

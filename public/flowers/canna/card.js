@@ -18,6 +18,8 @@ G.flowerCard({
   "scent": "none",
   "look": "Clump of upright stems; large broad paddle-shaped leaves; spikes of soft, irregular flag-like red, orange or yellow flowers; round seeds hard as shot.",
   "fact": "Called balunsaying or kolintasan in Bisaya (tikas in Tagalog). In Cebu, young leaves soaked in cold water are drunk to cool the body, and pounded leaves wrapped in cloth are rubbed on the skin for pasma, a folk illness blamed on sudden cold after heat. The leaf decoction is also drunk for cough.",
+  "tradition": "Its local name kolintasan is linked to kolintas, a necklace: children string the hard black seeds into beads and rattles. In Cebu the young leaves are soaked in cold water and drunk to cool the body.",
+  "keep": "Keep the seeds: one pod is enough to plant a whole border next year.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

@@ -17,6 +17,8 @@ G.flowerCard({
   "scent": "light",
   "look": "Round floating pads with a slit; star-shaped water-lily flowers on the surface, lotus flowers held above the water on tall stalks.",
   "fact": "Water lilies float round pads on still ponds and open their flowers in the morning sun. Calm water draws frogs and dragonflies.",
+  "tradition": "Still water and its lilies belong to the frog songs of the night and to children's stories about what lives at the bottom of the pond. Healers gathered pond plants carefully, always asking permission first.",
+  "keep": "“Tabi”: Visayan elders still say it before stepping near water or old trees, asking leave of whoever might live there.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

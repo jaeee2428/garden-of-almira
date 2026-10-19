@@ -15,6 +15,8 @@ G.flowerCard({
   "scent": "sweet (varies)",
   "look": "Thorny shrub; leaves of 5 toothed leaflets; layered spiral of velvety petals around a tight centre.",
   "fact": "A favourite of home gardens, and the flower of the Flores de Mayo and the Santacruzan processions in May, when girls bring roses and other flowers to the Virgin Mary.",
+  "tradition": "In May the girls carry roses to the Virgin for the Flores de Mayo, and the Santacruzan ends the month with flower arches through the streets, a tradition kept by memory and by every barrio's own way of doing it.",
+  "keep": "Flowers mark time: each month of the year once had its own blooms, feasts and songs.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

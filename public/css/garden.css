@@ -8,6 +8,7 @@
 
   #title { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; text-align:center; transition:opacity 2.6s ease; padding:0 24px; background:linear-gradient(to bottom, rgba(20,12,6,.35), rgba(20,12,6,.1) 40%, rgba(20,12,6,.5)); }
   #title.hide { opacity:0; }
+  #title .vision { font-size:clamp(14px,1.6vw,18px); max-width:34em; margin:1.1em auto 0; line-height:1.45; opacity:.88; font-style:italic; }
   #title .greet { font-size:clamp(15px,2vw,21px); letter-spacing:.4em; text-transform:uppercase; color:var(--gold); margin-bottom:.8em; }
   #title h1 { margin:0; font-weight:500; font-style:italic; font-size:clamp(46px,9vw,118px); line-height:1; color:#fff6e2; text-shadow:0 2px 24px rgba(0,0,0,.55); }
   #title .ceb { margin-top:.5em; font-size:clamp(20px,3vw,34px); font-style:italic; color:#f1d6a2; text-shadow:0 1px 12px rgba(0,0,0,.6); }
@@ -41,6 +42,7 @@
 
   #card { position:fixed; left:18px; bottom:70px; width:min(380px,calc(100vw - 36px)); padding:16px 18px 15px; transform:translateY(14px); opacity:0; pointer-events:none; transition:opacity .3s ease, transform .3s ease; z-index:11; will-change:opacity,transform; }
   #card.show { opacity:1; transform:none; pointer-events:auto; }
+  #card { max-height:calc(100vh - 110px); overflow-y:auto; overscroll-behavior:contain; }
   #card .row { display:flex; align-items:center; gap:10px; }
   #cdot { width:14px; height:14px; border-radius:50%; flex:none; border:2px solid rgba(255,255,255,.7); }
   #cname { font-size:30px; font-weight:600; line-height:1; }
@@ -50,6 +52,10 @@
   #cmeta:empty { display:none; }
   #csci { font-style:italic; opacity:.75; font-size:16px; margin:2px 0 8px 24px; }
   #cfact { font-size:18px; line-height:1.28; }
+  #ctrad, #ckeep { font-size:16px; line-height:1.32; margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,.22); }
+  #ctrad b, #ckeep b { display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin-bottom:3px; font-weight:700; }
+  #ckeep { font-style:italic; opacity:.92; }
+  #ctrad:empty, #ckeep:empty { display:none; }
   #cextra { margin-top:8px; color:var(--gold); font-size:16px; font-style:italic; }
   #cclose { margin-left:auto; background:none; border:none; color:var(--paper); font-size:22px; cursor:pointer; opacity:.6; }
 

@@ -1,6 +1,15 @@
 # The Garden of Almira  ·  Ang Hardin ni Almira
 A folk-tale garden in Sugbo (Cebu), built in Babylon.js. Inspired by the title *Garden of Almira* by Erlinda Alburo.
 
+## The vision
+*Mga bulak nga gitambal sa atong mga lola*: a garden of the plants Visayan healers (mananambal, herbolaryo) and grandmothers have known by heart. This knowledge was rarely written down. It lives in practice and is passed on by word of mouth: tuob (healing steam), palina (cleansing smoke), hilot with lana (herbal oil), the orasyon whispered over the herbs, "tabi" said before stepping near old trees or water, and the garlands, processions and stories that each flower belongs to.
+
+Every hero flower's card now has two extra parts:
+- **Sa naandan · in tradition**: how the plant lives in Visayan healing and oral tradition.
+- **Nakat-unan · what we learned**: what we keep doing with it today (and, for plants like adelfa, the warnings that are taught just as carefully).
+
+The folk uses come from public Philippine ethnobotany sources and shared community knowledge. They are traditions, not medical advice, and they are not taken from Alburo's text (which we could not find).
+
 ## Run
 Double-click `run.command`, or:  `python3 server.py`  then open http://localhost:8765  (Python 3 only, nothing to install)
 

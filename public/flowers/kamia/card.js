@@ -18,6 +18,8 @@ G.flowerCard({
   "scent": "sweet, strongest in the evening",
   "look": "Reed-like leafy stems to ~1.5 m; long lance leaves in two rows; a green cone at the top from which white butterfly-shaped flowers open a few at a time.",
   "fact": "The white ginger lily, with butterfly-shaped white flowers that smell strongest in the evening; also called katkatan in Bisaya. Folk uses: a decoction of the stem as a gargle for tonsillitis, the rhizome for worms and fever, and the flowers for wreaths and bridal bouquets.",
+  "tradition": "The white ginger lily grows by streams and wet corners of the yard. Its root, a cousin of luy-a (ginger), went into the steaming pots of tuob, where a sick person breathes in the steam of boiled leaves and roots under a blanket.",
+  "keep": "Tuob is still done in many homes when someone has a cold: a simple practice remembered from parents and grandparents.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

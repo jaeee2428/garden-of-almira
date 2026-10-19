@@ -17,6 +17,8 @@ G.flowerCard({
   "scent": "light, sweet",
   "look": "Shrub 1.5-2 m; narrow leathery leaves in whorls of three; clusters of pinwheel 5-petalled pink or white flowers with a fringed crown at the branch tips. Poisonous if eaten.",
   "fact": "Also called baladre: a shrub with narrow leaves in whorls of three and clusters of pink, white or red flowers at the branch tips. Philippine folk medicine uses it only on the skin: crushed leaves in oil on shingles and herpes sores, the juice of young leaves in coconut oil on ringworm, a poultice of pounded leaves on snake bites. Every part is poisonous if swallowed, even to animals, so it is never made into a tea.",
+  "tradition": "Elders know adelfa as a beautiful plant that must never be eaten; every part of it is poisonous. Its place in the old knowledge is a warning that is taught as carefully as any cure.",
+  "keep": "Never put adelfa leaves, flowers or sap in your mouth, and keep it away from cooking fires: the smoke is harmful too.",
   "sources": [
     "stuartxchange.org/Adelfa.html"
   ]

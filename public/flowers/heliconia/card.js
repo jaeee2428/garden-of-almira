@@ -15,6 +15,8 @@ G.flowerCard({
   "scent": "none",
   "look": "Banana-like clump; long paddle leaves; upright or hanging zigzag stems of stiff boat-shaped red bracts edged yellow-green.",
   "fact": "The red-and-yellow “claws” are boat-shaped bracts; the true flowers are small and hide inside them. A garden ornamental in the tropics, grown for its flowers and for cutting; I found no Visayan medicinal use recorded for it.",
+  "tradition": "A newer ornamental in Visayan gardens, used in fiesta and church arrangements. The old healers did not use it, so here it simply stands for the bright welcome of a Cebuano fiesta.",
+  "keep": "Keep the old lore and the new beauty apart, so neither is mistaken for the other.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"

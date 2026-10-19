@@ -15,6 +15,8 @@ G.flowerCard({
   "scent": "faint",
   "look": "Dense shrub; stiff glossy opposite leaves; round heads of many small 4-petalled star flowers on slender tubes (red, orange, pink, yellow).",
   "fact": "Tiny four-petalled flowers in round clusters, a classic hedge in Philippine yards. In folk medicine the root decoction is taken for nausea and hiccups and gargled for sore throat, the flower decoction for dysentery, and fresh leaves are poulticed on sprains, boils and bruises.",
+  "tradition": "Every Visayan child knows its sweet nectar, sucked from the base of the little flowers on the way home from school, and its clusters threaded into play necklaces. Healers kept its root for an upset stomach.",
+  "keep": "A hedge by the gate is a teacher too: children learn the plants they can touch, taste and play with.",
   "sources": [
     "StuartXchange (Philippine medicinal plants)",
     "PTKDL"
