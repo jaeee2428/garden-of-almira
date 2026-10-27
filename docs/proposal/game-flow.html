@@ -141,6 +141,45 @@ td .src{color:var(--mute);font-size:.85em}
 footer{padding:48px 0;color:var(--mute);font-size:.85rem}
 @media (max-width:860px){.g2,.g3,.g5,.must{grid-template-columns:1fr}.map{grid-template-columns:1fr 1fr}ul.chg li{grid-template-columns:1fr}
   .journal{inset:3%}.poem{inset:4% 6%}.mock{aspect-ratio:4/5}}
+
+/* story */
+.chars{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.chars .card .who{font:italic .9rem var(--serifi);color:var(--gold);margin-bottom:.4em}
+.rules{display:grid;gap:10px}
+.rule{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rule div{padding:14px 16px;font-size:.93rem;color:var(--ink2)}
+.rule .no{background:rgba(240,138,126,.07)}
+.rule .yes{background:rgba(159,211,154,.07)}
+.rule b{display:block;font:600 .66rem var(--sans);letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px}
+.rule .no b{color:var(--rose)} .rule .yes b{color:var(--leaf)}
+.arc{display:grid;gap:14px}
+.beat{display:grid;grid-template-columns:150px 1fr 1fr;gap:18px;padding:18px;border-radius:14px;border:1px solid var(--line);background:var(--bg2)}
+.beat .h{font:600 .66rem var(--sans);letter-spacing:.2em;text-transform:uppercase}
+.beat h3{margin:.2em 0}
+.beat .turn{font:italic 1rem var(--serifi);color:var(--ink)}
+.beat ul{list-style:none;display:grid;gap:6px}
+.beat li{font-size:.9rem;color:var(--ink2)}
+.beat li::before{content:"·";color:var(--gold);margin-right:.5em;font-weight:700}
+.beat .k{font:600 .64rem var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:6px}
+.script{background:#f4ead3;color:#2f2416;border-radius:10px;padding:34px 40px;font-family:"Courier Prime","Courier New",monospace;font-size:.95rem;line-height:1.6;box-shadow:0 20px 50px rgba(0,0,0,.4);max-width:820px}
+.script .sl{font-weight:700;text-transform:uppercase;margin:1.2em 0 .4em}
+.script .act{margin:.4em 0}
+.script .ch{margin:1em 0 0 34%;text-transform:uppercase}
+.script .pa{margin:0 0 0 26%;font-style:italic;color:#6b5236}
+.script .dl{margin:0 18% 0 20%}
+.script .en{margin:0 18% 0 20%;color:#8b6a3e;font-size:.85em}
+.script p{color:inherit;max-width:none}
+/* subtitle scene */
+.sub{position:absolute;left:0;right:0;bottom:7%;text-align:center;padding:0 10%}
+.sub .name{font:600 clamp(.62rem,1vw,.8rem) var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.sub .line{font:clamp(.95rem,1.9vw,1.6rem) var(--serifi);color:#fff;text-shadow:0 2px 10px #000;margin:.2em 0}
+.sub .tr{font:italic clamp(.7rem,1.1vw,.95rem) var(--serifi);color:#d8cdb8;text-shadow:0 2px 8px #000}
+.sub .opts{display:flex;justify-content:center;gap:10px;margin-top:1em;flex-wrap:wrap}
+.sub .opts button{font:italic clamp(.7rem,1.1vw,.95rem) var(--serifi);background:rgba(0,0,0,.45);border:1px solid rgba(255,240,210,.35);color:#fff;border-radius:99px;padding:.4em 1.1em;cursor:pointer}
+.sub .opts button:hover{border-color:var(--gold)}
+.candle{position:absolute;width:30%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,190,110,.55),rgba(255,160,80,.15) 40%,transparent 70%);animation:flick 2.4s infinite alternate}
+@keyframes flick{0%{opacity:.85;transform:scale(1)}40%{opacity:1;transform:scale(1.04)}70%{opacity:.8}100%{opacity:.95;transform:scale(.98)}}
+@media (max-width:860px){.chars{grid-template-columns:1fr 1fr}.beat{grid-template-columns:1fr}.rule{grid-template-columns:1fr}.script{padding:22px}.script .ch,.script .pa,.script .dl,.script .en{margin-left:8%}}
 </style>
 </head>
 <body>
@@ -148,15 +187,89 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
 <header class="hero">
   <img src="assets/04-gabii-fireflies.jpg" alt="">
   <div class="wrap">
-    <div class="kick">Game flow plan · draft v0.3 · for brainstorming</div>
+    <div class="kick">Game flow plan · draft v0.4 · for brainstorming</div>
     <h1>Hardin ni Almira</h1>
     <p class="lead">Lola Almira is losing her sight. You are her eyes. Find each flower, work out what it is, describe it to her, and she gives you its poem.</p>
   </div>
 </header>
 
 <nav class="top"><div class="wrap">
-  <a href="#loop">The loop</a><a href="#changes">What changed</a><a href="#mockups">Mockups</a><a href="#map">Chapter map</a><a href="#poems">Poems</a><a href="#scope">Build list</a><a href="#why">Why (RRL)</a><a href="#ask">To decide</a><a href="index.html">Open the deck ↗</a>
+  <a href="#story">The story</a><a href="#quiet">Quiet culture</a><a href="#arc">Story arc</a><a href="#scene">A scene</a><a href="#loop">The loop</a><a href="#changes">What changed</a><a href="#mockups">Mockups</a><a href="#map">Chapter map</a><a href="#poems">Poems</a><a href="#scope">Build list</a><a href="#why">Why (RRL)</a><a href="#ask">To decide</a><a href="index.html">Open the deck ↗</a>
 </div></nav>
+
+<!-- STORY -->
+<section id="story"><div class="wrap">
+  <div class="kick">A story first, a game second</div>
+  <h2>Ikaw comes home for one summer</h2>
+  <p class="lead">Ikaw grew up in the city and only half remembers Cebuano. Lola Almira, who taught Ikaw the names of her flowers as a child, can no longer see them. Over one summer in the garden, the apo becomes the eyes, and slowly, the one who remembers.</p>
+  <p style="margin-top:14px">Tone: like <i>Until Then</i> <span style="color:var(--mute)">(Polychroma Games, 2024)</span>. Ordinary days, real places, small talk that matters. The culture is never explained. It is simply how everyone lives. Inspired by Erlinda K. Alburo's <i>Sinug-ang Hardin ni Almira</i>.</p>
+  <div class="chars" style="margin-top:26px">
+    <div class="card"><div class="who">Lola Almira</div><h3>The one who knows</h3><p>A botanist, sharp and funny, too proud to say she can't see. Finds things by touch. Still corrects your Cebuano.</p></div>
+    <div class="card"><div class="who">Ikaw</div><h3>The one who listens</h3><p>The apo. Rusty Cebuano, so the player learns the words alongside Ikaw. That is why English help exists in the story.</p></div>
+    <div class="card"><div class="who">Nang Iday</div><h3>The neighbour</h3><p>Sells puto maya at dawn, knows every remedy, every rumour. Asks Lola before the clinic, every time.</p></div>
+    <div class="card"><div class="who">Toto Ben</div><h3>The fisherman</h3><p>Trades fish for mangoes. Tells stories at the shore that may or may not be true.</p></div>
+  </div>
+</div></section>
+
+<!-- QUIET CULTURE -->
+<section id="quiet"><div class="wrap">
+  <div class="kick">How the culture shows up</div>
+  <h2>Lived, never explained</h2>
+  <p style="margin-bottom:20px">The culture is in every scene, on purpose, but the game never stops to teach it. The player picks it up the way a child does: by being there, again and again.</p>
+  <div class="rules">
+    <div class="rule"><div class="no"><b>Not this</b>A pop up: "Did you know? Filipinos use tuob for colds."</div><div class="yes"><b>This</b>Ikaw coughs at night. Lola says nothing, boils leaves, puts a towel over Ikaw's head. Next morning there is a new line on her page.</div></div>
+    <div class="rule"><div class="no"><b>Not this</b>A tutorial prompt: "Press E to do the mano."</div><div class="yes"><b>This</b>At the gate Lola reaches for Ikaw's hand, misses once, then finds it. The player sees the mano three times before Ikaw does it alone.</div></div>
+    <div class="rule"><div class="no"><b>Not this</b>"Tabi is said to ask permission from spirits."</div><div class="yes"><b>This</b>Lola whispers "tabi, tabi" every time she passes the old tree. Late in the game, if the player walks slowly there, Ikaw says it too. Nobody comments.</div></div>
+    <div class="rule"><div class="no"><b>Not this</b>Folklore told as fact, with spooky music.</div><div class="yes"><b>This</b>Stories start with "Ingon sila…" (they say). Toto Ben laughs at his own tale. The game never confirms or denies.</div></div>
+    <div class="rule"><div class="no"><b>Not this</b>A quiz screen between chapters.</div><div class="yes"><b>This</b>The journal fills in after each scene, in Ikaw's handwriting. That is where the facts live.</div></div>
+    <div class="rule"><div class="no"><b>Not this</b>Remedies presented as cures.</div><div class="yes"><b>This</b>Lola does palina for Bebe's fever, then says, "Dad-a gihapon sa doktor ugma." Bring her to the doctor tomorrow anyway.</div></div>
+  </div>
+</div></section>
+
+<!-- ARC -->
+<section id="arc"><div class="wrap">
+  <div class="kick">Story arc</div>
+  <h2>One summer, six days in the garden</h2>
+  <p style="margin-bottom:20px">Each chapter is one day, told by the hour that suits it. Every day has small everyday moments, a turn that changes how Ikaw sees Lola, and the flowers that belong to it.</p>
+  <div class="arc">
+    <div class="beat"><div><div class="h" style="color:#f6d77a">Prologue · Hapon</div><h3>Pag-uli</h3><p class="turn">Lola can't find Ikaw's hand.</p></div>
+      <div><div class="k">Moments</div><ul><li>The jeepney leaves; the gate creaks</li><li>Tsinelas left at the door</li><li>Lola threads sampaguita by touch</li></ul></div>
+      <div><div class="k">The page</div><ul><li>Sampaguita</li><li>Lola hands over the journal: "Ikaw na ang akong mata."</li><li>Ikaw promises: sumpa kita</li></ul></div></div>
+    <div class="beat"><div><div class="h" style="color:#f3c46b">I · Buntag</div><h3>Ang nataran</h3><p class="turn">Lola waters the wrong plant, and laughs it off.</p></div>
+      <div><div class="k">Moments</div><ul><li>Rooster, sweeping dry leaves, smoke of the siga</li><li>Sikwate and puto maya from Nang Iday</li><li>An old photo: Lola as a young sagala</li></ul></div>
+      <div><div class="k">The pages</div><ul><li>Gumamela, santan, rosas, bogambilya, pukingan</li><li>Clues by sight, and her riddles</li></ul></div></div>
+    <div class="beat"><div><div class="h" style="color:#cfe7f5">II · Udto</div><h3>Lim-aw ug baybayon</h3><p class="turn">Lola asks Ikaw to read her own handwriting to her.</p></div>
+      <div><div class="k">Moments</div><ul><li>"Kaon na ta!" and a second plate you did not ask for</li><li>Siesta in the duyan; the radio low</li><li>Toto Ben trades fish for mangoes, and a story</li></ul></div>
+      <div><div class="k">The pages</div><ul><li>Liryo, canna, heliconia, orkidyas, kadena de amor</li><li>Clues from neighbours</li></ul></div></div>
+    <div class="beat"><div><div class="h" style="color:#f0a070">III · Hapon</div><h3>Tambal</h3><p class="turn">Bebe is sick, and Nang Iday comes to Lola, not the clinic.</p></div>
+      <div><div class="k">Moments</div><ul><li>Merienda on the bench; gossip over the fence</li><li>A visitor praised Bebe yesterday; no one says why that matters</li><li>Palina smoke, then "bring her to the doctor tomorrow"</li></ul></div>
+      <div><div class="k">The pages</div><ul><li>Kamia, ilang-ilang, tsampaka, adelfa</li><li>Clues by scent and touch; adelfa teaches caution</li></ul></div></div>
+    <div class="beat"><div><div class="h" style="color:#b9b0ff">IV · Gabii</div><h3>Brownout</h3><p class="turn">The power goes out. Now Ikaw sees the way Lola does.</p></div>
+      <div><div class="k">Moments</div><ul><li>Candles, the radio dies mid drama</li><li>Lola lights a candle for Lolo; it is almost kalag-kalag</li><li>She tells a story about the old tree. Tabi, tabi.</li></ul></div>
+      <div><div class="k">The pages</div><ul><li>Dama de noche, kalachuchi, rosal</li><li>Clues by scent, sound and memory only</li></ul></div></div>
+    <div class="beat"><div><div class="h" style="color:#f3c46b">✿ Fiesta morning</div><h3>Pagmata</h3><p class="turn">Ikaw reads the whole journal aloud. Lola mouths the poems along.</p></div>
+      <div><div class="k">Moments</div><ul><li>Drums from town, "Pit Señor!"</li><li>Lola's hand resting on the finished page</li></ul></div>
+      <div><div class="k">The end</div><ul><li>The garden awakens (the existing finale)</li><li>The last page is written by Ikaw alone</li></ul></div></div>
+  </div>
+  <p style="margin-top:16px;color:var(--mute);font-size:.9rem">The brownout gives the night chapter its reason: the player cannot see, so they find flowers by scent and sound, like Lola. It is something every Filipino knows, so nobody needs it explained.</p>
+</div></section>
+
+<!-- SCENE -->
+<section id="scene"><div class="wrap">
+  <div class="kick">A scene · prologue</div>
+  <h2>How it reads</h2>
+  <p style="margin-bottom:20px">A short sample of the writing style. Cebuano lines are placeholders for a native speaker to check.</p>
+  <div class="script">
+    <p class="sl">Ext. Hardin ni Almira, the gate · Hapon</p>
+    <p class="act">A jeepney pulls away. Dust settles. The smell of burning leaves from next door. LOLA ALMIRA sits on the papag, threading sampaguita by feel.</p>
+    <p class="ch">Ikaw</p><p class="dl">Lola! Mano po.</p>
+    <p class="act">Lola lifts her hand toward the voice. It misses. Ikaw moves into it. She presses the back of Ikaw's hand to her forehead herself.</p>
+    <p class="ch">Lola Almira</p><p class="pa">(smiling, not quite at Ikaw)</p><p class="dl">Dako na man ka. Kahumot nimo og siyudad.</p><p class="en">You've grown. You smell like the city.</p>
+    <p class="act">She sets the garland down. Feels for the old notebook on the bench. Holds it out.</p>
+    <p class="ch">Lola Almira</p><p class="dl">Wala na nako mahuman. Ikaw na ang akong mata.</p><p class="en">I couldn't finish it. You will be my eyes.</p>
+    <p class="act">The first page is open. A pressed white flower. The name is missing.</p>
+  </div>
+</div></section>
 
 <!-- LOOP -->
 <section id="loop"><div class="wrap">
@@ -176,12 +289,14 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <div class="kick">What changed from v0.2</div>
   <h2>Simpler and more direct</h2>
   <ul class="chg">
+    <li><b>Story first</b><span>Each chapter is one day with its own moments and one turn. Culture lives in the scenes, not in pop ups. The night chapter is a brownout.</span></li>
+    <li><b>Ikaw is rusty</b><span>Ikaw grew up in the city, so learning the Cebuano words is part of the story, not a school exercise.</span></li>
     <li><b>Her poems lead</b><span>Ma'am Alburo gave permission, so her poem is the reward on every page she wrote about. It is no longer a "stretch" item.</span></li>
     <li><b>One loop</b><span>Remedy pages are no longer a separate system. In Chapter III a visitor asks for help, and the answer is still a page with three blanks.</span></li>
     <li><b>One new thing per chapter</b><span>I: riddles. II: neighbours. III: visitors with a need. IV: scent only. Nothing else is added mid chapter.</span></li>
     <li><b>Describe with chips</b><span>"Tell Lola" is three chips picked from what you noticed. Quick to play, easy to score, easy to test.</span></li>
     <li><b>Fewer keys</b><span><b>J</b> journal, <b>L</b> sit with Lola, hold <b>O</b> for Mata ni Lola. "Tabi" happens by walking slowly past the old tree (no key).</span></li>
-    <li><b>Clear ending</b><span>18 pages done: Ikaw reads the journal to Lola at night, then the existing awakening plays.</span></li>
+    <li><b>Clear ending</b><span>18 pages done: on fiesta morning Ikaw reads the journal to Lola, then the existing awakening plays.</span></li>
   </ul>
 </div></section>
 
@@ -309,6 +424,20 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
     <button class="btn holdkey" id="holdO" style="color:#fff">Hold O</button>
   </div>
   <p class="mockcap"><b>Feel how Lola finds her flowers.</b> The view goes soft and dim, scents glow and sounds get louder. Short, optional, and tested with people who have low vision.</p>
+
+  <!-- G scene -->
+  <div class="mock" id="brown">
+    <img class="bgimg" src="assets/04-gabii-fireflies.jpg" alt="" style="filter:brightness(.22) saturate(.6)">
+    <div class="candle" style="left:35%;top:30%"></div>
+    <span class="tag">G · A scene, not a lesson · try it</span>
+    <div class="sub">
+      <div class="name" id="gname">Lola Almira</div>
+      <div class="line" id="gline">“Tabi, tabi…”</div>
+      <div class="tr" id="gtr">(whispered, passing the old tree)</div>
+      <div class="opts" id="gopts"><button data-n="0">Unsa na, La?</button><button data-n="1">(walk on quietly)</button></div>
+    </div>
+  </div>
+  <p class="mockcap"><b>Culture without a label.</b> Dialogue reads like subtitles, in the spirit of <i>Until Then</i>. The player can ask about it or say nothing. Either way it ends up in the journal later.</p>
 </div></section>
 
 <!-- MAP -->
@@ -316,24 +445,24 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <div class="kick">Chapter map</div>
   <h2>One day, eighteen pages</h2>
   <div class="map">
-    <div class="col" style="background:linear-gradient(180deg,#3a4a3a,#1a221a)"><div class="tod" style="color:#f6d77a">Prologue</div><h3>Sumpa kita</h3>
+    <div class="col" style="background:linear-gradient(180deg,#3a4a3a,#1a221a)"><div class="tod" style="color:#f6d77a">Prologue</div><h3>Pag-uli</h3>
       <div class="fl"><img src="assets/f-sampaguita.jpg" title="Sampaguita"></div>
-      <dl><dt>New</dt><dd>The whole loop, 2 blanks only</dd><dt>Story</dt><dd>Lola gives you the journal. You promise to finish it.</dd></dl></div>
+      <dl><dt>New</dt><dd>The whole loop, 2 blanks only</dd><dt>Story</dt><dd>Pag-uli. Lola can't find your hand.</dd></dl></div>
     <div class="col" style="background:linear-gradient(180deg,#4f6b4a,#1a221a)"><div class="tod" style="color:#f3c46b">I · Buntag</div><h3>Ang nataran</h3>
       <div class="fl"><img src="assets/f-gumamela.jpg" title="Gumamela"><img src="assets/f-santan.jpg" title="Santan"><img src="assets/f-rosas.jpg" title="Rosas"><img src="assets/f-bogambilya.jpg" title="Bogambilya"><img src="assets/f-pukingan.jpg" title="Pukingan"></div>
-      <dl><dt>New</dt><dd>Tigmo riddles</dd><dt>Clues by</dt><dd>Sight: colour, petals</dd><dt>Story</dt><dd>Flores de Mayo memory (rosas)</dd></dl></div>
+      <dl><dt>New</dt><dd>Tigmo riddles</dd><dt>Clues by</dt><dd>Sight: colour, petals</dd><dt>Story</dt><dd>An old photo of Lola as a sagala</dd></dl></div>
     <div class="col" style="background:linear-gradient(180deg,#4d6c86,#1a221a)"><div class="tod" style="color:#cfe7f5">II · Udto</div><h3>Lim-aw ug baybayon</h3>
       <div class="fl"><img src="assets/f-liryo.jpg" title="Liryo"><img src="assets/f-canna.jpg" title="Canna"><img src="assets/f-heliconia.jpg" title="Heliconia"><img src="assets/f-orkidyas.jpg" title="Orkidyas"><img src="assets/f-kadena.jpg" title="Kadena de amor"></div>
-      <dl><dt>New</dt><dd>Neighbours: fisherman, child by the pond</dd><dt>Clues by</dt><dd>Sight, fading drawings</dd><dt>Story</dt><dd>Maria Cacao at the shore</dd></dl></div>
+      <dl><dt>New</dt><dd>Neighbours: fisherman, child by the pond</dd><dt>Clues by</dt><dd>Sight, fading drawings</dd><dt>Story</dt><dd>Toto Ben's story at the shore</dd></dl></div>
     <div class="col" style="background:linear-gradient(180deg,#8a5a4a,#1a221a)"><div class="tod" style="color:#f0a070">III · Hapon</div><h3>Tambal</h3>
       <div class="fl"><img src="assets/f-kamia.jpg" title="Kamia"><img src="assets/f-ilangilang.jpg" title="Ilang-ilang"><img src="assets/f-tsampaka.jpg" title="Tsampaka"><img src="assets/f-adelfa.jpg" title="Adelfa"></div>
-      <dl><dt>New</dt><dd>Visitors with a need (a cough, a boil)</dd><dt>Clues by</dt><dd>Scent and touch</dd><dt>Story</dt><dd>Mananambal, tuob, buyag. Adelfa: beautiful, poisonous.</dd></dl></div>
-    <div class="col" style="background:linear-gradient(180deg,#2d3566,#10142a)"><div class="tod" style="color:#b9b0ff">IV · Gabii</div><h3>Mga sugilanon</h3>
+      <dl><dt>New</dt><dd>Visitors with a need (a cough, a boil)</dd><dt>Clues by</dt><dd>Scent and touch</dd><dt>Story</dt><dd>Bebe is sick. Palina, then the doctor.</dd></dl></div>
+    <div class="col" style="background:linear-gradient(180deg,#2d3566,#10142a)"><div class="tod" style="color:#b9b0ff">IV · Gabii</div><h3>Brownout</h3>
       <div class="fl"><img src="assets/f-dama.jpg" title="Dama de noche"><img src="assets/f-kalachuchi.jpg" title="Kalachuchi"><img src="assets/f-rosal.jpg" title="Rosal"></div>
-      <dl><dt>New</dt><dd>Scent only. Mata ni Lola.</dd><dt>Clues by</dt><dd>Scent, sound, memory</dd><dt>Story</dt><dd>Tamawo at the old tree, kalag-kalag</dd></dl></div>
+      <dl><dt>New</dt><dd>Scent only. Mata ni Lola.</dd><dt>Clues by</dt><dd>Scent, sound, memory</dd><dt>Story</dt><dd>Brownout. A candle for Lolo.</dd></dl></div>
     <div class="col" style="background:linear-gradient(180deg,#5a4a2a,#1a1a10)"><div class="tod" style="color:#f3c46b">✿ 18 / 18</div><h3>Pagmata</h3>
       <div class="fl" style="font-size:1.6rem">📖✨</div>
-      <dl><dt>Ending</dt><dd>Ikaw reads the full journal to Lola under the stars. The garden awakens.</dd><dt>Takeaway</dt><dd>Printable herbarium with her poems</dd></dl></div>
+      <dl><dt>Ending</dt><dd>On fiesta morning Ikaw reads the full journal to Lola. The garden awakens.</dd><dt>Takeaway</dt><dd>Printable herbarium with her poems</dd></dl></div>
   </div>
   <p style="margin-top:18px;color:var(--mute);font-size:.9rem">About 45 to 60 minutes. Free walk and the 190 s tour stay as they are.</p>
 </div></section>
@@ -377,6 +506,7 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
     <tr><td>Clue and <b>deduction</b> loop</td><td>Puzzle and adventure are the most used genres for intangible heritage games. Botany Manor proves the loop works with plants. <span class="src">(Zúñiga-Solórzano et al., 2025; Balloon Studios, 2024)</span></td></tr>
     <tr><td>A <b>story</b>, not a quiz</td><td>Heritage games work best on awareness and feeling, which a story carries. <span class="src">(Mortara et al., 2014; Anderson et al., 2010)</span></td></tr>
     <tr><td><b>Pre and post quiz</b> plus SUS and GEQ</td><td>Games improve learning when well designed, so we measure it, not assume it. <span class="src">(Clark et al., 2016; Wouters et al., 2013; Hake, 1998; Brooke, 1996; IJsselsteijn et al., 2013)</span></td></tr>
+    <tr><td>Culture shown in <b>everyday scenes</b></td><td>A Filipino game where daily life carries the culture without explaining it, and reached players worldwide. <span class="src">(Polychroma Games, 2024)</span></td></tr>
     <tr><td><b>Cebuano first</b>, made locally</td><td>Filipino games with Filipino stories, made for Filipinos, are still rare. <span class="src">(Cerda, 2021)</span></td></tr>
     <tr><td>Consent, credit, <b>no medical advice</b></td><td>Traditional knowledge belongs to its community; folk medicine has its own law. <span class="src">(RA 8371; RA 8423)</span></td></tr>
     <tr><td>Some gaps may be <b>the land</b>, not lost teaching</td><td>Use care when claiming loss; we say "often" and test our own players. <span class="src">(Hanazaki et al., 2013)</span></td></tr>
@@ -412,6 +542,7 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <p>Milani, F., Bottoni, M., Maiellaro, A., Crisci, A., Bruschi, P., Giuliani, C., &amp; Fico, G. (2025). Counteracting traditional knowledge erosion: An ethnobotanical survey in Valle Imagna (Bergamo, Italy) to foster intergenerational transfer. <i>Plants, 14</i>(22), 3477. https://doi.org/10.3390/plants14223477</p>
   <p>Mortara, M., Catalano, C. E., Bellotti, F., Fiucci, G., Houry-Panchetti, M., &amp; Petridis, P. (2014). Learning cultural heritage by serious games. <i>Journal of Cultural Heritage, 15</i>(3), 318–325. https://doi.org/10.1016/j.culher.2013.04.004</p>
   <p>Parsley, K. M. (2020). Plant awareness disparity: A case for renaming plant blindness. <i>Plants, People, Planet, 2</i>(6), 598–601. https://doi.org/10.1002/ppp3.10153</p>
+  <p>Polychroma Games. (2024). <i>Until Then</i> [Video game]. Maximum Entertainment.</p>
   <p>Republic Act No. 8371. (1997). <i>The Indigenous Peoples' Rights Act of 1997</i>.</p>
   <p>Republic Act No. 8423. (1997). <i>Traditional and Alternative Medicine Act of 1997</i>.</p>
   <p>Siquijor State College. (2015). <i>Folk healing practices of Siquijor Island</i> [Terminal report]. Philippine Traditional Knowledge Digital Library on Health. https://tkdlph.com</p>
@@ -420,7 +551,7 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <p>Zúñiga-Solórzano, M. E., Fabregat, R., &amp; Jové, T. (2025). Characterization of games technologies for learning in the context of intangible cultural heritage. In <i>Digital Heritage 2025</i>. Eurographics Association. https://doi.org/10.2312/dh.20253377</p>
 </div></section>
 
-<footer><div class="wrap">Hardin ni Almira · game flow draft v0.3 · Princess Jaena Marie O. De La Peña · Poems by Erlinda K. Alburo, used with permission.</div></footer>
+<footer><div class="wrap">Hardin ni Almira · game flow draft v0.4 · Princess Jaena Marie O. De La Peña · Poems by Erlinda K. Alburo, used with permission.</div></footer>
 
 <script>
 /* B · journal: pick a word, then a blank */
@@ -445,6 +576,14 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
 (()=>{const m=document.getElementById('mata'),b=document.getElementById('holdO');const on=()=>m.classList.add('on'),off=()=>m.classList.remove('on');
  b.addEventListener('pointerdown',on);addEventListener('pointerup',off);
  addEventListener('keydown',e=>{if(e.key==='o'||e.key==='O')on()});addEventListener('keyup',e=>{if(e.key==='o'||e.key==='O')off()})})();
+
+/* G · brownout scene */
+(()=>{const L=[["Ikaw","Unsa na, La?","What was that, La?"],["Lola Almira","Batasan ra, day. Para dili ta makasamok.","Just a habit, dear. So we don't disturb anyone."]];
+ const n=document.getElementById('gname'),l=document.getElementById('gline'),t=document.getElementById('gtr'),o=document.getElementById('gopts');
+ o.querySelectorAll('button').forEach(b=>b.onclick=()=>{o.style.display='none';
+   if(b.dataset.n==='0'){n.textContent=L[0][0];l.textContent='“'+L[0][1]+'”';t.textContent=L[0][2];setTimeout(()=>{n.textContent=L[1][0];l.textContent='“'+L[1][1]+'”';t.textContent=L[1][2]},1800)}
+   else{n.textContent='';l.textContent='';t.textContent='(The candle flickers. Lola keeps walking. Later, a new line in the journal: “Tabi.”)'}
+   setTimeout(()=>{o.style.display='flex';n.textContent='Lola Almira';l.textContent='“Tabi, tabi…”';t.textContent='(whispered, passing the old tree)'},7000)})})();
 </script>
 </body>
 </html>
