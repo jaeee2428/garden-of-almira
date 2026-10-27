@@ -180,6 +180,28 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
 .candle{position:absolute;width:30%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,190,110,.55),rgba(255,160,80,.15) 40%,transparent 70%);animation:flick 2.4s infinite alternate}
 @keyframes flick{0%{opacity:.85;transform:scale(1)}40%{opacity:1;transform:scale(1.04)}70%{opacity:.8}100%{opacity:.95;transform:scale(.98)}}
 @media (max-width:860px){.chars{grid-template-columns:1fr 1fr}.beat{grid-template-columns:1fr}.rule{grid-template-columns:1fr}.script{padding:22px}.script .ch,.script .pa,.script .dl,.script .en{margin-left:8%}}
+
+/* side tales */
+.tales{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tale{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:18px;position:relative}
+.tale .ty{font:600 .62rem var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.tale .ty.pab{color:var(--leaf)} .tale .ty.sug{color:#b9b0ff}
+.tale h3{margin:.3em 0 .2em}
+.tale .when{font:italic .9rem var(--serifi);color:var(--ink);margin-bottom:.5em}
+.tale p{font-size:.88rem}
+.tale .src{font-size:.78rem;color:var(--mute);margin-top:.6em}
+.backpage{display:grid;grid-template-columns:1fr 1.2fr;gap:0;border-radius:8px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);margin-top:26px;max-width:980px}
+.backpage .pg{background:linear-gradient(160deg,var(--paper),var(--paper2));color:#3b2d1c;padding:28px 30px;font-family:var(--serifi)}
+.backpage .pg:first-child{box-shadow:inset -14px 0 22px -14px rgba(90,60,30,.45)}
+.backpage h4{font:600 1.2rem var(--serif);margin-bottom:.8em}
+.backpage p{color:inherit;max-width:none}
+.tl{list-style:none;display:grid;gap:6px}
+.tl button{all:unset;cursor:pointer;display:block;width:100%;padding:6px 10px;border-radius:6px;font-style:italic;color:#4a3a26}
+.tl button:hover,.tl button.on{background:rgba(139,106,62,.15)}
+.tl button.lock{color:#b8a27c;cursor:default}
+#taletext{font-size:1.02rem;line-height:1.7;color:#4a3a26}
+#taletext .ikawhand{display:block;margin-top:1em}
+@media (max-width:860px){.tales,.backpage{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -194,7 +216,7 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
 </header>
 
 <nav class="top"><div class="wrap">
-  <a href="#story">The story</a><a href="#quiet">Quiet culture</a><a href="#arc">Story arc</a><a href="#scene">A scene</a><a href="#loop">The loop</a><a href="#changes">What changed</a><a href="#mockups">Mockups</a><a href="#map">Chapter map</a><a href="#poems">Poems</a><a href="#scope">Build list</a><a href="#why">Why (RRL)</a><a href="#ask">To decide</a><a href="index.html">Open the deck ↗</a>
+  <a href="#story">The story</a><a href="#quiet">Quiet culture</a><a href="#arc">Story arc</a><a href="#scene">A scene</a><a href="#tales">Side tales</a><a href="#loop">The loop</a><a href="#changes">What changed</a><a href="#mockups">Mockups</a><a href="#map">Chapter map</a><a href="#poems">Poems</a><a href="#scope">Build list</a><a href="#why">Why (RRL)</a><a href="#ask">To decide</a><a href="index.html">Open the deck ↗</a>
 </div></nav>
 
 <!-- STORY -->
@@ -233,19 +255,19 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <p style="margin-bottom:20px">Each chapter is one day, told by the hour that suits it. Every day has small everyday moments, a turn that changes how Ikaw sees Lola, and the flowers that belong to it.</p>
   <div class="arc">
     <div class="beat"><div><div class="h" style="color:#f6d77a">Prologue · Hapon</div><h3>Pag-uli</h3><p class="turn">Lola can't find Ikaw's hand.</p></div>
-      <div><div class="k">Moments</div><ul><li>The jeepney leaves; the gate creaks</li><li>Tsinelas left at the door</li><li>Lola threads sampaguita by touch</li></ul></div>
+      <div><div class="k">Moments</div><ul><li>The jeepney leaves; the gate creaks</li><li>Tsinelas left at the door</li><li>Lola threads sampaguita by touch, and tells its alamat</li></ul></div>
       <div><div class="k">The page</div><ul><li>Sampaguita</li><li>Lola hands over the journal: "Ikaw na ang akong mata."</li><li>Ikaw promises: sumpa kita</li></ul></div></div>
     <div class="beat"><div><div class="h" style="color:#f3c46b">I · Buntag</div><h3>Ang nataran</h3><p class="turn">Lola waters the wrong plant, and laughs it off.</p></div>
-      <div><div class="k">Moments</div><ul><li>Rooster, sweeping dry leaves, smoke of the siga</li><li>Sikwate and puto maya from Nang Iday</li><li>An old photo: Lola as a young sagala</li></ul></div>
+      <div><div class="k">Moments</div><ul><li>Rooster, sweeping dry leaves, smoke of the siga</li><li>Sikwate and puto maya from Nang Iday</li><li>Bebe asks why the hens scratch. Nang Iday tells her.</li><li>An old photo: Lola as a young sagala</li></ul></div>
       <div><div class="k">The pages</div><ul><li>Gumamela, santan, rosas, bogambilya, pukingan</li><li>Clues by sight, and her riddles</li></ul></div></div>
     <div class="beat"><div><div class="h" style="color:#cfe7f5">II · Udto</div><h3>Lim-aw ug baybayon</h3><p class="turn">Lola asks Ikaw to read her own handwriting to her.</p></div>
-      <div><div class="k">Moments</div><ul><li>"Kaon na ta!" and a second plate you did not ask for</li><li>Siesta in the duyan; the radio low</li><li>Toto Ben trades fish for mangoes, and a story</li></ul></div>
+      <div><div class="k">Moments</div><ul><li>"Kaon na ta!" and a second plate you did not ask for</li><li>Siesta in the duyan; Juan Pusong on the radio</li><li>Toto Ben trades fish for mangoes, then tells Bebe about the turtle and the monkey</li></ul></div>
       <div><div class="k">The pages</div><ul><li>Liryo, canna, heliconia, orkidyas, kadena de amor</li><li>Clues from neighbours</li></ul></div></div>
     <div class="beat"><div><div class="h" style="color:#f0a070">III · Hapon</div><h3>Tambal</h3><p class="turn">Bebe is sick, and Nang Iday comes to Lola, not the clinic.</p></div>
-      <div><div class="k">Moments</div><ul><li>Merienda on the bench; gossip over the fence</li><li>A visitor praised Bebe yesterday; no one says why that matters</li><li>Palina smoke, then "bring her to the doctor tomorrow"</li></ul></div>
+      <div><div class="k">Moments</div><ul><li>Merienda on the bench; Lola makes lana and tells the ilang-ilang legend</li><li>A visitor praised Bebe yesterday; no one says why that matters</li><li>Palina smoke, then "bring her to the doctor tomorrow"</li></ul></div>
       <div><div class="k">The pages</div><ul><li>Kamia, ilang-ilang, tsampaka, adelfa</li><li>Clues by scent and touch; adelfa teaches caution</li></ul></div></div>
     <div class="beat"><div><div class="h" style="color:#b9b0ff">IV · Gabii</div><h3>Brownout</h3><p class="turn">The power goes out. Now Ikaw sees the way Lola does.</p></div>
-      <div><div class="k">Moments</div><ul><li>Candles, the radio dies mid drama</li><li>Lola lights a candle for Lolo; it is almost kalag-kalag</li><li>She tells a story about the old tree. Tabi, tabi.</li></ul></div>
+      <div><div class="k">Moments</div><ul><li>Candles, the radio dies mid drama</li><li>Lola lights a candle for Lolo; it is almost kalag-kalag</li><li>Fireflies come out in the dark; the alamat of the alitaptap. Tabi, tabi at the old tree.</li></ul></div>
       <div><div class="k">The pages</div><ul><li>Dama de noche, kalachuchi, rosal</li><li>Clues by scent, sound and memory only</li></ul></div></div>
     <div class="beat"><div><div class="h" style="color:#f3c46b">✿ Fiesta morning</div><h3>Pagmata</h3><p class="turn">Ikaw reads the whole journal aloud. Lola mouths the poems along.</p></div>
       <div><div class="k">Moments</div><ul><li>Drums from town, "Pit Señor!"</li><li>Lola's hand resting on the finished page</li></ul></div>
@@ -271,6 +293,39 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   </div>
 </div></section>
 
+<!-- TALES -->
+<section id="tales"><div class="wrap">
+  <div class="kick">Side tales · alamat, pabula, sugilanon</div>
+  <h2>Stories you overhear</h2>
+  <p>The old tales are not the main story. They drift in the way they do at home: a neighbour telling a child why hens scratch, a legend at bedtime, a radio drama during siesta. Each one is short, told by someone in the garden, and tied to something the player can already see.</p>
+  <div class="grid g3" style="margin:22px 0 26px">
+    <div class="card"><h3>Overheard, not assigned</h3><p>No quest marker. Walk past at the right hour, or sit (L) to stay and listen. Walk away and it keeps going, quieter.</p></div>
+    <div class="card"><h3>Kept at the back</h3><p>Each tale you hear is written in the back of the journal: "Mga sugilanon nga akong nadungog". No score.</p></div>
+    <div class="card"><h3>A small reward</h3><p>Some tales leave one word in the word bank, a gentle extra clue for a page. Never required.</p></div>
+  </div>
+  <div class="tales">
+    <div class="tale"><div class="ty pab">Pabula · Buntag</div><h3>Ang Banog ug ang Himungaan</h3><div class="when">Nang Iday, feeding the hens, when Bebe asks why they scratch</div><p>The hen threw away the hawk's ring, so hens still scratch the ground looking for it, and the hawk still takes the chicks. The hens in the garden already peck and scratch; now they mean something.</p><div class="src">Visayan · Cole, 1916</div></div>
+    <div class="tale"><div class="ty sug">Sugilanon · Udto</div><h3>Juan Pusong</h3><div class="when">The radio during siesta, half heard from the duyan</div><p>The lazy trickster outwits the rich man again. Lola laughs at a joke you missed. If you stay, you hear the end.</p><div class="src">Visayan · Hart &amp; Hart, 1974</div></div>
+    <div class="tale"><div class="ty pab">Pabula · Udto</div><h3>Ang Bao ug ang Amo</h3><div class="when">Toto Ben, splitting a banana with Bebe under the clump</div><p>The turtle and the monkey share a banana tree; the greedy one loses. Told by a man who never shares his own fish.</p><div class="src">Told across the Philippines · Rizal, 1889</div></div>
+    <div class="tale"><div class="ty">Alamat · Prologue</div><h3>Ang sampaguita</h3><div class="when">Lola, threading the garland on the first day</div><p>"Sumpa kita": a promise kept even after death. It becomes Ikaw's promise to finish the journal.</p><div class="src">Told across the Philippines · Eugenio, 1996</div></div>
+    <div class="tale"><div class="ty">Alamat · Hapon</div><h3>Ang ilang-ilang</h3><div class="when">Lola, steeping ilang-ilang in oil for lana</div><p>A girl named Ilang, and the name someone kept calling. The scent stays on Ikaw's hands for the rest of the day. It leaves "alimyon" in the word bank.</p><div class="src">Sevilla, 1908 · versions differ</div></div>
+    <div class="tale"><div class="ty">Alamat · Gabii</div><h3>Ang alitaptap</h3><div class="when">Lola, in the brownout, when the fireflies come out</div><p>A star maiden who chose to stay. In the dark the fireflies are the only light, and Bebe stops being afraid.</p><div class="src">Eugenio, 1996 · versions differ</div></div>
+  </div>
+  <div class="backpage">
+    <div class="pg"><h4>Mga sugilanon nga akong nadungog</h4><p style="font-size:.9rem;color:#7a6346;margin-bottom:1em">Stories I heard · back of the journal · click one</p>
+      <ul class="tl" id="tl">
+        <li><button data-k="0" class="on">Ang sampaguita</button></li>
+        <li><button data-k="1">Ang Banog ug ang Himungaan</button></li>
+        <li><button data-k="2">Juan Pusong</button></li>
+        <li><button class="lock">· · · (not yet heard)</button></li>
+        <li><button class="lock">· · · (not yet heard)</button></li>
+        <li><button class="lock">· · · (not yet heard)</button></li>
+      </ul></div>
+    <div class="pg"><div id="taletext"></div></div>
+  </div>
+  <p class="mockcap" style="margin-top:14px">Versions of each tale differ by town. We use the Cebuano version a reviewer confirms, and say who told it. The Cebuano lines are placeholders.</p>
+</div></section>
+
 <!-- LOOP -->
 <section id="loop"><div class="wrap">
   <div class="kick">The loop</div>
@@ -290,6 +345,7 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <h2>Simpler and more direct</h2>
   <ul class="chg">
     <li><b>Story first</b><span>Each chapter is one day with its own moments and one turn. Culture lives in the scenes, not in pop ups. The night chapter is a brownout.</span></li>
+    <li><b>Side tales</b><span>Alamat, pabula and sugilanon are overheard from the people in the garden and kept at the back of the journal. Optional, never the main thread.</span></li>
     <li><b>Ikaw is rusty</b><span>Ikaw grew up in the city, so learning the Cebuano words is part of the story, not a school exercise.</span></li>
     <li><b>Her poems lead</b><span>Ma'am Alburo gave permission, so her poem is the reward on every page she wrote about. It is no longer a "stretch" item.</span></li>
     <li><b>One loop</b><span>Remedy pages are no longer a separate system. In Chapter III a visitor asks for help, and the answer is still a page with three blanks.</span></li>
@@ -488,7 +544,7 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
     <div class="card"><span class="pill">Must have</span><ul>
       <li>Lola Almira on the papag, with spoken lines</li><li>Journal (J) with 18 pages and 3 blanks each</li><li>Clues and word bank</li><li>Tell Lola with 3 chips</li><li>Her poems on solved pages</li><li>Prologue, 4 chapters, ending</li><li>Pre and post quiz built in</li></ul></div>
     <div class="card"><span class="pill new">Should have</span><ul>
-      <li>A tigmo for every flower</li><li>3 to 4 neighbour characters</li><li>Visitors with a need in Chapter III</li><li>Mata ni Lola (hold O)</li><li>Recorded Cebuano voice for Lola</li></ul></div>
+      <li>A tigmo for every flower</li><li>6 side tales (alamat, pabula, sugilanon)</li><li>3 to 4 neighbour characters</li><li>Visitors with a need in Chapter III</li><li>Mata ni Lola (hold O)</li><li>Recorded Cebuano voice for Lola</li></ul></div>
     <div class="card"><span class="pill" style="background:rgba(255,255,255,.08);color:var(--mute)">Later</span><ul>
       <li>Printable herbarium</li><li>Garland threading mini game</li><li>More towns and their stories</li><li>English and Cebuano toggle</li></ul></div>
   </div>
@@ -507,6 +563,7 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
     <tr><td>A <b>story</b>, not a quiz</td><td>Heritage games work best on awareness and feeling, which a story carries. <span class="src">(Mortara et al., 2014; Anderson et al., 2010)</span></td></tr>
     <tr><td><b>Pre and post quiz</b> plus SUS and GEQ</td><td>Games improve learning when well designed, so we measure it, not assume it. <span class="src">(Clark et al., 2016; Wouters et al., 2013; Hake, 1998; Brooke, 1996; IJsselsteijn et al., 2013)</span></td></tr>
     <tr><td>Culture shown in <b>everyday scenes</b></td><td>A Filipino game where daily life carries the culture without explaining it, and reached players worldwide. <span class="src">(Polychroma Games, 2024)</span></td></tr>
+    <tr><td><b>Folktales</b> as side stories</td><td>Philippine legends and fables are documented but vary by place, so each needs a named source and a local check. <span class="src">(Eugenio, 1996; Cole, 1916; Hart &amp; Hart, 1974)</span></td></tr>
     <tr><td><b>Cebuano first</b>, made locally</td><td>Filipino games with Filipino stories, made for Filipinos, are still rare. <span class="src">(Cerda, 2021)</span></td></tr>
     <tr><td>Consent, credit, <b>no medical advice</b></td><td>Traditional knowledge belongs to its community; folk medicine has its own law. <span class="src">(RA 8371; RA 8423)</span></td></tr>
     <tr><td>Some gaps may be <b>the land</b>, not lost teaching</td><td>Use care when claiming loss; we say "often" and test our own players. <span class="src">(Hanazaki et al., 2013)</span></td></tr>
@@ -534,8 +591,11 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <p>Balloon Studios. (2024). <i>Botany Manor</i> [Video game]. Whitethorn Games.</p>
   <p>Brooke, J. (1996). SUS: A “quick and dirty” usability scale. In P. W. Jordan et al. (Eds.), <i>Usability evaluation in industry</i> (pp. 189–194). Taylor &amp; Francis.</p>
   <p>Cerda, C. (2021). Towards a “Filipino” video game: Teaching Filipino culture and identity for video game development. <i>Transactions of the Digital Games Research Association, 5</i>(3). https://doi.org/10.26503/todigra.v5i3.122</p>
+  <p>Cole, M. C. (1916). <i>Philippine folk tales</i>. A. C. McClurg.</p>
   <p>Clark, D. B., Tanner-Smith, E. E., &amp; Killingsworth, S. S. (2016). Digital games, design, and learning: A systematic review and meta-analysis. <i>Review of Educational Research, 86</i>(1), 79–122. https://doi.org/10.3102/0034654315582065</p>
+  <p>Eugenio, D. L. (Ed.). (1996). <i>Philippine folk literature: The legends</i>. University of the Philippines.</p>
   <p>Hake, R. R. (1998). Interactive-engagement versus traditional methods. <i>American Journal of Physics, 66</i>(1), 64–74. https://doi.org/10.1119/1.18809</p>
+  <p>Hart, D. V., &amp; Hart, H. E. (1974). Juan Pusong: The Filipino trickster revisited. <i>Asian Studies, 12</i>(2–3).</p>
   <p>Hanazaki, N., Herbst, D. F., Marques, M. S., &amp; Vandebroek, I. (2013). Evidence of the shifting baseline syndrome in ethnobotanical research. <i>Journal of Ethnobiology and Ethnomedicine, 9</i>, 75. https://doi.org/10.1186/1746-4269-9-75</p>
   <p>IJsselsteijn, W. A., de Kort, Y. A. W., &amp; Poels, K. (2013). <i>The Game Experience Questionnaire</i>. Technische Universiteit Eindhoven.</p>
   <p>Miano, R. S., Picardal, J. P., Alonso, C. A. G., &amp; Reuyan, D. (2011). Ethnobotanical inventory and assessment of medically-important plant roots in Cebu Island, Philippines. <i>Asian Journal of Biodiversity, 2</i>(1).</p>
@@ -545,6 +605,8 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
   <p>Polychroma Games. (2024). <i>Until Then</i> [Video game]. Maximum Entertainment.</p>
   <p>Republic Act No. 8371. (1997). <i>The Indigenous Peoples' Rights Act of 1997</i>.</p>
   <p>Republic Act No. 8423. (1997). <i>Traditional and Alternative Medicine Act of 1997</i>.</p>
+  <p>Rizal, J. (1889). The monkey and the turtle. <i>Trübner's Oriental Record</i>.</p>
+  <p>Sevilla, J. N. (1908). <i>Alamat ng ilang-ilang</i>. Manila.</p>
   <p>Siquijor State College. (2015). <i>Folk healing practices of Siquijor Island</i> [Terminal report]. Philippine Traditional Knowledge Digital Library on Health. https://tkdlph.com</p>
   <p>Wandersee, J. H., &amp; Schussler, E. E. (1999). Preventing plant blindness. <i>The American Biology Teacher, 61</i>(2), 82–86. https://doi.org/10.2307/4450624</p>
   <p>Wouters, P., van Nimwegen, C., van Oostendorp, H., &amp; van der Spek, E. D. (2013). A meta-analysis of the cognitive and motivational effects of serious games. <i>Journal of Educational Psychology, 105</i>(2), 249–265. https://doi.org/10.1037/a0031311</p>
@@ -584,6 +646,14 @@ footer{padding:48px 0;color:var(--mute);font-size:.85rem}
    if(b.dataset.n==='0'){n.textContent=L[0][0];l.textContent='“'+L[0][1]+'”';t.textContent=L[0][2];setTimeout(()=>{n.textContent=L[1][0];l.textContent='“'+L[1][1]+'”';t.textContent=L[1][2]},1800)}
    else{n.textContent='';l.textContent='';t.textContent='(The candle flickers. Lola keeps walking. Later, a new line in the journal: “Tabi.”)'}
    setTimeout(()=>{o.style.display='flex';n.textContent='Lola Almira';l.textContent='“Tabi, tabi…”';t.textContent='(whispered, passing the old tree)'},7000)})})();
+
+/* side tales back page */
+(()=>{const T=["Ingon sila, sauna, usa ka dalaga ug usa ka batan-on nagsaad: sumpa kita. Wala na sila magkita pag-usab. Sa lubnganan sa dalaga, mituybo ang gagmayng puting bulak.<span class='ikawhand'>Lola told it while threading the garland. My promise: finish her journal.</span>",
+"Gihatagan sa banog og singsing ang himungaan. Gilabay kini sa himungaan. Mao nga hangtod karon, nagkutkot gihapon ang mga manok sa yuta, nangita sa singsing.<span class='ikawhand'>Nang Iday, feeding the hens. Bebe said she will help them look.</span>",
+"Si Juan Pusong na pud! Gilimbongan na pud niya ang datu. (The radio crackles. Lola laughs before the joke ends.)<span class='ikawhand'>Heard from the duyan. I fell asleep before the end.</span>"];
+ const box=document.getElementById('taletext'),bs=[...document.querySelectorAll('#tl button[data-k]')];
+ const show=k=>{box.innerHTML='<p>'+T[k]+'</p>';bs.forEach(b=>b.classList.toggle('on',b.dataset.k==k))};
+ bs.forEach(b=>b.onclick=()=>show(b.dataset.k));show(0)})();
 </script>
 </body>
 </html>
