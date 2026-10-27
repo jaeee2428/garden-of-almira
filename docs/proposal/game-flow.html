@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardin ni Almira · Game flow</title>
+<link rel="icon" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#121812;--bg2:#1a221a;--ink:#fbf6ec;--ink2:#e3d9c6;--mute:#b9ad97;--gold:#f3c46b;--rose:#f08a7e;--leaf:#9fd39a;--line:rgba(255,240,210,.14);
+  --paper:#f4ead3;--paper2:#e6d6b2;--pink:#3b2d1c;
+  --serif:"Fraunces",Georgia,serif;--serifi:"Newsreader",Georgia,serif;--sans:"Inter",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6}
+a{color:var(--gold)}
+i,em{font-family:var(--serifi)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header.hero{position:relative;height:clamp(420px,78vh,760px);display:flex;align-items:flex-end;overflow:hidden}
+header.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.05)}
+header.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,10,.1) 30%,rgba(18,24,18,1))}
+header.hero .wrap{position:relative;z-index:1;padding-bottom:clamp(32px,7vh,64px)}
+.kick{font:600 .74rem var(--sans);letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+h1{font:700 clamp(2.6rem,7vw,5.4rem)/1 var(--serif);margin:.4em 0 .25em;letter-spacing:-.02em}
+h2{font:600 clamp(1.6rem,3vw,2.4rem)/1.15 var(--serif);margin:.3em 0 .6em}
+h3{font:600 1.15rem var(--serif);margin-bottom:.3em}
+p{color:var(--ink2);max-width:72ch}
+.lead{font-size:1.2rem;color:var(--ink)}
+nav.top{position:sticky;top:0;z-index:10;background:rgba(18,24,18,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:18px;overflow-x:auto;padding-top:12px;padding-bottom:12px;white-space:nowrap}
+nav.top a{color:var(--mute);text-decoration:none;font-size:.86rem}
+nav.top a:hover{color:var(--gold)}
+section{padding:clamp(48px,9vh,96px) 0;border-bottom:1px solid var(--line)}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:20px}
+.card p{font-size:.95rem}
+.pill{display:inline-block;font:600 .7rem var(--sans);letter-spacing:.16em;text-transform:uppercase;padding:.35em .8em;border-radius:99px;background:rgba(243,196,107,.15);color:var(--gold)}
+.pill.new{background:rgba(159,211,154,.15);color:var(--leaf)}
+/* loop */
+.loop{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px}
+.loop span{font:600 1.05rem var(--serif);padding:.6em 1.1em;border-radius:99px;background:var(--bg2);border:1px solid var(--line)}
+.loop b{color:var(--gold);font-weight:400}
+/* changes list */
+ul.chg{list-style:none;display:grid;gap:12px;margin-top:10px}
+ul.chg li{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:150px 1fr;gap:14px}
+ul.chg li b{font:600 .95rem var(--serif);color:var(--gold)}
+ul.chg li span{color:var(--ink2);font-size:.95rem}
+/* mockup frames */
+.mock{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--line);box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.mock>img.bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mock .tag{position:absolute;left:14px;top:12px;z-index:5;font:600 .68rem var(--sans);letter-spacing:.2em;text-transform:uppercase;background:rgba(0,0,0,.55);padding:.4em .8em;border-radius:99px;color:var(--gold)}
+.mockcap{margin:12px 0 44px;font-size:.92rem;color:var(--mute)}
+.mockcap b{color:var(--ink)}
+/* journal */
+.journal{position:absolute;inset:6% 8%;display:grid;grid-template-columns:1fr 1fr;border-radius:8px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.journal .pg{background:linear-gradient(160deg,var(--paper),var(--paper2));color:var(--pink);padding:5% 6%;font-family:var(--serifi);position:relative;font-size:clamp(.62rem,1.15vw,1rem)}
+.journal .pg:first-child{box-shadow:inset -14px 0 22px -14px rgba(90,60,30,.45)}
+.journal h4{font:600 1.25em var(--serif);color:#3b2d1c;margin-bottom:.6em}
+.journal .ln{margin:.35em 0}
+.slot{display:inline-block;min-width:8em;border-bottom:1.5px dashed #8b6a3e;text-align:center;color:#8b6a3e;cursor:pointer;transition:all .3s;padding:0 .3em}
+.slot.ok{border-bottom:1.5px solid #2f6b35;color:#2f6b35}
+.slot.bad{animation:shake .4s;border-bottom-color:#b2473a}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.bank{display:flex;flex-wrap:wrap;gap:.4em;margin-top:.6em}
+.bank button{font:italic 1em var(--serifi);background:#fffaf0;border:1px solid #c8b088;color:#4a3a26;border-radius:6px;padding:.2em .55em;cursor:pointer}
+.bank button.used{opacity:.35;pointer-events:none}
+.bank button.sel{background:#f3c46b;border-color:#b78a2e}
+.stamp{position:absolute;right:7%;top:6%;transform:rotate(-9deg);font:700 .78em var(--sans);letter-spacing:.18em;padding:.35em .7em;border:2px solid #b2473a;color:#b2473a;border-radius:6px}
+.stamp.ok{border-color:#2f6b35;color:#2f6b35}
+.journal p,.poem p,.bubble p{color:inherit;max-width:none}
+.journal .clue{color:#4a3a26}
+.lolahand{font-family:"Newsreader",serif;font-style:italic;color:#6b5236;transform:rotate(-1deg);line-height:1.5}
+.press{width:34%;aspect-ratio:1;border-radius:6px;overflow:hidden;opacity:.85;box-shadow:0 4px 10px rgba(0,0,0,.25);float:right;margin:0 0 .6em .8em;transform:rotate(3deg);filter:sepia(.45) saturate(.8)}
+.press img{width:100%;height:100%;object-fit:cover}
+.clue{margin:.3em 0;font-size:.95em}
+/* hover label */
+.hl{position:absolute;transform:translate(-50%,-120%);font:italic 500 clamp(.8rem,1.4vw,1.1rem) var(--serifi);background:rgba(15,15,12,.72);padding:.3em .8em;border-radius:99px;color:#fff;white-space:nowrap}
+.hl small{font:500 .7em var(--sans);color:var(--gold);margin-left:.5em}
+.reticle{position:absolute;width:14px;height:14px;border:2px solid rgba(255,255,255,.85);border-radius:50%;transform:translate(-50%,-50%)}
+.toast{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);background:rgba(15,15,12,.75);padding:.6em 1.2em;border-radius:12px;font-size:clamp(.7rem,1.1vw,.92rem);color:var(--ink)}
+.toast b{color:var(--gold)}
+/* lola dialog */
+.dlg{position:absolute;left:5%;right:5%;bottom:5%;display:grid;grid-template-columns:auto 1fr;gap:3%;align-items:end}
+.portrait{width:clamp(80px,13vw,160px);position:relative}
+.portrait svg{width:100%;display:block;border-radius:14px;border:2px solid rgba(255,240,210,.45);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.portrait span{display:block;text-align:center;font:italic .85rem var(--serifi);color:var(--gold);margin-top:.3em}
+.bubble{background:rgba(250,244,230,.96);color:#3b2d1c;border-radius:16px;padding:2.2% 3%;font-size:clamp(.66rem,1.15vw,.98rem)}
+.bubble .say{font-family:var(--serifi);font-size:1.15em;margin-bottom:.4em}
+.bubble .say{color:#3b2d1c}
+.bubble .en{color:#7a6346;font-size:.9em;margin-bottom:.6em}
+.chips{display:flex;flex-wrap:wrap;gap:.4em}
+.chips button{font:500 .9em var(--sans);border:1px solid #c8b088;background:#fff;color:#4a3a26;border-radius:99px;padding:.3em .8em;cursor:pointer}
+.chips button.on{background:#3b2d1c;color:#fbf6ec;border-color:#3b2d1c}
+.dlgbar{display:flex;justify-content:space-between;align-items:center;margin-top:.7em;font-size:.85em;color:#7a6346}
+.btn{cursor:pointer;border:1px solid rgba(243,196,107,.7);background:rgba(243,196,107,.18);color:inherit;font:600 .9em var(--sans);padding:.45em 1em;border-radius:99px}
+.bubble .btn{background:#3b2d1c;color:#fbf6ec;border-color:#3b2d1c}
+/* poem */
+.poem{position:absolute;inset:8% 22%;background:linear-gradient(160deg,var(--paper),var(--paper2));border-radius:8px;color:#3b2d1c;padding:4% 5%;box-shadow:0 30px 70px rgba(0,0,0,.6);font-size:clamp(.62rem,1.1vw,.95rem);text-align:center}
+.poem h4{font:600 1.5em var(--serif)}
+.poem .sci{font-style:italic;color:#7a6346;margin-bottom:1em}
+.poem .verse{font-family:var(--serifi);font-style:italic;font-size:1.15em;line-height:2;color:#6b5236;border-top:1px solid #c8b088;border-bottom:1px solid #c8b088;padding:.8em 0;margin:.8em 0}
+.poem .two{display:grid;grid-template-columns:1fr 1fr;gap:1em;text-align:left;font-size:.9em}
+.poem .two b{display:block;font:600 .72em var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#8b6a3e}
+.ikawhand{font-family:var(--serifi);font-style:italic;color:#2f4f7a}
+/* chapter card */
+.chapcard{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:radial-gradient(ellipse at center,rgba(5,8,20,.35),rgba(5,8,20,.85))}
+.chapcard .n{font:600 clamp(.7rem,1.1vw,.9rem) var(--sans);letter-spacing:.4em;color:var(--gold);text-transform:uppercase}
+.chapcard .t{font:700 clamp(2rem,6vw,4.6rem)/1 var(--serif);margin:.2em 0}
+.chapcard .s{font:italic clamp(.9rem,1.6vw,1.3rem) var(--serifi);color:var(--ink2)}
+.chapcard .rule{font-size:clamp(.7rem,1vw,.85rem);color:var(--mute);margin-top:1.6em}
+/* mata ni lola */
+#mata img.bgimg{transition:filter 1.2s ease}
+#mata.on img.bgimg{filter:blur(7px) brightness(.55) saturate(.5)}
+.scent{position:absolute;pointer-events:none;opacity:0;transition:opacity 1.2s}
+#mata.on .scent{opacity:1}
+.holdkey{position:absolute;right:16px;bottom:14px;z-index:6}
+/* chapter map */
+.map{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.map .col{border-radius:14px;padding:14px;border:1px solid var(--line);min-height:100%}
+.map .col h3{font-size:1.02rem}
+.map .tod{font:600 .66rem var(--sans);letter-spacing:.2em;text-transform:uppercase}
+.map .fl{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}
+.map .fl img{width:42px;height:42px;border-radius:50%;object-fit:cover;object-position:center 70%;border:2px solid rgba(255,255,255,.25)}
+.map dl{font-size:.82rem;color:var(--ink2)}
+.map dt{font:600 .64rem var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-top:8px}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 .7rem var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+td:first-child{font-family:var(--serif);color:var(--ink);width:30%}
+td .src{color:var(--mute);font-size:.85em}
+.must{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.must ul{list-style:none;display:grid;gap:8px;margin-top:8px}
+.must li{font-size:.93rem;color:var(--ink2)}
+.must li::before{content:"•";color:var(--gold);margin-right:.5em}
+.q{display:grid;gap:10px;counter-reset:q;list-style:none}
+.q li{counter-increment:q;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 56px;position:relative;color:var(--ink2)}
+.q li::before{content:counter(q);position:absolute;left:16px;top:13px;width:26px;height:26px;border-radius:50%;background:var(--gold);color:#2a2112;display:grid;place-items:center;font:600 .85rem var(--serif)}
+.q li b{color:var(--ink)}
+.refs p{font-size:.84rem;margin-bottom:8px;padding-left:1.6em;text-indent:-1.6em;max-width:none}
+footer{padding:48px 0;color:var(--mute);font-size:.85rem}
+@media (max-width:860px){.g2,.g3,.g5,.must{grid-template-columns:1fr}.map{grid-template-columns:1fr 1fr}ul.chg li{grid-template-columns:1fr}
+  .journal{inset:3%}.poem{inset:4% 6%}.mock{aspect-ratio:4/5}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img src="assets/04-gabii-fireflies.jpg" alt="">
+  <div class="wrap">
+    <div class="kick">Game flow plan · draft v0.3 · for brainstorming</div>
+    <h1>Hardin ni Almira</h1>
+    <p class="lead">Lola Almira is losing her sight. You are her eyes. Find each flower, work out what it is, describe it to her, and she gives you its poem.</p>
+  </div>
+</header>
+
+<nav class="top"><div class="wrap">
+  <a href="#loop">The loop</a><a href="#changes">What changed</a><a href="#mockups">Mockups</a><a href="#map">Chapter map</a><a href="#poems">Poems</a><a href="#scope">Build list</a><a href="#why">Why (RRL)</a><a href="#ask">To decide</a><a href="index.html">Open the deck ↗</a>
+</div></nav>
+
+<!-- LOOP -->
+<section id="loop"><div class="wrap">
+  <div class="kick">The loop</div>
+  <h2>Every page works the same way</h2>
+  <p>One loop, eighteen times. Each chapter adds one new kind of clue, so the player always knows what to do and still meets something new.</p>
+  <div class="loop"><span>1 · Read the page</span><b>→</b><span>2 · Collect clues</span><b>→</b><span>3 · Fill the blanks</span><b>→</b><span>4 · Find the flower</span><b>→</b><span>5 · Tell Lola</span><b>→</b><span>6 · Hear the poem</span></div>
+  <div class="grid g3" style="margin-top:26px">
+    <div class="card"><h3>Three blanks, always</h3><p><b>Ngalan</b> (name), <b>Kanus-a / Asa</b> (when or where), <b>Gamit</b> (use). They are the parts Lola could not see to write.</p></div>
+    <div class="card"><h3>Words come from clues</h3><p>Every clue adds words to the word bank. You fill blanks only with words you found. No guessing from a list of 18.</p></div>
+    <div class="card"><h3>Never stuck</h3><p>A wrong word just does not stick. A weak description makes Lola ask one question back. No timer, no game over.</p></div>
+  </div>
+</div></section>
+
+<!-- CHANGES -->
+<section id="changes"><div class="wrap">
+  <div class="kick">What changed from v0.2</div>
+  <h2>Simpler and more direct</h2>
+  <ul class="chg">
+    <li><b>Her poems lead</b><span>Ma'am Alburo gave permission, so her poem is the reward on every page she wrote about. It is no longer a "stretch" item.</span></li>
+    <li><b>One loop</b><span>Remedy pages are no longer a separate system. In Chapter III a visitor asks for help, and the answer is still a page with three blanks.</span></li>
+    <li><b>One new thing per chapter</b><span>I: riddles. II: neighbours. III: visitors with a need. IV: scent only. Nothing else is added mid chapter.</span></li>
+    <li><b>Describe with chips</b><span>"Tell Lola" is three chips picked from what you noticed. Quick to play, easy to score, easy to test.</span></li>
+    <li><b>Fewer keys</b><span><b>J</b> journal, <b>L</b> sit with Lola, hold <b>O</b> for Mata ni Lola. "Tabi" happens by walking slowly past the old tree (no key).</span></li>
+    <li><b>Clear ending</b><span>18 pages done: Ikaw reads the journal to Lola at night, then the existing awakening plays.</span></li>
+  </ul>
+</div></section>
+
+<!-- MOCKUPS -->
+<section id="mockups"><div class="wrap">
+  <div class="kick">Mockups · click them</div>
+  <h2>What the player sees</h2>
+  <p style="margin-bottom:26px">Drawn on top of real screenshots from the current build. The Cebuano lines are placeholders for a native speaker to check.</p>
+
+  <!-- A hover -->
+  <div class="mock">
+    <img class="bgimg" src="assets/02-buntag-garden.jpg" alt="">
+    <span class="tag">A · In the garden</span>
+    <div class="reticle" style="left:58%;top:58%"></div>
+    <div class="hl" style="left:58%;top:58%">??? <small>not in your journal yet</small></div>
+    <div class="toast">New clue · <b>“mobukad inig gabii”</b> added to the word bank</div>
+  </div>
+  <p class="mockcap"><b>Unsolved flowers have no name.</b> The hover label shows "???" until the page is solved. Walking close to a clue adds its words to the bank.</p>
+
+  <!-- B journal -->
+  <div class="mock">
+    <img class="bgimg" src="assets/04-gabii-fireflies.jpg" alt="" style="filter:blur(3px) brightness(.6)">
+    <span class="tag">B · Journal (J) · try it</span>
+    <div class="journal">
+      <div class="pg">
+        <h4>Pahina 5</h4>
+        <div class="press"><img src="assets/f-dama.jpg" alt=""></div>
+        <p class="lolahand">“Dili na nako makita, pero kahibalo ko kanus-a siya mobukad. Ang iyang alimyon para sa mga molakaw sa gabii.”</p>
+        <p class="lolahand" style="font-size:.85em;color:#8b6a3e">I can't see it anymore, but I know when it opens. Its perfume is for the ones who walk at night.</p>
+        <p style="margin-top:1em;font-weight:600">Mga timailhan · clues</p>
+        <p class="clue">❓ <i>Usa ka babaye nga mag-ayo-ayo ra kon mosalop na ang adlaw.</i></p>
+        <p class="clue">👃 Near the gate the air turns sweet after 7 pm.</p>
+        <p class="clue">🗣️ Nang Iday: <i>“Simhota lang, day. Ayaw inma.”</i></p>
+      </div>
+      <div class="pg">
+        <span class="stamp" id="jstamp">KULANG PA</span>
+        <h4>&nbsp;</h4>
+        <p class="ln">Ngalan: <span class="slot" data-a="dama de noche">?</span></p>
+        <p class="ln">Kanus-a: <span class="slot ok">mobukad inig gabii</span></p>
+        <p class="ln">Gamit: <span class="slot" data-a="alimyon ra, dili imnon">?</span></p>
+        <p style="margin-top:1.2em;font-size:.85em;color:#7a6346">Word bank · pick a word, then a blank</p>
+        <div class="bank" id="bank">
+          <button>gumamela</button><button>dama de noche</button><button>tuob sa ubo</button><button>alimyon ra, dili imnon</button><button>sampaguita</button><button>tapal sa hubag</button>
+        </div>
+        <p class="ikawhand" id="jnote" style="margin-top:1.2em;opacity:0;transition:opacity .6s">Next: find it by the gate and tell Lola.</p>
+      </div>
+    </div>
+  </div>
+  <p class="mockcap"><b>The journal is the game.</b> Lola's shaky note and a pressed petal on the left, blanks on the right. Fill both blanks to unlock "find it".</p>
+
+  <!-- C describe -->
+  <div class="mock">
+    <img class="bgimg" src="assets/02-buntag-garden.jpg" alt="" style="filter:sepia(.35) saturate(1.1) brightness(.82) hue-rotate(-12deg)">
+    <span class="tag">C · Tell Lola · try it</span>
+    <div class="dlg">
+      <div class="portrait"><svg viewBox="0 0 120 150" aria-label="Lola Almira">
+  <defs><linearGradient id="pbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a8f6e"/><stop offset="1" stop-color="#3e4d3a"/></linearGradient></defs>
+  <rect width="120" height="150" fill="url(#pbg)"/>
+  <path d="M14 150 C 18 112, 40 100, 60 100 C 80 100, 102 112, 106 150 Z" fill="#8a4f62"/>
+  <path d="M22 150 C 30 120, 44 108, 60 112 C 76 108, 90 120, 98 150" fill="none" stroke="#e8c98a" stroke-width="3" opacity=".7"/>
+  <path d="M50 92 L 50 104 Q 60 110 70 104 L 70 92 Z" fill="#b98a68"/>
+  <ellipse cx="60" cy="66" rx="25" ry="30" fill="#c99a74"/>
+  <path d="M33 62 C 32 34, 50 26, 60 26 C 72 26, 89 34, 87 62 C 84 46, 74 40, 60 40 C 46 40, 36 46, 33 62 Z" fill="#ecebe6"/>
+  <circle cx="60" cy="22" r="11" fill="#ecebe6"/><circle cx="68" cy="18" r="3.5" fill="#fffaf0"/><circle cx="71" cy="23" r="3" fill="#fffaf0"/>
+  <circle cx="50" cy="66" r="7.5" fill="none" stroke="#3b2d1c" stroke-width="1.6"/><circle cx="70" cy="66" r="7.5" fill="none" stroke="#3b2d1c" stroke-width="1.6"/><path d="M57.5 66 L 62.5 66" stroke="#3b2d1c" stroke-width="1.6"/>
+  <path d="M46 67 Q 50 69 54 67 M66 67 Q 70 69 74 67" stroke="#5a4030" stroke-width="1.3" fill="none"/>
+  <path d="M60 70 Q 58 77 61 78" stroke="#9b6e52" stroke-width="1.3" fill="none"/>
+  <path d="M52 85 Q 60 90 68 85" stroke="#8a4a3a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M42 78 Q 45 82 48 80 M78 78 Q 75 82 72 80" stroke="#b07f60" stroke-width="1" fill="none"/>
+</svg><span>Lola Almira</span></div>
+      <div class="bubble">
+        <p class="say" id="lsay">“Unsa man ang imong nakita, day? Isulti kanako.”</p>
+        <p class="en" id="len">What did you see, dear? Tell me.</p>
+        <div class="chips" id="chips">
+          <button data-t="1">puti</button><button>pula</button><button data-t="1">humot sa gabii</button><button>humot sa buntag</button><button data-t="1">gagmay, morag tubo</button><button>lima ka dagkong talulot</button><button data-t="1">duol sa ganghaan</button>
+        </div>
+        <div class="dlgbar"><span id="ccount">Pick 3 details</span><button class="btn" id="tell">Isulti</button></div>
+      </div>
+    </div>
+  </div>
+  <p class="mockcap"><b>The key mechanic.</b> Pick three things you noticed. Three true details: Lola names the flower and recites its poem. Fewer: she asks one question back, as a hint.</p>
+
+  <!-- D poem -->
+  <div class="mock" id="poemmock">
+    <img class="bgimg" src="assets/04-gabii-fireflies.jpg" alt="" style="filter:brightness(.45)">
+    <span class="tag">D · The reward</span>
+    <div class="poem">
+      <span class="stamp ok" style="font-size:.9em">NAHUMAN ✓</span>
+      <h4>Dama de noche</h4>
+      <p class="sci">Cestrum nocturnum · Pahina 5</p>
+      <div class="verse">[ Balak ni Erlinda K. Alburo ]<br>· · · · · · · · · · · · · · · · ·<br>· · · · · · · · · · · · · ·<br>· · · · · · · · · · · · · · · ·</div>
+      <div class="two">
+        <div><b>Sa naandan</b>Grown by the door for its night scent. Smelled, never drunk.</div>
+        <div><b>Nakat-unan</b><span class="ikawhand">Every part is poisonous. Lola says: smell it, don't drink it.</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="mockcap"><b>Her poem, her knowledge, your handwriting.</b> The existing card becomes the page. Ikaw's blue ink sits next to Lola's brown ink. The verse shows Ma'am Alburo's text exactly.</p>
+
+  <!-- E chapter -->
+  <div class="mock">
+    <img class="bgimg" src="assets/04-gabii-fireflies.jpg" alt="">
+    <span class="tag">E · Chapter card</span>
+    <div class="chapcard"><div>
+      <div class="n">Kapitulo IV · Gabii</div>
+      <div class="t">Mga sugilanon</div>
+      <div class="s">“Dili na ko makakita. Simhota, paminawa.”</div>
+      <div class="rule">New this chapter: clues by scent only · 3 pages left</div>
+    </div></div>
+  </div>
+  <p class="mockcap"><b>Each chapter opens with one line from Lola</b> and one sentence on what is new. The time of day changes with it.</p>
+
+  <!-- F mata -->
+  <div class="mock" id="mata">
+    <img class="bgimg" src="assets/04-gabii-fireflies.jpg" alt="">
+    <span class="tag">F · Mata ni Lola (hold O)</span>
+    <svg class="scent" viewBox="0 0 100 56" preserveAspectRatio="none" style="inset:0;width:100%;height:100%">
+      <defs><radialGradient id="sg"><stop offset="0" stop-color="#fff4c2" stop-opacity=".75"/><stop offset="1" stop-color="#fff4c2" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="30" cy="38" r="9" fill="url(#sg)"><animate attributeName="r" values="6;11;6" dur="3.2s" repeatCount="indefinite"/></circle>
+      <circle cx="72" cy="34" r="6" fill="url(#sg)"><animate attributeName="r" values="4;8;4" dur="2.6s" repeatCount="indefinite"/></circle>
+      <path d="M30 38 C 36 30, 26 24, 33 16" stroke="#fff4c2" stroke-opacity=".5" stroke-width=".4" fill="none" stroke-dasharray="1.5 1.5"><animate attributeName="stroke-dashoffset" values="0;-6" dur="2s" repeatCount="indefinite"/></path>
+      <text x="30" y="50" fill="#fff4c2" font-size="2.2" text-anchor="middle" font-style="italic">humot · tam-is</text>
+      <text x="72" y="44" fill="#fff4c2" font-size="2" text-anchor="middle" font-style="italic">ting-ting · tubig</text>
+    </svg>
+    <button class="btn holdkey" id="holdO" style="color:#fff">Hold O</button>
+  </div>
+  <p class="mockcap"><b>Feel how Lola finds her flowers.</b> The view goes soft and dim, scents glow and sounds get louder. Short, optional, and tested with people who have low vision.</p>
+</div></section>
+
+<!-- MAP -->
+<section id="map"><div class="wrap">
+  <div class="kick">Chapter map</div>
+  <h2>One day, eighteen pages</h2>
+  <div class="map">
+    <div class="col" style="background:linear-gradient(180deg,#3a4a3a,#1a221a)"><div class="tod" style="color:#f6d77a">Prologue</div><h3>Sumpa kita</h3>
+      <div class="fl"><img src="assets/f-sampaguita.jpg" title="Sampaguita"></div>
+      <dl><dt>New</dt><dd>The whole loop, 2 blanks only</dd><dt>Story</dt><dd>Lola gives you the journal. You promise to finish it.</dd></dl></div>
+    <div class="col" style="background:linear-gradient(180deg,#4f6b4a,#1a221a)"><div class="tod" style="color:#f3c46b">I · Buntag</div><h3>Ang nataran</h3>
+      <div class="fl"><img src="assets/f-gumamela.jpg" title="Gumamela"><img src="assets/f-santan.jpg" title="Santan"><img src="assets/f-rosas.jpg" title="Rosas"><img src="assets/f-bogambilya.jpg" title="Bogambilya"><img src="assets/f-pukingan.jpg" title="Pukingan"></div>
+      <dl><dt>New</dt><dd>Tigmo riddles</dd><dt>Clues by</dt><dd>Sight: colour, petals</dd><dt>Story</dt><dd>Flores de Mayo memory (rosas)</dd></dl></div>
+    <div class="col" style="background:linear-gradient(180deg,#4d6c86,#1a221a)"><div class="tod" style="color:#cfe7f5">II · Udto</div><h3>Lim-aw ug baybayon</h3>
+      <div class="fl"><img src="assets/f-liryo.jpg" title="Liryo"><img src="assets/f-canna.jpg" title="Canna"><img src="assets/f-heliconia.jpg" title="Heliconia"><img src="assets/f-orkidyas.jpg" title="Orkidyas"><img src="assets/f-kadena.jpg" title="Kadena de amor"></div>
+      <dl><dt>New</dt><dd>Neighbours: fisherman, child by the pond</dd><dt>Clues by</dt><dd>Sight, fading drawings</dd><dt>Story</dt><dd>Maria Cacao at the shore</dd></dl></div>
+    <div class="col" style="background:linear-gradient(180deg,#8a5a4a,#1a221a)"><div class="tod" style="color:#f0a070">III · Hapon</div><h3>Tambal</h3>
+      <div class="fl"><img src="assets/f-kamia.jpg" title="Kamia"><img src="assets/f-ilangilang.jpg" title="Ilang-ilang"><img src="assets/f-tsampaka.jpg" title="Tsampaka"><img src="assets/f-adelfa.jpg" title="Adelfa"></div>
+      <dl><dt>New</dt><dd>Visitors with a need (a cough, a boil)</dd><dt>Clues by</dt><dd>Scent and touch</dd><dt>Story</dt><dd>Mananambal, tuob, buyag. Adelfa: beautiful, poisonous.</dd></dl></div>
+    <div class="col" style="background:linear-gradient(180deg,#2d3566,#10142a)"><div class="tod" style="color:#b9b0ff">IV · Gabii</div><h3>Mga sugilanon</h3>
+      <div class="fl"><img src="assets/f-dama.jpg" title="Dama de noche"><img src="assets/f-kalachuchi.jpg" title="Kalachuchi"><img src="assets/f-rosal.jpg" title="Rosal"></div>
+      <dl><dt>New</dt><dd>Scent only. Mata ni Lola.</dd><dt>Clues by</dt><dd>Scent, sound, memory</dd><dt>Story</dt><dd>Tamawo at the old tree, kalag-kalag</dd></dl></div>
+    <div class="col" style="background:linear-gradient(180deg,#5a4a2a,#1a1a10)"><div class="tod" style="color:#f3c46b">✿ 18 / 18</div><h3>Pagmata</h3>
+      <div class="fl" style="font-size:1.6rem">📖✨</div>
+      <dl><dt>Ending</dt><dd>Ikaw reads the full journal to Lola under the stars. The garden awakens.</dd><dt>Takeaway</dt><dd>Printable herbarium with her poems</dd></dl></div>
+  </div>
+  <p style="margin-top:18px;color:var(--mute);font-size:.9rem">About 45 to 60 minutes. Free walk and the 190 s tour stay as they are.</p>
+</div></section>
+
+<!-- POEMS -->
+<section id="poems"><div class="wrap">
+  <div class="kick">Decision · poems</div>
+  <h2>Build around her poems. Do not write new ones.</h2>
+  <div class="grid g2">
+    <div class="card"><h3 style="color:var(--leaf)">What we do</h3><p>Her poems become the heart of the game: the reward on every page she wrote about, read aloud by Lola, shown in Cebuano with an English line under it, and collected in the printable herbarium at the end.</p>
+      <p style="margin-top:10px">If her work has a poem for a flower that is not in our 18, we add that flower (new plants never reshuffle the garden).</p></div>
+    <div class="card"><h3 style="color:var(--rose)">What we do not do</h3><p>We do not write new poems and put them in her voice or her name. A made up "Alburo poem" would be the one thing a panel or Ma'am Alburo could fairly object to.</p>
+      <p style="margin-top:10px">Pages with no poem of hers end with Lola's spoken knowledge and the folk use instead. They still feel complete.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px;border-color:rgba(243,196,107,.5)"><h3>What I need from you</h3><p>The poem text (or a photo of the pages), which flowers it covers, and the exact wording of her permission, so we can credit it right in the game and in the thesis.</p></div>
+</div></section>
+
+<!-- SCOPE -->
+<section id="scope"><div class="wrap">
+  <div class="kick">Build list</div>
+  <h2>What to build first</h2>
+  <div class="must">
+    <div class="card"><span class="pill">Must have</span><ul>
+      <li>Lola Almira on the papag, with spoken lines</li><li>Journal (J) with 18 pages and 3 blanks each</li><li>Clues and word bank</li><li>Tell Lola with 3 chips</li><li>Her poems on solved pages</li><li>Prologue, 4 chapters, ending</li><li>Pre and post quiz built in</li></ul></div>
+    <div class="card"><span class="pill new">Should have</span><ul>
+      <li>A tigmo for every flower</li><li>3 to 4 neighbour characters</li><li>Visitors with a need in Chapter III</li><li>Mata ni Lola (hold O)</li><li>Recorded Cebuano voice for Lola</li></ul></div>
+    <div class="card"><span class="pill" style="background:rgba(255,255,255,.08);color:var(--mute)">Later</span><ul>
+      <li>Printable herbarium</li><li>Garland threading mini game</li><li>More towns and their stories</li><li>English and Cebuano toggle</li></ul></div>
+  </div>
+</div></section>
+
+<!-- WHY -->
+<section id="why"><div class="wrap">
+  <div class="kick">Why each choice (RRL)</div>
+  <h2>The research behind the design</h2>
+  <table>
+    <tr><th>Design choice</th><th>Why</th></tr>
+    <tr><td>The player learns by <b>talking with an elder</b></td><td>Children know fewer plants than their grandparents, and asking them to interview elders started real exchange. <span class="src">(Milani et al., 2025)</span></td></tr>
+    <tr><td>Real <b>Cebuano</b> healing plants and uses</td><td>Cebu and Siquijor healers' knowledge is documented and can be checked. <span class="src">(Miano et al., 2011; Siquijor State College, 2015)</span></td></tr>
+    <tr><td><b>Noticing</b> is the core action</td><td>People tend to overlook plants; the gap covers attention, attitude, knowledge and interest. <span class="src">(Wandersee &amp; Schussler, 1999; Parsley, 2020)</span></td></tr>
+    <tr><td>Clue and <b>deduction</b> loop</td><td>Puzzle and adventure are the most used genres for intangible heritage games. Botany Manor proves the loop works with plants. <span class="src">(Zúñiga-Solórzano et al., 2025; Balloon Studios, 2024)</span></td></tr>
+    <tr><td>A <b>story</b>, not a quiz</td><td>Heritage games work best on awareness and feeling, which a story carries. <span class="src">(Mortara et al., 2014; Anderson et al., 2010)</span></td></tr>
+    <tr><td><b>Pre and post quiz</b> plus SUS and GEQ</td><td>Games improve learning when well designed, so we measure it, not assume it. <span class="src">(Clark et al., 2016; Wouters et al., 2013; Hake, 1998; Brooke, 1996; IJsselsteijn et al., 2013)</span></td></tr>
+    <tr><td><b>Cebuano first</b>, made locally</td><td>Filipino games with Filipino stories, made for Filipinos, are still rare. <span class="src">(Cerda, 2021)</span></td></tr>
+    <tr><td>Consent, credit, <b>no medical advice</b></td><td>Traditional knowledge belongs to its community; folk medicine has its own law. <span class="src">(RA 8371; RA 8423)</span></td></tr>
+    <tr><td>Some gaps may be <b>the land</b>, not lost teaching</td><td>Use care when claiming loss; we say "often" and test our own players. <span class="src">(Hanazaki et al., 2013)</span></td></tr>
+  </table>
+</div></section>
+
+<!-- ASK -->
+<section id="ask"><div class="wrap">
+  <div class="kick">Let's brainstorm</div>
+  <h2>Questions to decide together</h2>
+  <ol class="q">
+    <li><b>Which flowers do her poems cover?</b> If her list differs from our 18, do we follow her list?</li>
+    <li><b>Who plays it?</b> Senior high, college, or both? This sets the reading level and the quiz.</li>
+    <li><b>Where does Lola sit?</b> The papag by the kubo, the duyan, or a window of the bahay?</li>
+    <li><b>Order of flowers.</b> Is the chapter split above right, or should a flower move (for example kalachuchi to the night for kalag-kalag)?</li>
+    <li><b>English help.</b> Always on under the Cebuano, or a key to show it?</li>
+    <li><b>Voice.</b> Recorded Cebuano voice for Lola, or text only for now?</li>
+    <li><b>Who checks the Cebuano and the folk uses?</b> Ma'am Alburo, Ma'am Gabales, a local elder or a mananambal?</li>
+  </ol>
+</div></section>
+
+<section><div class="wrap refs">
+  <div class="kick">References</div><h2 style="font-size:1.4rem">References</h2>
+  <p>Anderson, E. F., McLoughlin, L., Liarokapis, F., Peters, C., Petridis, P., &amp; de Freitas, S. (2010). Developing serious games for cultural heritage: A state-of-the-art review. <i>Virtual Reality, 14</i>(4), 255–275. https://doi.org/10.1007/s10055-010-0177-3</p>
+  <p>Balloon Studios. (2024). <i>Botany Manor</i> [Video game]. Whitethorn Games.</p>
+  <p>Brooke, J. (1996). SUS: A “quick and dirty” usability scale. In P. W. Jordan et al. (Eds.), <i>Usability evaluation in industry</i> (pp. 189–194). Taylor &amp; Francis.</p>
+  <p>Cerda, C. (2021). Towards a “Filipino” video game: Teaching Filipino culture and identity for video game development. <i>Transactions of the Digital Games Research Association, 5</i>(3). https://doi.org/10.26503/todigra.v5i3.122</p>
+  <p>Clark, D. B., Tanner-Smith, E. E., &amp; Killingsworth, S. S. (2016). Digital games, design, and learning: A systematic review and meta-analysis. <i>Review of Educational Research, 86</i>(1), 79–122. https://doi.org/10.3102/0034654315582065</p>
+  <p>Hake, R. R. (1998). Interactive-engagement versus traditional methods. <i>American Journal of Physics, 66</i>(1), 64–74. https://doi.org/10.1119/1.18809</p>
+  <p>Hanazaki, N., Herbst, D. F., Marques, M. S., &amp; Vandebroek, I. (2013). Evidence of the shifting baseline syndrome in ethnobotanical research. <i>Journal of Ethnobiology and Ethnomedicine, 9</i>, 75. https://doi.org/10.1186/1746-4269-9-75</p>
+  <p>IJsselsteijn, W. A., de Kort, Y. A. W., &amp; Poels, K. (2013). <i>The Game Experience Questionnaire</i>. Technische Universiteit Eindhoven.</p>
+  <p>Miano, R. S., Picardal, J. P., Alonso, C. A. G., &amp; Reuyan, D. (2011). Ethnobotanical inventory and assessment of medically-important plant roots in Cebu Island, Philippines. <i>Asian Journal of Biodiversity, 2</i>(1).</p>
+  <p>Milani, F., Bottoni, M., Maiellaro, A., Crisci, A., Bruschi, P., Giuliani, C., &amp; Fico, G. (2025). Counteracting traditional knowledge erosion: An ethnobotanical survey in Valle Imagna (Bergamo, Italy) to foster intergenerational transfer. <i>Plants, 14</i>(22), 3477. https://doi.org/10.3390/plants14223477</p>
+  <p>Mortara, M., Catalano, C. E., Bellotti, F., Fiucci, G., Houry-Panchetti, M., &amp; Petridis, P. (2014). Learning cultural heritage by serious games. <i>Journal of Cultural Heritage, 15</i>(3), 318–325. https://doi.org/10.1016/j.culher.2013.04.004</p>
+  <p>Parsley, K. M. (2020). Plant awareness disparity: A case for renaming plant blindness. <i>Plants, People, Planet, 2</i>(6), 598–601. https://doi.org/10.1002/ppp3.10153</p>
+  <p>Republic Act No. 8371. (1997). <i>The Indigenous Peoples' Rights Act of 1997</i>.</p>
+  <p>Republic Act No. 8423. (1997). <i>Traditional and Alternative Medicine Act of 1997</i>.</p>
+  <p>Siquijor State College. (2015). <i>Folk healing practices of Siquijor Island</i> [Terminal report]. Philippine Traditional Knowledge Digital Library on Health. https://tkdlph.com</p>
+  <p>Wandersee, J. H., &amp; Schussler, E. E. (1999). Preventing plant blindness. <i>The American Biology Teacher, 61</i>(2), 82–86. https://doi.org/10.2307/4450624</p>
+  <p>Wouters, P., van Nimwegen, C., van Oostendorp, H., &amp; van der Spek, E. D. (2013). A meta-analysis of the cognitive and motivational effects of serious games. <i>Journal of Educational Psychology, 105</i>(2), 249–265. https://doi.org/10.1037/a0031311</p>
+  <p>Zúñiga-Solórzano, M. E., Fabregat, R., &amp; Jové, T. (2025). Characterization of games technologies for learning in the context of intangible cultural heritage. In <i>Digital Heritage 2025</i>. Eurographics Association. https://doi.org/10.2312/dh.20253377</p>
+</div></section>
+
+<footer><div class="wrap">Hardin ni Almira · game flow draft v0.3 · Princess Jaena Marie O. De La Peña · Poems by Erlinda K. Alburo, used with permission.</div></footer>
+
+<script>
+/* B · journal: pick a word, then a blank */
+(()=>{let pick=null;const bank=document.getElementById('bank');
+ bank.querySelectorAll('button').forEach(b=>b.onclick=()=>{bank.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));pick=b;b.classList.add('sel')});
+ document.querySelectorAll('.slot[data-a]').forEach(s=>s.onclick=()=>{if(!pick)return;
+   if(pick.textContent===s.dataset.a){s.textContent=pick.textContent;s.classList.add('ok');pick.classList.add('used');pick.classList.remove('sel');pick=null;
+     if(document.querySelectorAll('.slot[data-a]:not(.ok)').length===0){const st=document.getElementById('jstamp');st.textContent='PANGITAA';st.classList.add('ok');document.getElementById('jnote').style.opacity=1}}
+   else{s.classList.remove('bad');void s.offsetWidth;s.classList.add('bad')}})})();
+/* C · tell Lola */
+(()=>{const chips=[...document.querySelectorAll('#chips button')],cc=document.getElementById('ccount'),say=document.getElementById('lsay'),en=document.getElementById('len');
+ chips.forEach(c=>c.onclick=()=>{if(!c.classList.contains('on')&&chips.filter(x=>x.classList.contains('on')).length>=3)return;c.classList.toggle('on');
+   const n=chips.filter(x=>x.classList.contains('on')).length;cc.textContent=n<3?`Pick ${3-n} more`:'Ready'});
+ document.getElementById('tell').onclick=()=>{const on=chips.filter(x=>x.classList.contains('on'));if(on.length<3){cc.textContent='Pick 3 details first';return}
+   const good=on.filter(x=>x.dataset.t).length;
+   if(good>=3){say.textContent='“Mao na! Ang dama de noche. Paminawa ang iyang balak…”';en.textContent='That\'s it! The dama de noche. Listen to its poem…';
+     setTimeout(()=>document.getElementById('poemmock').scrollIntoView({behavior:'smooth',block:'center'}),1400)}
+   else{const miss=['humot sa gabii','puti','duol sa ganghaan'].find(t=>!on.some(x=>x.textContent===t));
+     const qs={'humot sa gabii':['“Humot ba kini sa gabii o sa buntag?”','Is it fragrant at night or in the morning?'],'puti':['“Unsa may kolor, day? Puti ba?”','What colour is it, dear? White?'],'duol sa ganghaan':['“Asa man kini nimo nakita?”','Where did you find it?']};
+     say.textContent=qs[miss][0];en.textContent=qs[miss][1]+'  (a hint, not a loss)';chips.forEach(x=>x.classList.remove('on'));cc.textContent='Pick 3 details'}}})();
+/* F · hold O or the button */
+(()=>{const m=document.getElementById('mata'),b=document.getElementById('holdO');const on=()=>m.classList.add('on'),off=()=>m.classList.remove('on');
+ b.addEventListener('pointerdown',on);addEventListener('pointerup',off);
+ addEventListener('keydown',e=>{if(e.key==='o'||e.key==='O')on()});addEventListener('keyup',e=>{if(e.key==='o'||e.key==='O')off()})})();
+</script>
+</body>
+</html>

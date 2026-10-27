@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardin ni Almira · Thesis Proposal</title>
+<link rel="icon" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#fbf6ec; --ink2:#e9dfcc; --mute:#c9bda6; --gold:#f3c46b; --rose:#f08a7e; --leaf:#9fd39a;
+  --glass:rgba(22,24,20,.58); --glass2:rgba(255,255,255,.07); --line:rgba(255,240,210,.18);
+  --serif:"Fraunces",Georgia,"Times New Roman",serif; --serifi:"Newsreader",Georgia,serif; --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#141a14;color:var(--ink);font-family:var(--sans)}
+canvas#bg{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+#deck{position:fixed;inset:0;z-index:1;pointer-events:none}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:5vh 6vw 11vh;
+  opacity:0;transform:translateY(18px) scale(.985);transition:opacity .7s ease,transform .9s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.slide.on{opacity:1;transform:none;pointer-events:auto}
+.panel{background:var(--glass);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);
+  border:1px solid var(--line);border-radius:22px;padding:4.2vh 3.6vw;max-width:1180px;width:100%;
+  box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.kicker{font:600 .78rem/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:1.6vh}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+h2{font-size:clamp(1.9rem,3.6vw,3.1rem);line-height:1.08;margin-bottom:2.4vh}
+h3{font-size:clamp(1.05rem,1.45vw,1.3rem);margin-bottom:.6vh;color:var(--ink)}
+p,li{font-size:clamp(.95rem,1.25vw,1.16rem);line-height:1.55;color:var(--ink2)}
+i,em{font-family:var(--serifi)}
+em.ceb{font-family:var(--serifi);font-size:1.06em;font-style:italic;color:var(--gold)}
+.lead{font-size:clamp(1.1rem,1.6vw,1.45rem);line-height:1.5;color:var(--ink)}
+.cite{font-size:.82em;color:var(--mute);white-space:nowrap}
+.grid{display:grid;gap:1.6vw}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--glass2);border:1px solid var(--line);border-radius:16px;padding:2.2vh 1.4vw;transition:transform .35s cubic-bezier(.2,.8,.2,1),background .3s,border-color .3s}
+.card:hover{transform:translateY(-4px);background:rgba(255,255,255,.12);border-color:rgba(243,196,107,.45)}
+.card .ico{font-size:1.6rem;margin-bottom:.8vh;display:block}
+.card p{font-size:clamp(.86rem,1.08vw,1.02rem)}
+.take{margin-top:2.6vh;padding:1.6vh 1.4vw;border-left:3px solid var(--gold);background:rgba(243,196,107,.08);border-radius:0 12px 12px 0}
+.take p{color:var(--ink)}
+ol.obj{counter-reset:o;list-style:none;display:grid;gap:1.1vh}
+ol.obj li{counter-increment:o;position:relative;padding-left:3rem}
+ol.obj li::before{content:counter(o);position:absolute;left:0;top:.05em;width:2.1rem;height:2.1rem;border-radius:50%;display:grid;place-items:center;
+  font:600 1rem var(--serif);color:#2a2112;background:var(--gold)}
+.row{display:grid;grid-template-columns:1.1fr 1.6fr;gap:1.4vw;align-items:center;padding:1.3vh 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row b{font-family:var(--serif);font-weight:600;font-size:clamp(1rem,1.35vw,1.22rem);color:var(--ink)}
+.arrow{color:var(--gold);margin-right:.5em}
+/* title */
+.title{text-align:center;max-width:1100px;padding:6vh 5vw;border-radius:40px;background:radial-gradient(ellipse at center,rgba(10,20,14,.55),rgba(10,20,14,.22) 45%,transparent 68%)}
+.title .tag,.title .by{text-shadow:0 1px 12px rgba(0,0,0,.55)}
+.title h1{filter:drop-shadow(0 4px 18px rgba(0,0,0,.35))}
+.title .kicker{margin-bottom:2.4vh}
+.title h1{font-size:clamp(3.2rem,9vw,8rem);line-height:.95;font-weight:700;letter-spacing:-.02em;
+  background:linear-gradient(180deg,#fff7e6 20%,#f3c46b 120%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.title .tag{font-family:var(--serifi);font-style:italic;font-size:clamp(1.15rem,1.8vw,1.6rem);color:#fff8ea;margin:2.2vh auto 4vh;max-width:760px}
+.title .by{font-size:.85rem;letter-spacing:.24em;text-transform:uppercase;color:var(--mute)}
+.title .by strong{display:block;font:600 clamp(1.05rem,1.5vw,1.35rem) var(--serif);letter-spacing:.02em;text-transform:none;color:var(--ink);margin:.8vh 0}
+/* flow */
+.flow{display:flex;flex-direction:column;gap:.7vh}
+.step{display:flex;align-items:center;gap:.9vw;padding:1vh 1vw;border-radius:12px;background:var(--glass2);border:1px solid var(--line);
+  font:500 clamp(.85rem,1.1vw,1rem) var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);cursor:default;transition:background .3s,border-color .3s}
+.step i{font-style:normal;width:1.9rem;height:1.9rem;flex:none;border-radius:50%;display:grid;place-items:center;background:rgba(243,196,107,.18);color:var(--gold);font:600 .9rem var(--serif)}
+.step.hot{background:rgba(243,196,107,.18);border-color:rgba(243,196,107,.6)}
+.page{font-family:var(--serif);background:linear-gradient(160deg,#f6ecd6,#e8d9b6);color:#3b2d1c;border-radius:6px 16px 16px 6px;padding:2.6vh 2vw;
+  box-shadow:0 18px 40px rgba(0,0,0,.35), inset 6px 0 0 rgba(120,90,50,.18);position:relative}
+.page p,.page li{color:#4a3a26;font-size:clamp(.88rem,1.1vw,1.04rem)}
+.page .blank{display:inline-block;min-width:7.5em;border-bottom:1.5px dashed #8b6a3e;color:#8b6a3e;text-align:center;transition:color .4s}
+.page .blank.solved{color:#2f6b35;border-bottom-style:solid}
+.page .stamp{position:absolute;right:1.4vw;top:1.6vh;transform:rotate(-9deg);font:700 .8rem var(--sans);letter-spacing:.18em;padding:.4em .7em;border:2px solid #b2473a;color:#b2473a;border-radius:6px;opacity:.85}
+.page .stamp.ok{border-color:#2f6b35;color:#2f6b35}
+.btn{pointer-events:auto;cursor:pointer;border:1px solid rgba(243,196,107,.6);background:rgba(243,196,107,.14);color:var(--ink);
+  font:500 .9rem var(--sans);padding:.6em 1.1em;border-radius:999px;transition:background .25s,transform .25s}
+.btn:hover{background:rgba(243,196,107,.3);transform:translateY(-1px)}
+/* formula */
+.formula{font-family:var(--serif);font-size:clamp(1.15rem,2vw,1.8rem);text-align:center;padding:2.4vh 1vw;margin:1vh 0 2.4vh;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid var(--line);color:var(--ink)}
+.formula sub{font-size:.55em;color:var(--mute)}
+.formula .op{color:var(--gold);padding:0 .3em}
+.note{font-size:.85rem;color:var(--mute);margin-top:1.8vh}
+/* chapters */
+.chap{display:grid;grid-template-columns:repeat(6,1fr);gap:.8vw}
+.chap .card{padding:1.8vh 1vw;text-align:left}
+.chap .t{font:600 .72rem var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.chap h3{font-size:clamp(.98rem,1.25vw,1.15rem);margin:.6vh 0}
+.chap p{font-size:clamp(.8rem,.98vw,.94rem)}
+.sense{display:flex;height:10px;border-radius:99px;overflow:hidden;margin:2.6vh 0 .8vh}
+.sense span{flex:1}
+.senselab{display:flex;justify-content:space-between;font-size:.82rem;color:var(--mute)}
+/* gallery */
+.shots{display:grid;grid-template-columns:1.5fr 1fr;gap:1vw}
+.shots .main{border-radius:14px;overflow:hidden;position:relative;aspect-ratio:16/9;background:#000}
+.shots .main img{width:100%;height:100%;object-fit:cover;transition:opacity .5s}
+.shots .main .cap{position:absolute;left:0;right:0;bottom:0;padding:1.2vh 1vw;font:500 .85rem var(--sans);background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:.5vw;margin-top:.6vw}
+.thumbs img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;cursor:pointer;opacity:.6;border:2px solid transparent;transition:opacity .25s,border-color .25s}
+.thumbs img.sel,.thumbs img:hover{opacity:1;border-color:var(--gold)}
+.flowers{display:grid;grid-template-columns:repeat(4,1fr);gap:.5vw;margin-top:1.2vh}
+.flowers figure{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1}
+.flowers img{width:100%;height:100%;object-fit:cover;object-position:center 72%;transition:transform .5s}
+.flowers figure:hover img{transform:scale(1.08)}
+.flowers figcaption{position:absolute;left:0;right:0;bottom:0;font:italic 500 .86rem var(--serifi);padding:.5em .6em;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+ul.built{list-style:none;display:grid;gap:.55vh}
+ul.built li{font-size:clamp(.82rem,1vw,.96rem)}
+ul.built li::before{content:"✓";color:var(--leaf);margin-right:.55em;font-weight:600}
+ul.built li.todo::before{content:"○";color:var(--gold)}
+#demo{position:fixed;inset:4vh 4vw 10vh;z-index:5;border-radius:18px;overflow:hidden;border:1px solid var(--line);display:none;background:#000;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+#demo.on{display:block}
+#demo iframe{width:100%;height:100%;border:0}
+#demo .x{position:absolute;right:12px;top:12px;z-index:2}
+/* eval */
+.ev .card h3{display:flex;align-items:center;gap:.5em}
+.ev .q{font-family:var(--serifi);font-style:italic;color:var(--gold);margin:.4vh 0 .8vh;font-size:clamp(.92rem,1.15vw,1.06rem)}
+/* summary chain */
+.chain{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.6vw;margin-top:3.4vh}
+.chain span{font:600 clamp(.95rem,1.4vw,1.3rem) var(--serif);padding:.55em 1.1em;border-radius:999px;background:var(--glass2);border:1px solid var(--line);transition:all .4s}
+.chain span.lit{background:rgba(243,196,107,.22);border-color:var(--gold);color:#fff}
+.chain b{color:var(--gold);font-weight:400}
+/* thanks */
+.thanks{text-align:center}
+.thanks h1{font-size:clamp(3.5rem,11vw,9rem);line-height:1;font-weight:700;color:#fff7e6;text-shadow:0 0 40px rgba(243,196,107,.35)}
+.thanks p{font-family:var(--serifi);font-style:italic;font-size:clamp(1.1rem,1.8vw,1.6rem);margin-top:2vh}
+/* refs */
+.refs{columns:2;column-gap:2.4vw;max-height:66vh;overflow:auto;padding-right:.6vw}
+.refs p{font-size:clamp(.74rem,.86vw,.85rem);line-height:1.45;margin-bottom:1.1vh;break-inside:avoid;padding-left:1.6em;text-indent:-1.6em}
+/* hud */
+#hud{position:fixed;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.6vh 2.2vw;
+  font:500 .8rem var(--sans);color:var(--mute);pointer-events:none}
+#hud .l,#hud .r{display:flex;align-items:center;gap:.9rem;pointer-events:auto}
+#hud .time{font:italic 500 1rem var(--serifi);color:var(--gold);min-width:6.5em}
+#hud .brand{font:italic 500 1rem var(--serifi);color:var(--ink2)}
+#dots{display:flex;gap:6px;pointer-events:auto}
+#dots button{width:8px;height:8px;border-radius:50%;border:0;background:rgba(255,240,210,.28);cursor:pointer;transition:all .3s;padding:0}
+#dots button.on{width:22px;border-radius:99px;background:var(--gold)}
+.nav{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);cursor:pointer;font-size:1rem}
+.nav:hover{background:rgba(243,196,107,.25)}
+#bar{position:fixed;left:0;top:0;height:3px;background:var(--gold);z-index:4;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+#notes{position:fixed;right:2vw;bottom:9vh;z-index:4;max-width:440px;padding:1.4em 1.5em;border-radius:14px;background:rgba(10,12,10,.88);border:1px solid var(--line);
+  font-size:.92rem;line-height:1.55;color:var(--ink2);display:none}
+#notes.on{display:block}
+#notes b{display:block;font:600 .72rem var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:.6em}
+#help{position:fixed;left:50%;top:2.4vh;transform:translateX(-50%);z-index:4;font-size:.78rem;color:var(--mute);background:rgba(0,0,0,.35);padding:.5em 1em;border-radius:99px;transition:opacity 1s}
+@media (max-width:820px){
+  .g3,.g4,.chap{grid-template-columns:1fr 1fr} .g2,.shots{grid-template-columns:1fr} .refs{columns:1}
+  .slide{padding:3vh 16px 12vh;align-items:flex-start;overflow:auto} .panel{padding:3vh 18px}
+  #hud .brand,#help{display:none}
+}
+@media (prefers-reduced-motion:reduce){.slide{transition:opacity .3s}}
+/* print → one slide per page, PDF-ready */
+@media print{
+  @page{size:1600px 900px;margin:0}
+  html,body{overflow:visible;height:auto;background:#1d2a1f}
+  canvas#bg,#hud,#bar,#notes,#help,#demo,.btn{display:none!important}
+  #deck{position:static}
+  .slide{position:relative;inset:auto;width:1600px;height:900px;opacity:1;transform:none;page-break-after:always;break-after:page;
+    background:linear-gradient(180deg,#2f4a3a,#16221a)}
+  .panel{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(20,22,18,.82)}
+  .title h1{color:#f6e3b4;background:none}
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="bar"></div>
+<div id="help">← → or click to move · N speaker notes · F full screen · move / click on the garden</div>
+
+<main id="deck">
+
+<!-- 1 BACKGROUND -->
+<section class="slide" data-notes="Our grandmothers know these plants by name, by use and by story. Most of it was never written down. It is passed on by talking and by doing. If the young do not learn it, it is gone. That is the problem this thesis works on.">
+  <div class="panel">
+    <div class="kicker">Background</div>
+    <h2>Knowledge that lives in a lola's memory</h2>
+    <div class="grid g2" style="align-items:start">
+      <div>
+        <p class="lead">Cebuano plant names, folk uses and stories are rarely written down. They live with elders and healers (<em class="ceb">mananambal</em>, <em class="ceb">herbolaryo</em>) and are passed on by word of mouth.</p>
+        <p style="margin-top:2vh">Young Cebuanos see these flowers every day. Many do not know their names or what they were used for. Knowledge that is not passed on is lost.</p>
+      </div>
+      <div class="grid" style="gap:1.2vh">
+        <div class="card"><span class="ico">♨︎</span><h3><em class="ceb">Tuob</em> · healing steam</h3><p>Boil the leaves, breathe in the steam.</p></div>
+        <div class="card"><span class="ico">🌿</span><h3><em class="ceb">Palina</em> · cleansing smoke</h3><p>Burn dried herbs to cleanse a person or a house.</p></div>
+        <div class="card"><span class="ico">🫙</span><h3><em class="ceb">Hilot</em> with <em class="ceb">lana</em></h3><p>Massage with herbal oil, often with an <em class="ceb">orasyon</em> said over it.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 RRL: FADING -->
+<section class="slide" data-notes="First group of studies: the knowledge is real and documented, and it is fading. Miano and colleagues recorded medicinal roots used by healers in four Cebu towns. The Siquijor documentation for the PTKDL recorded healers' plant knowledge. Milani and colleagues found children know far less than their grandparents. Hanazaki and colleagues remind us to be careful: some differences come from changes in the land, not only from loss.">
+  <div class="panel">
+    <div class="kicker">Review of related literature · 1</div>
+    <h2>The knowledge is real, and it is fading</h2>
+    <div class="grid g2">
+      <div class="card"><h3>Healers of Cebu</h3><p>Healers in Argao, Naga, San Fernando and San Remigio named 16 to 22 medicinal plants per town, mostly taken as decoctions <span class="cite">(Miano et al., 2011)</span>.</p></div>
+      <div class="card"><h3>Siquijor folk healing</h3><p>Healers around Mt. Bandilaan shared their plant knowledge for the national record of traditional health knowledge <span class="cite">(Siquijor State College, 2015)</span>.</p></div>
+      <div class="card"><h3>Children know less</h3><p>Children named fewer plants than their parents and grandparents. Asking children to interview their elders started new exchange between generations <span class="cite">(Milani et al., 2025)</span>.</p></div>
+      <div class="card"><h3>A word of caution</h3><p>Some gaps between old and young come from changes in the land, not only from lost teaching <span class="cite">(Hanazaki et al., 2013)</span>.</p></div>
+    </div>
+    <div class="take"><p>Learning from elders works best when the young <b>take part</b> in it. That is the role the player plays.</p></div>
+  </div>
+</section>
+
+<!-- 3 RRL: PLANT AWARENESS -->
+<section class="slide" data-notes="Second group: people tend to overlook plants. Wandersee and Schussler named this in 1999. Parsley proposed the term plant awareness disparity, because the old term uses blindness as a metaphor. We use the new term on purpose, since our story is about a woman who is really losing her sight.">
+  <div class="panel">
+    <div class="kicker">Review of related literature · 2</div>
+    <h2>People look past plants</h2>
+    <div class="grid g2">
+      <div class="card"><h3>Overlooked by default</h3><p>People notice animals more than plants and often see plants as background <span class="cite">(Wandersee &amp; Schussler, 1999)</span>.</p></div>
+      <div class="card"><h3>Plant awareness disparity</h3><p>A better name for the same problem, with four parts: attention, attitude, knowledge and interest <span class="cite">(Parsley, 2020)</span>.</p></div>
+    </div>
+    <div class="take"><p>The game makes the player <b>stop and look closely</b> at each flower: its colour, its leaf, its scent, the hour it opens. Noticing is the core action.</p></div>
+    <p class="note">We use "plant awareness disparity", not "plant blindness". Lola's loss of sight is treated with care and checked with people who have low vision.</p>
+  </div>
+</section>
+
+<!-- 4 RRL: GAMES -->
+<section class="slide" data-notes="Third group: games for heritage and for learning. Mortara and Anderson reviewed serious games for cultural heritage. Zuniga Solorzano and colleagues found games for intangible heritage cover oral traditions and social practices, mostly as adventure and puzzle games. Clark and Wouters show games can improve learning, especially with good design. Cerda argues for Filipino games made by Filipinos for Filipinos.">
+  <div class="panel">
+    <div class="kicker">Review of related literature · 3</div>
+    <h2>Games can carry heritage and teach</h2>
+    <div class="grid g3">
+      <div class="card"><h3>Heritage games</h3><p>Serious games raise cultural awareness and help people value heritage <span class="cite">(Mortara et al., 2014; Anderson et al., 2010)</span>.</p></div>
+      <div class="card"><h3>Intangible heritage</h3><p>34 studies used games for oral traditions, crafts and social practices, mostly puzzle and adventure games <span class="cite">(Zúñiga-Solórzano et al., 2025)</span>.</p></div>
+      <div class="card"><h3>Learning gains</h3><p>Digital games improve learning compared with usual teaching, more so when well designed <span class="cite">(Clark et al., 2016; Wouters et al., 2013)</span>.</p></div>
+    </div>
+    <div class="grid g2" style="margin-top:1.6vw">
+      <div class="card"><h3>Filipino games</h3><p>Games with Filipino stories, made by Filipinos for Filipinos, are still few <span class="cite">(Cerda, 2021)</span>.</p></div>
+      <div class="card"><h3>Learning by doing</h3><p>Good games teach through action and discovery, not lists <span class="cite">(Gee, 2003; Prensky, 2001)</span>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 RRL: PRECEDENTS -->
+<section class="slide" data-notes="Fourth group: the works closest to ours. StuartXchange and the PTKDL hold the facts, as text. Botany Manor is the model for the deduction loop. Never Alone and Mulaka show games built around a people's own stories.">
+  <div class="panel">
+    <div class="kicker">Review of related literature · 4</div>
+    <h2>Closest existing works</h2>
+    <div class="grid g4">
+      <div class="card"><span class="ico">📚</span><h3>StuartXchange</h3><p>Online list of Philippine medicinal plants and their folk uses <span class="cite">(Stuart, n.d.)</span>.</p></div>
+      <div class="card"><span class="ico">🗂️</span><h3>PTKDL</h3><p>National digital library of traditional health knowledge <span class="cite">(UP Manila IHM, n.d.)</span>.</p></div>
+      <div class="card"><span class="ico">🔍</span><h3>Botany Manor</h3><p>Identify plants by collecting clues and deducing what they need <span class="cite">(Balloon Studios, 2024)</span>.</p></div>
+      <div class="card"><span class="ico">❄️</span><h3>Never Alone · Mulaka</h3><p>Games built on Iñupiaq and Rarámuri stories <span class="cite">(Upper One Games, 2014; Lienzo, 2018)</span>.</p></div>
+    </div>
+    <div class="take"><p>The facts exist as <b>text</b>. Games can carry <b>oral tradition</b>. No one has joined the two for Cebuano plants.</p></div>
+  </div>
+</section>
+
+<!-- 6 GAP -->
+<section class="slide" data-notes="The gap in one slide. Databases keep facts without context. Heritage games keep stories but not our plants. Deduction games teach looking but with made up plants. We join all three.">
+  <div class="panel">
+    <div class="kicker">What is missing?</div>
+    <h2>Three pieces that have not met</h2>
+    <div>
+      <div class="row"><b>Herbal databases</b><p><span class="arrow">→</span>keep the uses as text, apart from the place, the season and the person who taught them</p></div>
+      <div class="row"><b>Heritage games</b><p><span class="arrow">→</span>carry oral tradition, but not Cebuano plants or healing practice</p></div>
+      <div class="row"><b>Deduction games</b><p><span class="arrow">→</span>teach close looking, but with invented or foreign plants</p></div>
+    </div>
+    <div class="take"><p>Our opportunity: one 3D garden where players learn <b>real Cebuano flowers, their uses and their stories</b> by looking and working them out, as knowledge handed down by an elder.</p></div>
+  </div>
+</section>
+
+<!-- 7 TITLE -->
+<section class="slide" data-notes="The title. Hardin ni Almira, the garden of Almira. Based on the work of Erlinda K. Alburo, used with her permission.">
+  <div class="title">
+    <div class="kicker">Thesis</div>
+    <h1>Hardin ni Almira</h1>
+    <p class="tag">A 3D garden game where players learn Cebuano plant knowledge by finding each flower, working out what it is, and passing it on</p>
+    <p class="by">by<strong>Princess Jaena Marie O. De La Peña</strong>BS Computer Science · University of the Philippines Cebu</p>
+  </div>
+</section>
+
+<!-- 8 STORY -->
+<section class="slide" data-notes="The story. Lola Almira is a botanist going blind. Each flower has a page with her poem and her knowledge. The last pages are unfinished. The player is her apo and becomes her eyes. This is the thesis problem told as a story.">
+  <div class="panel">
+    <div class="kicker">The story</div>
+    <h2>Lola Almira is losing her sight</h2>
+    <div class="grid g2" style="align-items:center">
+      <div>
+        <p class="lead">She kept a journal with a <b>poem and her knowledge for every flower</b> in her garden. Now she cannot see well enough to finish it.</p>
+        <p style="margin-top:2vh">You are <em class="ceb">Ikaw</em>, her <em class="ceb">apo</em>. Find each flower, describe it to her, and finish the journal with her.</p>
+        <p class="note">Based on Erlinda K. Alburo's <i>Sinug-ang Hardin ni Almira</i>, used with her permission.</p>
+      </div>
+      <div class="page" style="text-align:center;padding:5vh 2vw">
+        <p style="font-size:clamp(1.4rem,2.4vw,2.2rem);font-style:italic;color:#3b2d1c">“Ikaw na ang akong mata.”</p>
+        <p style="margin-top:1.2vh">You will be my eyes.</p>
+        <p class="note" style="color:#7a6346;margin-top:3vh">As her sight fades, the clues change: first <b>sight</b>, then <b>scent and touch</b>, then <b>scent, sound and memory</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 POEMS -->
+<section class="slide" data-notes="Her poems. Ma'am Alburo has given permission to use her poem. Her poems are the reward for each solved page. We do not write new poems in her name. Pages without her poem carry Lola's spoken knowledge.">
+  <div class="panel">
+    <div class="kicker">Balak ni Almira</div>
+    <h2>Her poems are the reward</h2>
+    <div class="grid g2" style="align-items:center">
+      <div>
+        <p class="lead">When a page is solved, Lola recites the flower's poem. The player writes it into the journal next to her handwriting.</p>
+        <ul class="built" style="margin-top:2vh">
+          <li>Poems by Erlinda K. Alburo, used with her permission</li>
+          <li>Each poem is shown in Cebuano with an English line beneath</li>
+          <li>No new poems are written in her name</li>
+          <li class="todo">Pages without one of her poems carry Lola's spoken knowledge instead</li>
+        </ul>
+      </div>
+      <div class="page" style="padding:4vh 2.4vw">
+        <span class="stamp ok">NAHUMAN ✓</span>
+        <p style="font-weight:600;font-size:1.1em">Pahina 1 · Sampaguita</p>
+        <p style="margin-top:2vh;font-style:italic;color:#7a6346;line-height:2">[ Balak ni Erlinda K. Alburo ]<br>· · · · · · · · · · · · · · ·<br>· · · · · · · · · · · · ·<br>· · · · · · · · · · · · · · · ·</p>
+        <p class="note" style="color:#7a6346">The poem text goes here exactly as she wrote it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 SYSTEM FLOW -->
+<section class="slide" data-notes="The loop, with an example. Press Play example. A page has blanks. The player collects clues: Lola's note, a riddle, a scent in the world, a neighbour's warning. They fill the blanks, find the plant, describe it to Lola, and the page is stamped. The answer is dama de noche.">
+  <div class="panel">
+    <div class="kicker">How it works</div>
+    <h2>From a blank page to a remembered flower</h2>
+    <div class="grid g2" style="align-items:start">
+      <div class="flow" id="flow">
+        <div class="step"><i>1</i>Open a page with a missing name</div>
+        <div class="step"><i>2</i>Collect clues in the garden</div>
+        <div class="step"><i>3</i>Fill the blanks</div>
+        <div class="step"><i>4</i>Find and pick the flower</div>
+        <div class="step"><i>5</i>Describe it to Lola</div>
+        <div class="step"><i>6</i>Lola recites its poem</div>
+        <div class="step"><i>7</i>Page stamped, next page</div>
+        <div style="margin-top:1.2vh"><button class="btn" id="playflow">▶ Play example</button></div>
+      </div>
+      <div class="page" id="ex">
+        <span class="stamp" id="exstamp">KULANG PA</span>
+        <p style="font-weight:600;font-size:1.1em;margin-bottom:1.2vh">Pahina 5 · <span id="extitle">???</span></p>
+        <p>Ngalan: <span class="blank" id="b1">?</span></p>
+        <p>Kanus-a: <span class="blank solved">mobukad inig gabii</span></p>
+        <p>Gamit: <span class="blank" id="b2">?</span></p>
+        <p style="margin:1.6vh 0 .6vh;font-weight:600">Mga timailhan · clues</p>
+        <ul style="list-style:none;display:grid;gap:.7vh">
+          <li>📖 <i>“I always know when it opens. Its perfume is for the ones who walk at night.”</i></li>
+          <li>❓ <i>A lady who dresses up only when the sun goes down.</i></li>
+          <li>👃 Near the gate the air turns sweet after 7 pm.</li>
+          <li>🗣️ Nang Iday: <i>“Smell it, day, don’t drink it.”</i></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 OBJECTIVES -->
+<section class="slide" data-notes="One general objective and six specific ones. The first three are building the game. The last three are testing it.">
+  <div class="panel">
+    <div class="kicker">Objectives</div>
+    <h2 style="font-size:clamp(1.5rem,2.6vw,2.3rem)">To build and evaluate <i>Hardin ni Almira</i>, a 3D web game for learning Cebuano plant knowledge.</h2>
+    <p style="margin-bottom:1.6vh;color:var(--mute)">Specifically, to:</p>
+    <ol class="obj">
+      <li>Build a 3D Cebuano seaside garden with <b>18 flowers</b>, day and night, and living wind.</li>
+      <li>Build the <b>journal and deduction loop</b>, including describing each flower to Lola.</li>
+      <li>Gather and <b>check the plant knowledge</b> of each flower with cultural reviewers.</li>
+      <li>Measure what players <b>learn</b>: names, uses and cautions.</li>
+      <li>Measure how <b>easy and enjoyable</b> the game is to play.</li>
+      <li>Measure how well it <b>runs</b> on a regular school laptop.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 12 BENEFICIARIES -->
+<section class="slide" data-notes="Who gains from this. Students learn their own plants. Teachers get a free lesson tool. Elders get their knowledge recorded and credited. Developers get a reference. Future researchers can build on it.">
+  <div class="panel">
+    <div class="kicker">Who can benefit?</div>
+    <h2>From the classroom to the community</h2>
+    <div class="grid g3">
+      <div class="card"><span class="ico">🎒</span><h3>Cebuano students</h3><p>Learn the names, uses and cautions of flowers they see every day.</p></div>
+      <div class="card"><span class="ico">🧑‍🏫</span><h3>Teachers</h3><p>A free tool for lessons on local culture, language and science.</p></div>
+      <div class="card"><span class="ico">👵</span><h3>Elders and healers</h3><p>Their knowledge is recorded, checked and credited to them.</p></div>
+      <div class="card"><span class="ico">💻</span><h3>Developers</h3><p>A reference for fast 3D web games: GPU wind, levels of detail, plants made from code.</p></div>
+      <div class="card"><span class="ico">🏛️</span><h3>Cultural workers</h3><p>An example of telling oral tradition with respect in a game.</p></div>
+      <div class="card"><span class="ico">🔭</span><h3>Future researchers</h3><p>Can add more plants, towns, languages and stories.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 SCOPE -->
+<section class="slide" data-notes="What is in and what is out. Two things to stress: these are folk uses, not medical advice, and any knowledge we get from healers needs their consent, following RA 8371 where it applies.">
+  <div class="panel">
+    <div class="kicker">Scope and limitations</div>
+    <h2>What the study covers, and what it does not</h2>
+    <div class="grid g2" style="align-items:start">
+      <div class="card"><h3 style="color:var(--leaf)">Scope</h3>
+        <ul class="built" style="margin-top:1vh">
+          <li>18 flowers found in Cebuano gardens</li>
+          <li>Cebuano first, English help below</li>
+          <li>Plays in a web browser on a laptop, keyboard and mouse</li>
+          <li>Folk uses from published sources, checked by cultural reviewers</li>
+          <li>A prologue and 4 chapters, one per time of day</li>
+          <li>Poems by Erlinda K. Alburo, with her permission</li>
+        </ul>
+      </div>
+      <div class="card"><h3 style="color:var(--rose)">Limitations</h3>
+        <ul class="built" style="margin-top:1vh">
+          <li class="todo">Folk uses are tradition, <b>not medical advice</b> <span class="cite">(RA 8423)</span></li>
+          <li class="todo">Knowledge from healers is used only with their <b>consent and credit</b> <span class="cite">(RA 8371)</span></li>
+          <li class="todo">Only the flowers and stories we build are covered</li>
+          <li class="todo">Phones and tablets are not targeted</li>
+          <li class="todo">Testing uses the devices and players we can reach</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 METHOD -->
+<section class="slide" data-notes="We work in rounds. Research, design, build, review, test, improve, then again. Elders and reviewers check the content every round, not only at the end.">
+  <div class="panel">
+    <div class="kicker">Methodology</div>
+    <h2>Research and development design</h2>
+    <p style="margin-bottom:2.4vh">We build in rounds. Every round ends with a check by cultural reviewers.</p>
+    <div class="grid g3" id="cycle">
+      <div class="card"><span class="ico">1 · 🔎</span><h3>Research</h3><p>Published studies, talks with elders and healers, stories with named sources.</p></div>
+      <div class="card"><span class="ico">2 · ✏️</span><h3>Design</h3><p>Story, journal pages, clue types, chapters.</p></div>
+      <div class="card"><span class="ico">3 · 🛠️</span><h3>Build</h3><p>Garden, flowers, Lola Almira, journal and loop in Babylon.js.</p></div>
+      <div class="card"><span class="ico">4 · 🧓</span><h3>Review</h3><p>Names, Cebuano lines and uses checked by reviewers.</p></div>
+      <div class="card"><span class="ico">5 · 🧪</span><h3>Test</h3><p>Learning, ease of play, enjoyment and speed.</p></div>
+      <div class="card"><span class="ico">6 · 🔁</span><h3>Improve</h3><p>Fix what testers and reviewers found. Repeat.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 TOOLS -->
+<section class="slide" data-notes="It all runs in the browser. Plants are made from code. Sound is made live, with no audio files. Headless Chrome takes automatic screenshots for testing.">
+  <div class="panel">
+    <div class="kicker">Tools and technologies</div>
+    <h2>Runs in the browser, made from code</h2>
+    <div class="grid g3">
+      <div class="card"><h3>Babylon.js</h3><p>3D engine: lights, shadows, levels of detail</p></div>
+      <div class="card"><h3>JavaScript</h3><p>Game logic, journal and story</p></div>
+      <div class="card"><h3>GLSL shaders</h3><p>Wind on every plant, sea waves</p></div>
+      <div class="card"><h3>Plants from code</h3><p>Stems, branches and leaves generated, not modelled by hand</p></div>
+      <div class="card"><h3>Web Audio</h3><p>Sea, wind, birds and footsteps made live</p></div>
+      <div class="card"><h3>Python server</h3><p>Runs the game locally, nothing to install</p></div>
+      <div class="card"><h3>Git and GitHub</h3><p>Version control</p></div>
+      <div class="card"><h3>Vercel</h3><p>Web hosting for play tests</p></div>
+      <div class="card"><h3>Headless Chrome</h3><p>Automatic screenshots and tests</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 MODEL -->
+<section class="slide" data-notes="When is a page solved? All three blanks are right, and the player tells Lola at least three true things about the flower. If they get fewer than three, Lola asks a question back. That is a hint, never a loss.">
+  <div class="panel">
+    <div class="kicker">The deduction rule</div>
+    <h2>When is a page solved?</h2>
+    <div class="formula">Solved<sub>page</sub> <span class="op">=</span> ( Ngalan ✓ <span class="op">∧</span> Kanus-a/Asa ✓ <span class="op">∧</span> Gamit ✓ ) <span class="op">∧</span> | D <span class="op">∩</span> T | <span class="op">≥</span> 3</div>
+    <div class="grid g3">
+      <div class="card"><h3>Blanks</h3><p>Filled from a <b>word bank</b> that grows with every clue: name, when or where, use.</p></div>
+      <div class="card"><h3>D ∩ T</h3><p><b>D</b> is what the player tells Lola. <b>T</b> is what is true of the flower: colour, shape, scent, hour, place, leaf.</p></div>
+      <div class="card"><h3>No losing</h3><p>Fewer than 3 true details? Lola asks about one she is missing. That is the hint.</p></div>
+    </div>
+    <div class="grid g3" style="margin-top:1.6vw">
+      <div class="card"><h3>📖 Lola's page · ❓ Tigmo</h3><p>What she wrote, and a Cebuano riddle.</p></div>
+      <div class="card"><h3>👃 In the garden</h3><p>Scent at night, colour, leaf, bees, place.</p></div>
+      <div class="card"><h3>🗣️ Neighbours · 🌙 Sugilanon</h3><p>How people use it, and stories at dusk.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 CHAPTERS -->
+<section class="slide" data-notes="One day in the garden. Each chapter opens a new area and adds one new kind of clue. As the day goes, Lola's pages fade and the clues move from sight to scent and sound. About 45 to 60 minutes. This deck follows the same day.">
+  <div class="panel">
+    <div class="kicker">Game flow</div>
+    <h2>One day in the garden, eighteen pages</h2>
+    <div class="chap">
+      <div class="card"><div class="t">Prologue</div><h3>Sumpa kita</h3><p>Sampaguita. Learn the loop.</p></div>
+      <div class="card"><div class="t">I · Buntag</div><h3>Ang nataran</h3><p>Yard and house. 5 pages. Riddles.</p></div>
+      <div class="card"><div class="t">II · Udto</div><h3>Lim-aw ug baybayon</h3><p>Pond and shore. 5 pages. Neighbours.</p></div>
+      <div class="card"><div class="t">III · Hapon</div><h3>Tambal</h3><p>Remedies. 4 pages. Adelfa teaches caution.</p></div>
+      <div class="card"><div class="t">IV · Gabii</div><h3>Mga sugilanon</h3><p>Night stories. 3 pages. Find by scent.</p></div>
+      <div class="card"><div class="t">✿ 18 / 18</div><h3>Pagmata</h3><p>The journal is read to Lola.</p></div>
+    </div>
+    <div class="sense"><span style="background:#f6d77a"></span><span style="background:#f3c46b"></span><span style="background:#e9a06b"></span><span style="background:#c4707a"></span><span style="background:#6c5a9a"></span><span style="background:#2d3566"></span></div>
+    <div class="senselab"><span>Clues by sight</span><span>scent and touch</span><span>scent, sound and memory</span></div>
+    <p class="note">About 45 to 60 minutes. Free walk and the camera tour stay as they are. &nbsp;<a class="btn" href="game-flow.html" target="_blank" style="text-decoration:none">Full game flow and mockups ↗</a></p>
+  </div>
+</section>
+
+<!-- 18 PROTOTYPE -->
+<section class="slide" data-notes="This is what already works. Click a thumbnail to switch pictures. Open the live garden to play it here. Still to build: Lola, the journal, clues, describing to Lola and the chapters.">
+  <div class="panel">
+    <div class="kicker">Current prototype</div>
+    <h2>The garden already grows</h2>
+    <div class="shots">
+      <div>
+        <div class="main"><img id="shot" src="assets/02-buntag-garden.jpg" alt="Garden screenshot"><div class="cap" id="shotcap">Buntag · the garden in the morning</div></div>
+        <div class="thumbs" id="thumbs">
+          <img class="sel" src="assets/02-buntag-garden.jpg" data-cap="Buntag · the garden in the morning" alt="">
+          <img src="assets/01-hapon-garden-gate.jpg" data-cap="Hapon · the gate and the house" alt="">
+          <img src="assets/03-hapon-sea-and-boats.jpg" data-cap="Hapon · the sea and the bangka" alt="">
+          <img src="assets/04-gabii-fireflies.jpg" data-cap="Gabii · fireflies at night" alt="">
+        </div>
+      </div>
+      <div>
+        <ul class="built">
+          <li>18 flowers with cards: <i>Sa naandan</i> and <i>Nakat-unan</i></li>
+          <li>Ikaw walks in first or third person; plants part around her</li>
+          <li>Buntag to Gabii, wind on every plant, a living sea</li>
+          <li>Hens, egret, butterflies, fireflies, live sound</li>
+          <li>Bayong collection and the final awakening</li>
+          <li class="todo">Lola Almira, journal, clues and word bank</li>
+          <li class="todo">Describing to Lola, her poems, the chapters</li>
+        </ul>
+        <div class="flowers">
+          <figure><img src="assets/f-sampaguita.jpg" alt=""><figcaption>Sampaguita</figcaption></figure>
+          <figure><img src="assets/f-gumamela.jpg" alt=""><figcaption>Gumamela</figcaption></figure>
+          <figure><img src="assets/f-dama.jpg" alt=""><figcaption>Dama de noche</figcaption></figure>
+          <figure><img src="assets/f-adelfa.jpg" alt=""><figcaption>Adelfa</figcaption></figure>
+        </div>
+        <div style="margin-top:1.4vh"><button class="btn" id="opendemo">▶ Open the live garden</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 EVALUATION -->
+<section class="slide" data-notes="Four checks. Learning: a quiz before and after playing, scored as normalized gain. Ease and enjoyment: SUS and the Game Experience Questionnaire. Accuracy: elders and experts review the content. Speed and function: every feature tested, frame rate measured on a school laptop.">
+  <div class="panel ev">
+    <div class="kicker">Evaluation</div>
+    <h2>How we will know it works</h2>
+    <div class="grid g2">
+      <div class="card"><h3>🎓 Learning</h3><p class="q">Do players remember names, uses and cautions?</p><p>Quiz on 6 to 8 flowers before and after playing. Score: <i>g = (post − pre) / (max − pre)</i> <span class="cite">(Hake, 1998)</span>.</p></div>
+      <div class="card"><h3>🙂 Ease and enjoyment</h3><p class="q">Is it easy and pleasant to play?</p><p>System Usability Scale <span class="cite">(Brooke, 1996)</span> and Game Experience Questionnaire <span class="cite">(IJsselsteijn et al., 2013)</span>, plus open questions.</p></div>
+      <div class="card"><h3>🧓 Accuracy and respect</h3><p class="q">Is the knowledge right, and told with care?</p><p>Elders, healers and cultural experts review names, Cebuano lines, uses and stories.</p></div>
+      <div class="card"><h3>⚡ Speed and function</h3><p class="q">Does every feature work and run smoothly?</p><p>Each feature tested. Frame rate, load time and draw calls measured on a school laptop.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 SUMMARY -->
+<section class="slide" data-notes="In one sentence: knowledge that lived in one elder's memory is learned by playing, and passed on.">
+  <div class="panel" style="text-align:center">
+    <div class="kicker">In short</div>
+    <p class="lead" style="max-width:860px;margin:0 auto"><i>Hardin ni Almira</i> puts Cebuano flowers, their uses, their stories and Ma'am Alburo's poems into a 3D garden. Knowledge that lived in one elder's memory is learned by playing and passed on.</p>
+    <p style="margin-top:2.4vh">Players:</p>
+    <div class="chain" id="chain"><span>Look</span><b>→</b><span>Work it out</span><b>→</b><span>Describe</span><b>→</b><span>Remember</span><b>→</b><span>Pass it on</span></div>
+  </div>
+</section>
+
+<!-- 21 THANK YOU -->
+<section class="slide" data-notes="Thank the panel. Open the floor. Click the garden for petals.">
+  <div class="thanks">
+    <h1>Salamat!</h1>
+    <p>“Ikaw na ang akong mata.”</p>
+    <p class="by" style="font-family:var(--sans);font-style:normal;font-size:.8rem;letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin-top:4vh">Questions and suggestions are welcome</p>
+  </div>
+</section>
+
+<!-- 22 REFERENCES -->
+<section class="slide" data-notes="References. Confirm the publication details of Ma'am Alburo's work before the defense.">
+  <div class="panel">
+    <div class="kicker">References</div>
+    <h2 style="font-size:clamp(1.5rem,2.4vw,2.1rem)">References</h2>
+    <div class="refs">
+      <p>Alburo, E. K. (n.d.). <i>Sinug-ang Hardin ni Almira</i>. [Publication details to be added.]</p>
+      <p>Anderson, E. F., McLoughlin, L., Liarokapis, F., Peters, C., Petridis, P., &amp; de Freitas, S. (2010). Developing serious games for cultural heritage: A state-of-the-art review. <i>Virtual Reality, 14</i>(4), 255–275. https://doi.org/10.1007/s10055-010-0177-3</p>
+      <p>Balloon Studios. (2024). <i>Botany Manor</i> [Video game]. Whitethorn Games.</p>
+      <p>Brooke, J. (1996). SUS: A “quick and dirty” usability scale. In P. W. Jordan, B. Thomas, B. A. Weerdmeester, &amp; I. L. McClelland (Eds.), <i>Usability evaluation in industry</i> (pp. 189–194). Taylor &amp; Francis.</p>
+      <p>Cerda, C. (2021). Towards a “Filipino” video game: Teaching Filipino culture and identity for video game development. <i>Transactions of the Digital Games Research Association, 5</i>(3). https://doi.org/10.26503/todigra.v5i3.122</p>
+      <p>Clark, D. B., Tanner-Smith, E. E., &amp; Killingsworth, S. S. (2016). Digital games, design, and learning: A systematic review and meta-analysis. <i>Review of Educational Research, 86</i>(1), 79–122. https://doi.org/10.3102/0034654315582065</p>
+      <p>Gee, J. P. (2003). <i>What video games have to teach us about learning and literacy</i>. Palgrave Macmillan.</p>
+      <p>Hake, R. R. (1998). Interactive-engagement versus traditional methods: A six-thousand-student survey of mechanics test data for introductory physics courses. <i>American Journal of Physics, 66</i>(1), 64–74. https://doi.org/10.1119/1.18809</p>
+      <p>Hanazaki, N., Herbst, D. F., Marques, M. S., &amp; Vandebroek, I. (2013). Evidence of the shifting baseline syndrome in ethnobotanical research. <i>Journal of Ethnobiology and Ethnomedicine, 9</i>, 75. https://doi.org/10.1186/1746-4269-9-75</p>
+      <p>IJsselsteijn, W. A., de Kort, Y. A. W., &amp; Poels, K. (2013). <i>The Game Experience Questionnaire</i>. Technische Universiteit Eindhoven.</p>
+      <p>Institute of Herbal Medicine, University of the Philippines Manila. (n.d.). <i>Philippine Traditional Knowledge Digital Library on Health</i>. https://tkdlph.com</p>
+      <p>Lienzo. (2018). <i>Mulaka</i> [Video game]. Lienzo.</p>
+      <p>Miano, R. S., Picardal, J. P., Alonso, C. A. G., &amp; Reuyan, D. (2011). Ethnobotanical inventory and assessment of medically-important plant roots in Cebu Island, Philippines. <i>Asian Journal of Biodiversity, 2</i>(1).</p>
+      <p>Milani, F., Bottoni, M., Maiellaro, A., Crisci, A., Bruschi, P., Giuliani, C., &amp; Fico, G. (2025). Counteracting traditional knowledge erosion: An ethnobotanical survey in Valle Imagna (Bergamo, Italy) to foster intergenerational transfer. <i>Plants, 14</i>(22), 3477. https://doi.org/10.3390/plants14223477</p>
+      <p>Mortara, M., Catalano, C. E., Bellotti, F., Fiucci, G., Houry-Panchetti, M., &amp; Petridis, P. (2014). Learning cultural heritage by serious games. <i>Journal of Cultural Heritage, 15</i>(3), 318–325. https://doi.org/10.1016/j.culher.2013.04.004</p>
+      <p>Parsley, K. M. (2020). Plant awareness disparity: A case for renaming plant blindness. <i>Plants, People, Planet, 2</i>(6), 598–601. https://doi.org/10.1002/ppp3.10153</p>
+      <p>Prensky, M. (2001). <i>Digital game-based learning</i>. McGraw-Hill.</p>
+      <p>Republic Act No. 8371. (1997). <i>The Indigenous Peoples' Rights Act of 1997</i>. Republic of the Philippines.</p>
+      <p>Republic Act No. 8423. (1997). <i>Traditional and Alternative Medicine Act of 1997</i>. Republic of the Philippines.</p>
+      <p>Siquijor State College. (2015). <i>Folk healing practices of Siquijor Island</i> [Terminal report]. Philippine Traditional Knowledge Digital Library on Health. https://tkdlph.com</p>
+      <p>Stuart, G. U., Jr. (n.d.). <i>Philippine medicinal plants</i>. StuartXchange. http://www.stuartxchange.org</p>
+      <p>Upper One Games &amp; E-Line Media. (2014). <i>Never Alone (Kisima Ingitchuna)</i> [Video game]. E-Line Media.</p>
+      <p>Wandersee, J. H., &amp; Schussler, E. E. (1999). Preventing plant blindness. <i>The American Biology Teacher, 61</i>(2), 82–86. https://doi.org/10.2307/4450624</p>
+      <p>Wouters, P., van Nimwegen, C., van Oostendorp, H., &amp; van der Spek, E. D. (2013). A meta-analysis of the cognitive and motivational effects of serious games. <i>Journal of Educational Psychology, 105</i>(2), 249–265. https://doi.org/10.1037/a0031311</p>
+      <p>Zúñiga-Solórzano, M. E., Fabregat, R., &amp; Jové, T. (2025). Characterization of games technologies for learning in the context of intangible cultural heritage. In <i>Digital Heritage 2025</i>. Eurographics Association. https://doi.org/10.2312/dh.20253377</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div id="demo"><button class="btn x" id="closedemo">✕ Close</button></div>
+<div id="notes"><b>Speaker notes</b><span id="notetext"></span></div>
+
+<div id="hud">
+  <div class="l"><span class="brand">Hardin ni Almira</span><span class="time" id="tod">Buntag</span></div>
+  <div id="dots"></div>
+  <div class="r"><span id="count">1 / 22</span><button class="nav" id="prev" aria-label="Previous">‹</button><button class="nav" id="next" aria-label="Next">›</button></div>
+</div>
+
+<script>
+/* ---------- deck ---------- */
+const slides=[...document.querySelectorAll('.slide')], N=slides.length;
+const dots=document.getElementById('dots'), bar=document.getElementById('bar');
+let cur=0;
+slides.forEach((_,i)=>{const b=document.createElement('button');b.setAttribute('aria-label','Slide '+(i+1));b.onclick=()=>go(i);dots.appendChild(b)});
+const TOD=[[0,'Buntag'],[.22,'Udto'],[.48,'Hapon'],[.7,'Kilumkilom'],[.86,'Gabii']];
+// time of day per slide: morning → night across the deck, like Lola's fading sight
+const slideU=i=>Math.min(1,i/(N-3));
+function go(i){
+  i=Math.max(0,Math.min(N-1,i)); if(i===cur&&slides[i].classList.contains('on'))return;
+  slides[cur].classList.remove('on'); cur=i; slides[cur].classList.add('on');
+  [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===cur));
+  document.getElementById('count').textContent=(cur+1)+' / '+N;
+  bar.style.width=((cur+1)/N*100)+'%';
+  scene.target=slideU(cur);
+  let name='Buntag'; for(const [u,n] of TOD) if(scene.target>=u-1e-6) name=n;
+  document.getElementById('tod').textContent=name;
+  document.getElementById('notetext').textContent=slides[cur].dataset.notes||'';
+  history.replaceState(null,'','#'+(cur+1));
+  if(slides[cur].querySelector('#chain')) lightChain();
+}
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('iframe'))return;
+  const k=e.key;
+  if(document.getElementById('demo').classList.contains('on')){ if(k==='Escape') closeDemo(); return; }
+  if(['ArrowRight','PageDown',' ','Enter'].includes(k)){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(k)){e.preventDefault();go(cur-1)}
+  else if(k==='Home')go(0); else if(k==='End')go(N-1);
+  else if(k==='n'||k==='N')document.getElementById('notes').classList.toggle('on');
+  else if(k==='f'||k==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}
+  else if(/^[1-9]$/.test(k))go(+k-1);
+});
+let tx=null;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(cur+(dx<0?1:-1));tx=null});
+setTimeout(()=>document.getElementById('help').style.opacity=0,6000);
+
+/* system-flow example */
+document.getElementById('playflow').onclick=()=>{
+  const st=[...document.querySelectorAll('#flow .step')];
+  const b1=document.getElementById('b1'),b2=document.getElementById('b2'),s=document.getElementById('exstamp'),t=document.getElementById('extitle');
+  b1.textContent='?';b2.textContent='?';b1.classList.remove('solved');b2.classList.remove('solved');s.textContent='KULANG PA';s.classList.remove('ok');t.textContent='???';
+  st.forEach((x,k)=>setTimeout(()=>{
+    st.forEach(y=>y.classList.remove('hot'));x.classList.add('hot');
+    if(k===2){b1.textContent='dama de noche';b2.textContent='alimyon ra · do not drink';b1.classList.add('solved');b2.classList.add('solved')}
+    if(k===5){t.textContent='Dama de noche'}
+    if(k===6){s.textContent='NAHUMAN ✓';s.classList.add('ok');burst(innerWidth*.72,innerHeight*.35,26)}
+  },k*900));
+};
+/* gallery */
+document.querySelectorAll('#thumbs img').forEach(im=>im.onclick=()=>{
+  document.querySelectorAll('#thumbs img').forEach(x=>x.classList.remove('sel'));im.classList.add('sel');
+  const s=document.getElementById('shot');s.style.opacity=0;setTimeout(()=>{s.src=im.src;s.style.opacity=1},250);
+  document.getElementById('shotcap').textContent=im.dataset.cap;
+});
+/* live garden: local server first, deployed site as fallback */
+const demo=document.getElementById('demo');
+document.getElementById('opendemo').onclick=async()=>{
+  let url='https://garden-of-almira.vercel.app/';
+  try{const c=new AbortController();setTimeout(()=>c.abort(),900);await fetch('http://localhost:8765/',{mode:'no-cors',signal:c.signal});url='http://localhost:8765/'}catch(e){}
+  const f=document.createElement('iframe');f.src=url;f.allow='fullscreen; autoplay';demo.appendChild(f);demo.classList.add('on');scene.paused=true;
+};
+function closeDemo(){demo.classList.remove('on');demo.querySelector('iframe')?.remove();scene.paused=false}
+document.getElementById('closedemo').onclick=closeDemo;
+function lightChain(){const c=[...document.querySelectorAll('#chain span')];c.forEach(x=>x.classList.remove('lit'));c.forEach((x,k)=>setTimeout(()=>x.classList.add('lit'),500+k*450))}
+
+/* ---------- living garden background ---------- */
+const cv=document.getElementById('bg'), ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W=0,H=0,DPR=1;
+const scene={u:0,target:0,paused:false};
+const mouse={x:-999,y:-999,vx:0,vy:0,px:-999,py:-999,in:false};
+function resize(){DPR=Math.min(devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);build()}
+// sky palettes: [u, top, mid, horizon, hillFar, hillNear, ground, sea]
+const PAL=[
+ [0,   '#7fb3d9','#bcd9e8','#f6e2c0','#7c9c80','#4f7a4f','#2f5a32','#6fa8c4'],
+ [.25, '#4f95d1','#9cc8e8','#e4f1f2','#6f9a74','#467a46','#2b5a2d','#4f9cc4'],
+ [.5,  '#5b6fa8','#d79a7a','#f8c77e','#7a7a5a','#4e6a3a','#2c4a26','#c49a6a'],
+ [.72, '#2e2f63','#8a4f6e','#f08a5e','#4a3f55','#2f3a35','#1c2a20','#7a5068'],
+ [1,   '#070b1c','#121a36','#26305a','#1b2235','#121a1e','#0b1410','#1a2440']];
+const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const PALC=PAL.map(r=>[r[0],...r.slice(1).map(hex)]);
+function pal(u){let a=PALC[0],b=PALC[PALC.length-1];for(let i=0;i<PALC.length-1;i++)if(u>=PALC[i][0]&&u<=PALC[i+1][0]){a=PALC[i];b=PALC[i+1];break}
+  const t=(u-a[0])/((b[0]-a[0])||1),s=t*t*(3-2*t);return a.slice(1).map((c,k)=>c.map((v,j)=>Math.round(v+(b[k+1][j]-v)*s)))}
+const rgb=(c,a=1)=>`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+let blades=[],stars=[],petals=[],flies=[],clouds=[];
+const FLOWER_COL=['#fffaf0','#ffffff','#e8423a','#f6c445','#f39bb6','#ff7a3d'];
+function build(){
+  const nb=Math.round(Math.min(420,W/3.2));blades=[];
+  for(let i=0;i<nb;i++){const x=rnd(-20,W+20),h=rnd(H*.07,H*.2)*(.6+.4*Math.random());
+    blades.push({x,h,w:rnd(2,4.5),a:0,v:0,ph:rnd(0,6.28),dark:Math.random(),
+      fl:Math.random()<.16?FLOWER_COL[(Math.random()*FLOWER_COL.length)|0]:null,fs:rnd(3,6)})}
+  blades.sort((a,b)=>a.dark-b.dark);
+  stars=Array.from({length:Math.round(W*H/5200)},()=>({x:rnd(0,W),y:rnd(0,H*.62),r:rnd(.4,1.5),tw:rnd(0,6.28)}));
+  if(!petals.length) petals=Array.from({length:34},()=>newPetal(true));
+  if(!flies.length) flies=Array.from({length:70},()=>({x:rnd(0,W),y:rnd(H*.35,H*.95),vx:0,vy:0,ph:rnd(0,6.28),s:rnd(.6,1.4)}));
+  clouds=Array.from({length:6},()=>({x:rnd(0,W),y:rnd(H*.06,H*.3),s:rnd(.7,1.5),v:rnd(4,10)}));
+}
+function newPetal(any){return{x:any?rnd(0,W):rnd(-60,-10),y:any?rnd(0,H):rnd(0,H*.7),vx:rnd(10,30),vy:rnd(6,18),r:rnd(4,8),rot:rnd(0,6.28),vr:rnd(-2,2),
+  c:Math.random()<.6?'#fff8ec':(Math.random()<.5?'#f08a7e':'#f6c445'),life:1}}
+function burst(x,y,n=16){for(let i=0;i<n;i++){const p=newPetal(true);p.x=x;p.y=y;const a=rnd(0,6.28),s=rnd(60,220);p.vx=Math.cos(a)*s;p.vy=Math.sin(a)*s-60;p.burst=1;petals.push(p)}
+  for(const b of blades){const dx=b.x-x;if(Math.abs(dx)<220)b.v+=Math.sign(dx||1)*(1-Math.abs(dx)/220)*3.2}}
+addEventListener('pointermove',e=>{mouse.in=true;mouse.vx=e.clientX-mouse.x;mouse.vy=e.clientY-mouse.y;mouse.x=e.clientX;mouse.y=e.clientY});
+addEventListener('pointerleave',()=>{mouse.in=false;mouse.x=mouse.y=-999});
+cv.addEventListener('pointerdown',e=>burst(e.clientX,e.clientY,18));
+document.getElementById('deck').addEventListener('pointerdown',e=>{if(e.target.closest('.panel,.title,.thanks,button,img'))return;burst(e.clientX,e.clientY,18)});
+document.getElementById('deck').style.pointerEvents='auto';
+
+function hill(y0,amp,freq,ph,col,par){ctx.beginPath();ctx.moveTo(0,H);
+  for(let x=0;x<=W+20;x+=16){const xx=x+par;ctx.lineTo(x,y0+Math.sin(xx*freq+ph)*amp+Math.sin(xx*freq*2.7+ph*1.7)*amp*.35)}
+  ctx.lineTo(W,H);ctx.closePath();ctx.fillStyle=col;ctx.fill()}
+let last=performance.now(),T=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(scene.paused){requestAnimationFrame(frame);return}
+  const sp=reduce?.3:1;T+=dt*sp;
+  scene.u+=(scene.target-scene.u)*(1-Math.exp(-dt*1.6)); // eased, frame-rate independent
+  const u=scene.u, P=pal(u), night=Math.max(0,Math.min(1,(u-.62)/.3)), dusk=Math.max(0,1-Math.abs(u-.6)/.18);
+  const par=(mouse.in?(mouse.x/W-.5):0);
+  // sky
+  const g=ctx.createLinearGradient(0,0,0,H*.72);g.addColorStop(0,rgb(P[0]));g.addColorStop(.55,rgb(P[1]));g.addColorStop(1,rgb(P[2]));
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // stars
+  if(night>0){for(const s of stars){ctx.globalAlpha=night*(.5+.5*Math.sin(T*1.5+s.tw));ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fill()}ctx.globalAlpha=1}
+  // sun / moon on an arc
+  const a=Math.PI*(.12+u*.9), cx=W*(.85-u*.7), cy=H*.62-Math.sin(a)*H*.48;
+  if(u<.82){const r=Math.min(W,H)*.045;const sg=ctx.createRadialGradient(cx,cy,0,cx,cy,r*6);
+    sg.addColorStop(0,`rgba(255,240,200,${.55-.2*dusk})`);sg.addColorStop(1,'rgba(255,220,160,0)');ctx.fillStyle=sg;ctx.fillRect(cx-r*6,cy-r*6,r*12,r*12);
+    ctx.fillStyle=dusk>.3?'#ffb36b':'#fff4d6';ctx.beginPath();ctx.arc(cx,cy,r,0,6.28);ctx.fill()}
+  if(night>.05){const mx=W*.78,my=H*.18,r=Math.min(W,H)*.035;ctx.globalAlpha=night;
+    const mg=ctx.createRadialGradient(mx,my,0,mx,my,r*5);mg.addColorStop(0,'rgba(220,230,255,.35)');mg.addColorStop(1,'rgba(200,210,255,0)');ctx.fillStyle=mg;ctx.fillRect(mx-r*5,my-r*5,r*10,r*10);
+    ctx.fillStyle='#eef0ff';ctx.beginPath();ctx.arc(mx,my,r,0,6.28);ctx.fill();ctx.fillStyle=rgb(P[1]);ctx.beginPath();ctx.arc(mx+r*.45,my-r*.2,r*.85,0,6.28);ctx.fill();ctx.globalAlpha=1}
+  // clouds
+  ctx.globalAlpha=.35*(1-night*.85);ctx.fillStyle=dusk>.3?'#f6c4a0':'#ffffff';
+  for(const c of clouds){c.x+=c.v*dt*sp;if(c.x>W+200)c.x=-200;for(let k=0;k<4;k++){ctx.beginPath();ctx.ellipse(c.x+k*38*c.s,c.y+Math.sin(k)*6,46*c.s,16*c.s,0,0,6.28);ctx.fill()}}
+  ctx.globalAlpha=1;
+  // sea band with glitter
+  const seaY=H*.6;ctx.fillStyle=rgb(P[6]);ctx.fillRect(0,seaY,W,H*.1);
+  ctx.strokeStyle=`rgba(255,250,230,${.25+.25*dusk-.15*night})`;ctx.lineWidth=1;
+  for(let i=0;i<40;i++){const x=(i*97+T*18)%W,y=seaY+4+(i*13)%(H*.07);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+10+Math.sin(T*2+i)*6,y);ctx.stroke()}
+  // hills (parallax with the pointer)
+  hill(H*.58,H*.05,.004,1.3,rgb(P[3]),par*-30);
+  hill(H*.68,H*.045,.006,4.1,rgb(P[4]),par*-60);
+  hill(H*.8,H*.03,.009,2.2,rgb(P[5]),par*-90);
+  // a few palms on the near hill
+  for(const px of [.08,.16,.9]){const bx=W*px+par*-90,by=H*.8+Math.sin((bx)*.009+2.2)*H*.03,ht=H*.26,sw=Math.sin(T*.9+px*9)*6;
+    ctx.strokeStyle=rgb(P[5].map(v=>v*.7));ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(bx,by);ctx.quadraticCurveTo(bx+12,by-ht*.5,bx+18+sw,by-ht);ctx.stroke();
+    ctx.lineWidth=3;for(let f=0;f<7;f++){const ang=-Math.PI/2+(f-3)*.5+Math.sin(T*1.3+f)*.05;const tx2=bx+18+sw,ty=by-ht;
+      ctx.beginPath();ctx.moveTo(tx2,ty);ctx.quadraticCurveTo(tx2+Math.cos(ang)*40,ty+Math.sin(ang)*30-10,tx2+Math.cos(ang)*70,ty+Math.sin(ang)*30+28);ctx.stroke()}}
+  // grass: wind + spring that parts around the pointer
+  const wind=t=>Math.sin(t*.7)*.5+Math.sin(t*.23)*.5;
+  for(const b of blades){
+    const gust=wind(T+b.x*.0035)*.18+Math.sin(T*2.1+b.ph)*.04;
+    let push=0;if(mouse.in){const dx=b.x-mouse.x,dy=(H-b.h*.6)-mouse.y,d=Math.hypot(dx,dy);if(d<140)push=Math.sign(dx||1)*(1-d/140)*.9}
+    const goal=gust+push; b.v+=((goal-b.a)*28-b.v*7)*dt; b.a+=b.v*dt; // damped spring toward wind/push
+    const lean=b.a, tipx=b.x+Math.sin(lean)*b.h, tipy=H-Math.cos(lean)*b.h;
+    const col=P[5].map((v,k)=>Math.round(v*(.55+.6*b.dark)+(k===1?10:0)));
+    ctx.fillStyle=rgb(col);ctx.beginPath();ctx.moveTo(b.x-b.w,H);
+    ctx.quadraticCurveTo(b.x-b.w*.4+Math.sin(lean)*b.h*.45,H-b.h*.55,tipx,tipy);
+    ctx.quadraticCurveTo(b.x+b.w*.4+Math.sin(lean)*b.h*.45,H-b.h*.55,b.x+b.w,H);ctx.fill();
+    if(b.fl){ctx.fillStyle=b.fl;ctx.globalAlpha=1-night*.55;for(let k=0;k<5;k++){const an=k*1.2566+T*.2;ctx.beginPath();ctx.ellipse(tipx+Math.cos(an)*b.fs*.7,tipy+Math.sin(an)*b.fs*.7,b.fs*.6,b.fs*.35,an,0,6.28);ctx.fill()}
+      ctx.fillStyle='#f6c445';ctx.beginPath();ctx.arc(tipx,tipy,b.fs*.3,0,6.28);ctx.fill();ctx.globalAlpha=1}
+  }
+  // petals: drift on the breeze, pushed by the pointer
+  const breeze=12+wind(T)*18;
+  for(let i=petals.length-1;i>=0;i--){const p=petals[i];
+    if(mouse.in){const dx=p.x-mouse.x,dy=p.y-mouse.y,d2=dx*dx+dy*dy;if(d2<14400){const f=(1-Math.sqrt(d2)/120)*600*dt;p.vx+=dx/Math.sqrt(d2+1)*f+mouse.vx*.4*dt*10;p.vy+=dy/Math.sqrt(d2+1)*f}}
+    p.vx+=(breeze-p.vx)*dt*.8;p.vy+=(14-p.vy)*dt*.8;p.x+=p.vx*dt*sp;p.y+=(p.vy+Math.sin(T*2+p.rot)*8)*dt*sp;p.rot+=p.vr*dt;
+    if(p.burst){p.life-=dt*.25;if(p.life<=0||p.y>H+20){petals.splice(i,1);continue}}
+    else if(p.x>W+40||p.y>H+20)petals[i]=newPetal(false);
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalAlpha=Math.min(1,p.life)*(.85-night*.35);ctx.fillStyle=p.c;
+    ctx.beginPath();ctx.ellipse(0,0,p.r,p.r*.5,0,0,6.28);ctx.fill();ctx.restore()}
+  ctx.globalAlpha=1;
+  // fireflies: only at dusk and night, they drift and gather near the pointer
+  const fl=Math.max(0,(u-.55)/.3);
+  if(fl>0){ctx.globalCompositeOperation='lighter';
+    for(const f of flies){f.ph+=dt;let ax=Math.sin(f.ph*.9+f.s*7)*20,ay=Math.cos(f.ph*.7+f.s*3)*14;
+      if(mouse.in){const dx=mouse.x-f.x,dy=mouse.y-f.y,d=Math.hypot(dx,dy);if(d<260&&d>30){ax+=dx/d*40;ay+=dy/d*40}}
+      f.vx+=(ax-f.vx)*dt*1.5;f.vy+=(ay-f.vy)*dt*1.5;f.x+=f.vx*dt;f.y+=f.vy*dt;
+      if(f.x<-20)f.x=W+20;if(f.x>W+20)f.x=-20;if(f.y<H*.3)f.vy+=20*dt;if(f.y>H)f.y=H*.95;
+      const glow=Math.max(0,Math.sin(f.ph*2.2*f.s+f.s*5))**3*fl;if(glow<.02)continue;
+      const r=10*f.s,fg=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,r);fg.addColorStop(0,`rgba(230,255,140,${glow})`);fg.addColorStop(1,'rgba(200,255,100,0)');
+      ctx.fillStyle=fg;ctx.fillRect(f.x-r,f.y-r,r*2,r*2)}
+    ctx.globalCompositeOperation='source-over'}
+  // soft vignette for text contrast
+  const v=ctx.createRadialGradient(W/2,H*.45,Math.min(W,H)*.3,W/2,H*.5,Math.max(W,H)*.75);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.38)');
+  ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+  mouse.vx*=.8;mouse.vy*=.8;
+  requestAnimationFrame(frame);
+}
+addEventListener('resize',resize);resize();
+const start=Math.max(1,Math.min(N,parseInt(location.hash.slice(1))||1))-1;
+cur=start;scene.u=scene.target=slideU(start);go(start);slides[start].classList.add('on');
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
