@@ -29,6 +29,8 @@ const MODULES = [
   // 6 · player, interaction, HUD, loop (starts rendering), sound, dev switches
   'game/controls', 'game/avatar', 'game/avatar-glb', 'game/interaction', 'ui/hud', 'game/loop', 'audio/soundscape', 'dev/debug',
 ];
+// ?story=1 : the story prototype (Lola Almira, journal, chapters). Off by default, so the garden itself is unchanged.
+if (/[?&]story=1/.test(location.search)) { MODULES.push('story/story-data', 'story/lola', 'story/story'); const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/css/story.css'; document.head.appendChild(l); }
 const t = window.__t = window.__t || [];
 for (const m of MODULES) {
   const s = document.createElement('script'); s.src = m.startsWith('flowers/') ? `/${m}.js` : `/js/${m}.js`; s.async = false;

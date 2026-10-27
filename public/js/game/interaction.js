@@ -30,19 +30,20 @@ function pickThing(r) {
   return best;
 }
 const infoFor = hit => hit.kind === 'plant' ? G.INFO[hit.sp] : G.INFO_OTHER[hit.kind];
+const label = (hit, info) => G.storyLabel ? G.storyLabel(hit, info) : info ? info.ceb : '';      // story mode (?story=1) can rename what you point at
 
 /* ---------- hover label: the Cebuano name of exactly what you point at ---------- */
 const tip = $('tip');
 function onHover(e) {
   if (e.target !== canvas) { tip.style.opacity = 0; return; } const now = performance.now(); if (now - onHover.t < 70) return; onHover.t = now;
   const hit = pickThing(rayFrom(e));
-  if (hit) { const info = infoFor(hit); canvas.style.cursor = 'pointer'; tip.textContent = info ? info.ceb : ''; tip.style.left = e.clientX + 14 + 'px'; tip.style.top = e.clientY + 8 + 'px'; tip.style.opacity = info ? 1 : 0; }
+  if (hit) { const info = infoFor(hit); canvas.style.cursor = 'pointer'; tip.textContent = label(hit, info); tip.style.left = e.clientX + 14 + 'px'; tip.style.top = e.clientY + 8 + 'px'; tip.style.opacity = info ? 1 : 0; }
   else { canvas.style.cursor = P.mode === 'walk' ? 'crosshair' : 'default'; tip.style.opacity = 0; }
 }
 onHover.t = 0;
 function reticleStep() {                                   // walking with a locked mouse: label what is under the reticle
   if (!P.locked) return; const hit = pickThing(rayFrom()), info = hit && infoFor(hit);
-  tip.textContent = info ? info.ceb : ''; tip.style.left = '54%'; tip.style.top = '51%'; tip.style.opacity = info ? 1 : 0; $('reticle').classList.toggle('on', !!info);
+  tip.textContent = label(hit, info); tip.style.left = '54%'; tip.style.top = '51%'; tip.style.opacity = info ? 1 : 0; $('reticle').classList.toggle('on', !!info);
 }
 
 /* ---------- the guide card, and your bayong of flowers ---------- */
@@ -68,6 +69,7 @@ function onClick(e) {
   const ray = rayFrom(e), hit = pickThing(ray);
   if (!hit) { if (ray.direction.y < -.01) { const tt = (ray.origin.y - .35) / -ray.direction.y; if (tt > 0 && tt < 60) G.poke(ray.origin.x + ray.direction.x * tt, ray.origin.z + ray.direction.z * tt, .8); } return; }
   G.poke(hit.pos.x, hit.pos.z, 1);
+  if (G.storyPick && G.storyPick(hit)) return;                                       // story mode (?story=1) handles its own clicks
   if (hit.kind === 'candle') { const c = G.candles[hit.idx]; c.lit = !c.lit; c.flame.setEnabled(c.lit); showCard(G.INFO_OTHER.candle, c.lit ? 'You lit a candle.' : 'You snuffed it out.'); return; }
   const info = infoFor(hit); if (!info) return;
   if (hit.kind === 'hen' && hit.ref) { hit.ref.state = 'peck'; hit.ref.timer = 2.5; }      // a touched hen stops to peck
